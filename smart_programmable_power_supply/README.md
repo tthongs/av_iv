@@ -36,7 +36,6 @@ The **Smart Programmable Power Supply Module** is an intelligent, digitally cont
 ### Primary Engineering Documentation
 * 📄 **Product Requirement Document (High-Level PRD)**: [`PRODUCT_REQUIREMENT_DOCUMENT_PRD.md`](PRODUCT_REQUIREMENT_DOCUMENT_PRD.md)
 * 📐 **Hardware Design Document (HDD) Deep Technical Reference**: [`HARDWARE_DESIGN_TECHNICAL_DETAILS_FOR_HDD.md`](HARDWARE_DESIGN_TECHNICAL_DETAILS_FOR_HDD.md)
-* 📥 **Official Word Deliverables**: [`PRODUCT_REQUIREMENT_DOCUMENT_PRD.docx`](PRODUCT_REQUIREMENT_DOCUMENT_PRD.docx) | [`PRD.docx`](PRD.docx)
 
 ---
 
@@ -185,15 +184,15 @@ Why is a two-stage cascaded architecture (**Universal AC-DC Flyback + Synchronou
 
 ## 5. Documentation Suite Roadmap
 
-This project is organized into four specialized, comprehensive technical dossiers accompanied by Microsoft Word (`.docx`) deliverables:
+This project is organized into four specialized, comprehensive technical dossiers in Markdown:
 
 ```text
 smart_programmable_power_supply/
-├── README.md (.docx)                                      # Master Hub, system specs, block diagrams & roadmap
-├── ac-dc-flyback-stage-design.md (.docx)                  # Universal AC frontend, QR Flyback, transformer & SR
-├── mcu-buck-boost-post-regulator.md (.docx)               # 4-switch Buck-Boost, digital CV/CC loops & DAC control
-├── efficiency-monitoring-and-telemetry.md (.docx)         # Dual AC/DC metering, real-time η, MicroSD & SCPI
-└── system-schematics-and-pcb-design.md (.docx)            # Complete system schematics, BOM, isolation & bring-up
+├── README.md                                      # Master Hub, system specs, block diagrams & roadmap
+├── ac-dc-flyback-stage-design.md                  # Universal AC frontend, QR Flyback, transformer & SR
+├── mcu-buck-boost-post-regulator.md               # 4-switch Buck-Boost, digital CV/CC loops & DAC control
+├── efficiency-monitoring-and-telemetry.md         # Dual AC/DC metering, real-time η, MicroSD & SCPI
+└── system-schematics-and-pcb-design.md            # Complete system schematics, BOM, isolation & bring-up
 ```
 
 ### [1. AC-DC Flyback Stage Design & Magnetic Engineering](file:///home/tthhongs/build_tthongs/tasks_aa_ii/vvdn/smart_programmable_power_supply/ac-dc-flyback-stage-design.md)
