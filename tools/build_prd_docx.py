@@ -257,19 +257,19 @@ def generate_prd_docx():
         set_cell_background(cell, "BFBFBF")
     style_row_text(t1.rows[0], bold=True, font_size=Pt(9))
     
-    set_cell_text(t1.rows[1].cells[0], "08 Oct 2026", font_size=Pt(8.5))
+    set_cell_text(t1.rows[1].cells[0], "12 Oct 2026", font_size=Pt(8.5))
     set_cell_text(t1.rows[1].cells[1], "Rev 1.0", font_size=Pt(8.5))
-    set_cell_text(t1.rows[1].cells[2], "Initial release of PRD for Smart Programmable Voltage Supply Module", font_size=Pt(8.5))
-    set_cell_text(t1.rows[1].cells[3], "Hardware Team Lead", font_size=Pt(8.5))
+    set_cell_text(t1.rows[1].cells[2], "Initial release of PRD aligned with Power Electronics Engineer Trainee scope & deliverables", font_size=Pt(8.5))
+    set_cell_text(t1.rows[1].cells[3], "Power Electronics Engineer Trainee (GET - Hardware Engineering)", font_size=Pt(8.5))
     set_cell_text(t1.rows[1].cells[4], "BU SME (Power Electronics)", font_size=Pt(8.5))
     set_cell_text(t1.rows[1].cells[5], "BU Head (Embedded Hardware)", font_size=Pt(8.5))
     
     set_cell_text(t1.rows[2].cells[0], "25 Sep 2026", font_size=Pt(8.5))
     set_cell_text(t1.rows[2].cells[1], "Rev 0.1", font_size=Pt(8.5))
     set_cell_text(t1.rows[2].cells[2], "Draft architecture & component selection study", font_size=Pt(8.5))
-    set_cell_text(t1.rows[2].cells[3], "Power HW Lead", font_size=Pt(8.5))
-    set_cell_text(t1.rows[2].cells[4], "Lead Architect", font_size=Pt(8.5))
-    set_cell_text(t1.rows[2].cells[5], "BU Head", font_size=Pt(8.5))
+    set_cell_text(t1.rows[2].cells[3], "Power Electronics Engineer Trainee (GET)", font_size=Pt(8.5))
+    set_cell_text(t1.rows[2].cells[4], "Senior Hardware Architect", font_size=Pt(8.5))
+    set_cell_text(t1.rows[2].cells[5], "BU SME (Power Electronics)", font_size=Pt(8.5))
 
     apply_table_geometry(t1, [Inches(0.85), Inches(0.65), Inches(2.07), Inches(0.95), Inches(0.95), Inches(1.00)])
     set_table_borders(t1)
@@ -498,14 +498,14 @@ def generate_prd_docx():
     set_cell_text(t9.rows[0].cells[3], "System 3 (PC Telemetry Suite)", bold=True)
 
     matrix = [
-        ("Hardware - HW", "Yes", "No", "No"),
-        ("Mechanical - ME", "Yes", "No", "No"),
-        ("Embedded Firmware - FW", "No", "Yes", "No"),
-        ("Software / App - SW", "No", "No", "Yes"),
+        ("Hardware - HW (Trainee Ownership)", "Yes (Primary)", "No", "No"),
+        ("Mechanical - ME (Cross-Functional)", "Yes (Interface)", "No", "No"),
+        ("Embedded Firmware - FW (Cross-Functional)", "No", "Yes (Primary)", "No"),
+        ("Software / App - SW (Cross-Functional)", "No", "No", "Yes (Primary)"),
         ("Cloud / Backend", "No", "No", "No"),
-        ("Quality Assurance - QA", "Yes", "Yes", "Yes"),
+        ("Quality Assurance - QA (Joint)", "Yes (Joint)", "Yes (Joint)", "Yes (Joint)"),
         ("Production / Operations", "Yes", "No", "No"),
-        ("Safety & Certification", "Yes", "No", "No")
+        ("Safety & Certification", "Yes (Pre-comp)", "No", "No")
     ]
     for r_idx, (dname, s1, s2, s3) in enumerate(matrix):
         if r_idx + 1 < len(t9.rows):
@@ -524,10 +524,10 @@ def generate_prd_docx():
     for cell in t10.rows[0].cells:
         set_cell_background(cell, "BFBFBF")
     set_cell_text(t10.rows[0].cells[0], "Sl.No", bold=True)
-    set_cell_text(t10.rows[0].cells[1], "Domain 1 [HW]", bold=True)
-    set_cell_text(t10.rows[0].cells[2], "Domain 2 [Mechanical]", bold=True)
-    set_cell_text(t10.rows[0].cells[3], "Domain 3 [Embedded SW]", bold=True)
-    set_cell_text(t10.rows[0].cells[4], "Domain 4 [QA & Test]", bold=True)
+    set_cell_text(t10.rows[0].cells[1], "Domain 1 [HW - Trainee]", bold=True)
+    set_cell_text(t10.rows[0].cells[2], "Domain 2 [ME - Support]", bold=True)
+    set_cell_text(t10.rows[0].cells[3], "Domain 3 [FW - Support]", bold=True)
+    set_cell_text(t10.rows[0].cells[4], "Domain 4 [QA - Joint]", bold=True)
 
     deliverables = [
         ("1", "Hardware Design Document (HDD)", "Industrial Design (ID) Outline", "Software Design Document (SDD)", "DVT Test Plan & Traceability Matrix"),
@@ -684,14 +684,14 @@ def generate_prd_docx():
         "<CCCC_PPPP>": "VVDN_SPPS_2026",
         "<Project Name>": "Smart Programmable Voltage Supply Module (85–265 V AC In, 5–20 V / 3 A DC Out)",
         "<Current Revision Number>": "Rev 1.0",
-        "<Date of Release>": "08 Oct 2026",
-        "<Author>": "Hardware Team Lead",
+        "<Date of Release>": "12 Oct 2026",
+        "<Author>": "Power Electronics Engineer Trainee (GET - Hardware Engineering)",
         "<BU SME>": "BU SME (Power Electronics)",
         "<BU Head>": "BU Head (Embedded Hardware)",
-        "<Briefly describe the purpose": "This Product Requirement Document (PRD) defines all engineering, electrical, mechanical, safety, firmware, and telemetry requirements for the Smart Programmable Voltage Supply Module (85–265 V AC In, 5–20 V / 3 A DC Out). This document serves as the single source of technical truth across development, verification, certification, and production.",
+        "<Briefly describe the purpose": "This Product Requirement Document (PRD) defines all engineering, electrical, mechanical, safety, firmware, and telemetry requirements for the Smart Programmable Voltage Supply Module (85–265 V AC In, 5–20 V / 3 A DC Out). Prepared within the scope of a Power Electronics Engineer Trainee (Graduate Engineer Trainee - GET, Hardware Engineering) under BU SME mentorship, this document serves as the authoritative technical baseline across design, verification, safety compliance, and prototype bring-up.\n\nTrainee Project Scope & Engineering Ownership:\nThe project is explicitly bounded to develop industrial-grade power electronics hardware design mastery within the graduate trainee scope. The trainee directly owns the power conversion design: Stage 1 AC-DC Quasi-Resonant Flyback calculations (PQ26/20 transformer magnetics, 3kV RMS reinforced isolation, Furukawa TEX-E wire), Stage 2 Synchronous 4-Switch Buck-Boost post-regulator design (LM5176 inductor sizing, MOSFET selection, low-ESR ripple filtering), analog DAC voltage steering feedback calculations, autonomous hardware CC protection (< 5µs response), Altium Designer multi-sheet schematics, 4-layer PCB layout execution (Kelvin sensing, high-voltage creepage slot >= 6.4mm), master engineering BOM, bench bring-up cold checks with safe Variac ramp-up, and Design Verification Testing (DVT). Adjacent domains—embedded firmware (FreeRTOS, SCPI parser) and mechanical tooling (aluminum extrusion, ID)—are cross-functional supporting domains with which the trainee defines hardware interfaces, pin mappings, scaling equations, and mechanical keep-outs.",
         "Explicitly mention that the requirements": "The requirements captured in this PRD supersede any previous documents, customer RFQs, preliminary proposals, and meeting discussions. This document shall be taken as the sole authoritative reference baseline for design acceptance and sign-off.",
         "<Describe any standards or typographical": "Requirements marked with [MUST] are mandatory non-negotiable specifications essential for safety, electrical regulation, and compliance. Requirements marked with [SHOULD] represent performance targets where trade-offs require SME approval. Requirements marked with [MAY] represent optional enhancements. All electrical units follow SI conventions.",
-        "<Describe the different types of reader": "This document is intended for Client Engineering & Management (scope sign-off), Hardware Architecture Teams (schematics, magnetics, safety), Embedded Software Teams (control loops, SCPI), PCB Layout & Mechanical Teams (stackup, creepage slots), and Quality Assurance (EMC & safety verification).",
+        "<Describe the different types of reader": "This document is intended for Client Engineering & Management (scope sign-off), Senior Hardware Mentors & BU SMEs (design calculations, stress derating, and safety sign-off), the Power Electronics Engineer Trainee (author and hardware design owner), Embedded Software Teams (control loops and SCPI interfaces), Mechanical Teams (enclosure and thermal interfaces), and Quality Assurance (EMC & safety verification).",
         "<Define all the terms necessary to properly interpret the PRD": "The following table defines the engineering acronyms, abbreviations, and electrical nomenclature utilized throughout this Product Requirement Document:",
         "<List any other documents or web addresses that this PRD refers": "The following industry standards, manufacturer component datasheets, and project architecture documents serve as normative references for this PRD:",
         "<Provide a short description of the product being specified and its purpose": "The Smart Programmable Voltage Supply Module is an intelligent, high-density bench and industrial power supply delivering a tightly regulated, programmable DC voltage output from 5.0 V to 20.0 V at currents up to 3.0 A (60 W continuous output power) from universal mains AC input (85 V – 265 V AC RMS, 47 Hz – 63 Hz).",
@@ -706,14 +706,14 @@ def generate_prd_docx():
         "<UI/UX design or wireframes that will define": "The 1.3\" monochrome OLED display presents a real-time operational dashboard with large-digit output voltage and current meters, power readout, true system efficiency bar graph, and operating status annunciators (CV, CC, FLT).",
         "<List any assumed factors": "Assumptions: Grid AC mains is nominal sinusoidal waveform with THD ≤ 5%; Operating ambient temperature is -20°C to +50°C under natural convection; Secondary DC ground is floating with reinforced galvanic isolation (≥ 3000V RMS) from Earth and AC mains.",
         "<Identify any dependencies the project has on external factors": "Dependencies: Component supply chain availability for TI LM5176, UCC28740, INA226, AMC1311, and STM32G474; Custom transformer tooling on Ferroxcube PQ26/20 ferrite cores with triple-insulated secondary wire; Compliance laboratory access for CISPR 32 Class B EMC testing.",
-        "<All standard deliverable documents of each domain": "The development lifecycle encompasses standard engineering deliverables across Hardware (HW), Mechanical (ME), Embedded Software (FW), and Quality Assurance (QA). The phase-wise deliverables and formal release order are summarized in Table 10 below:",
+        "<All standard deliverable documents of each domain": "The development lifecycle encompasses standard engineering deliverables across Hardware (HW), Mechanical (ME), Embedded Software (FW), and Quality Assurance (QA). As the primary hardware design owner, the Power Electronics Trainee directly owns Domain 1 deliverables (HDD, schematics, PCB layout, BOM, bring-up, and DVT reports), collaborating with cross-functional teams for firmware and mechanical releases. The phase-wise deliverables and formal release order are summarized in Table 10 below:",
         "<Top level development plan": "The project follows a 4-phase lifecycle spanning 18 weeks: Phase 1 (Weeks 1-3: PRD & Architecture Sign-Off); Phase 2 (Weeks 4-7: HDD, Schematic & PCB Layout); Phase 3 (Weeks 8-12: Rev A Fabrication, Bring-Up & Functional Tuning); Phase 4 (Weeks 13-18: DVT, EMC Pre-Compliance, Thermal Chamber Testing & Rev B Release).",
         "<Fill as applicable>": "System 2 (Embedded Software & Telemetry) development plan comprises four key software milestones: Alpha Release (BSP bring-up, DAC/ADC low-level drivers), Beta Release (Type-II feedback loop tuning, OLED dashboard, 10Hz dual-domain calculation), RC Release (SCPI parser over USB-CDC, FAT32 MicroSD ring-buffered logger), and Final Production Gold Release (full DVT pass, self-test diagnostics, and calibrated look-up tables).",
         "<Architecture section is optional to mention": "The architecture comprises two galvanically isolated power conversion stages followed by dual-domain digital telemetry and autonomous analog hardware protection.",
         "<Insert System level BOM>": "Refer to detailed bill of materials in the respective system table below.",
         "Out of scope point 1": "Three-phase 400V/480V AC industrial grid input operation.",
         "Out of scope point 2": "Active Power Factor Correction (Active PFC boost stage). System utilizes passive EMI filtering with PF ~ 0.62.",
-        "Out of scope point 3": "Negative/bipolar voltage rails (system provides positive 5.0V to 20.0V DC only). Wireless connectivity (Wi-Fi/Bluetooth) is excluded.",
+        "Out of scope point 3": "Negative/bipolar voltage rails (system provides positive 5.0V to 20.0V DC only). Wireless connectivity (Wi-Fi/Bluetooth) is excluded. Trainee direct boundaries: firmware kernel implementation, custom aluminum extrusion die tooling, and accredited regulatory laboratory filing are executed by collaborating cross-functional teams.",
         "Open Item 1": "Mechanical enclosure extrusion profile selection (finalizing 130x85x42mm profile vs 140x90x50mm based on binding post clearance).",
         "Open Item 2": "Current shunt value trade-off (evaluating 5mΩ vs 10mΩ for thermal dissipation vs ADC low-current resolution).",
         "Open Item 3": "Auxiliary DC-in barrel jack option (evaluating 24V DC auxiliary input to bypass AC mains in vehicle/field environments)."
@@ -1153,8 +1153,47 @@ def generate_prd_docx():
         if "<BOM section is optional to mention" in p.text:
             p.text = "Note: This is the expected BOM and it might get changed during the design stage. The BOM does not contain any pricing/cost information."
             p.runs[0].font.italic = True
-        elif "System Architecture: Universal Mains AC -> EMI" in p.text:
-            p.text = ""
+    # --------------------------------------------------------------------------
+    # 18. APPEND APPENDIX: TRAINEE MENTOR WALKTHROUGH & Q&A CHEATSHEET
+    # --------------------------------------------------------------------------
+    p_app_h1 = doc.add_paragraph("Appendix: Power Electronics Engineer Trainee Mentor Walkthrough & Q&A Cheatsheet")
+    p_app_h1.style = "Heading 1"
+
+    p_app_intro = doc.add_paragraph(
+        "This appendix provides key talking points and technical rationales for the Power Electronics Engineer Trainee (GET) "
+        "when presenting design choices, circuit calculations, component selections, and safety boundaries to senior mentors and BU leadership:"
+    )
+
+    qa_list = [
+        ("Q1: Why did you choose a 2-stage architecture instead of converting AC directly to 5–20V?",
+         "Direct single-stage AC-to-DC conversion across a wide 5V to 20V output range is inefficient and difficult to stabilize because transformer turns ratios and duty cycles would have to vary wildly. By splitting the design into Stage 1 (an isolated Flyback that produces a fixed +24V intermediate rail) and Stage 2 (a non-isolated 4-switch Buck-Boost post-regulator), Stage 1 handles safety isolation and high-voltage rectification, while Stage 2 provides fast, tight voltage tuning with sub-25mV ripple and over 95% efficiency."),
+
+        ("Q2: How is galvanic safety isolation achieved, and what standard applies?",
+         "We comply strictly with IEC 62368-1 for reinforced safety isolation. We use a custom transformer wound with triple-insulated Furukawa TEX-E wire, optocouplers for feedback, and an AMC1311 isolated modulator for AC voltage sensing. The PCB includes a 6.4mm physical milled air slot to maintain safety creepage distance between the hot primary side and the cold secondary side. It withstands a 3000V RMS Hipot dielectric test for 1 minute."),
+
+        ("Q3: How does the microcontroller set the output voltage?",
+         "We use DAC voltage steering. The LM5176 Buck-Boost controller regulates based on its feedback (FB) pin. The STM32's internal 12-bit DAC injects a small, controlled current into the feedback resistor network (R_top = 49.9kΩ, R_DAC = 11.0kΩ, R_bot = 3.65kΩ). As the DAC voltage changes, it tricks the controller into raising or lowering the output voltage between 5.0V and 20.0V in precise 10mV increments."),
+
+        ("Q4: How does the power supply protect itself during a short circuit?",
+         "We have two layers of protection. First and most importantly, we have a fast analog hardware loop: an INA240 current sense amplifier feeds a high-speed TLV3501 analog comparator. If output current exceeds the set limit, the comparator directly pulls down the LM5176's COMP pin in under 5 microseconds, instantly throttling the duty cycle. The second layer is a software task in the STM32 that detects the persistent overload, updates the OLED to show 'CC FAULT', and disconnects the output if the fault persists."),
+
+        ("Q5: How is electrical efficiency calculated in real time?",
+         "We have dual-domain power metering. On the primary AC side, an isolated AMC1311 modulator measures RMS voltage, and a 1000:1 current transformer measures RMS current to compute true active AC input power (P_AC). On the secondary DC side, a high-precision 16-bit INA226 monitor measures DC output voltage and current to compute output power (P_DC). At a 10Hz rate, the MCU calculates Efficiency = (P_DC / P_AC) * 100% and displays it live on the OLED and logs it to the MicroSD card."),
+
+        ("Q6: What are the main deliverables you are responsible for as a Power Electronics Trainee?",
+         "Following VVDN's standard development plan across 4 phases and 10 release milestones, my primary hardware deliverables are: the Hardware Design Document (HDD), Flyback and Buck-Boost calculations, PQ26/20 transformer design, Altium schematics, 4-layer PCB layout with safety creepage slots, master engineering BOM, prototype bring-up cold checks and Variac testing, dynamic load transient test reports, CISPR 32 EMC and Hipot safety pre-compliance reports, and final Rev B production documentation."),
+
+        ("Q7: How do you interface with the firmware and mechanical teams?",
+         "For the firmware team, I define hardware register mappings, DAC scaling formulas (target voltage to DAC code), INA226/AMC1311 gain constants, and comparator fault trip lines. For the mechanical team, I specify the 3D STEP PCBA model, connector keep-outs, thermal loss figures (7.5W max at 60W load), and thermal gap pad placement locations."),
+
+        ("Q8: How did you calculate the transformer magnetics and verify safety creepage?",
+         "For the Flyback transformer, I selected a Ferroxcube PQ26/20 ferrite core with 3C95 material. At 85V AC minimum input (120V DC bulk) and 72W output power, I calculated a primary inductance Lp of 220µH to operate in quasi-resonant valley switching with a 6:1 turns ratio. To comply with IEC 62368-1 reinforced isolation (3000V RMS), I specified triple-insulated Furukawa TEX-E wire on the secondary winding. On the PCB layout, I routed a 6.4mm wide milled air slot beneath the transformer and optocoupler barriers to prevent surface tracking.")
+    ]
+
+    for q, a in qa_list:
+        p_q = doc.add_paragraph(q)
+        p_q.style = "Heading 3"
+        p_a = doc.add_paragraph(a)
 
     # FINAL PASS: Ensure EVERY table in doc.tables has NO floating tblpPr
     for t in doc.tables:

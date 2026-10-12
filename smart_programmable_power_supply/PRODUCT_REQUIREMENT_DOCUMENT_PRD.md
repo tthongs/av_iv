@@ -14,8 +14,8 @@
 
 | Date | Revision No. | Description | Prepared/Revised By | Reviewed By | Approved By |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| 12 Oct 2026 | Rev 1.0 | Initial release of PRD for Smart Programmable Voltage Supply Module | Hardware Team Lead (SPPS) | BU SME (Power Electronics) | BU Head (Embedded Hardware) |
-| 25 Sep 2026 | Rev 0.1 | Draft architecture & preliminary component selection study | Hardware Design Engineer | Senior Hardware Architect | BU SME (Power Electronics) |
+| 12 Oct 2026 | Rev 1.0 | Initial release of PRD aligned with Power Electronics Engineer Trainee scope & deliverables | Power Electronics Engineer Trainee (GET - Hardware Engineering) | BU SME (Power Electronics) | BU Head (Embedded Hardware) |
+| 25 Sep 2026 | Rev 0.1 | Draft architecture & preliminary component selection study | Power Electronics Engineer Trainee (GET) | Senior Hardware Architect | BU SME (Power Electronics) |
 
 ---
 
@@ -67,6 +67,7 @@
 ## Table of Contents
 * **1. Introduction**
   * 1.1 Purpose
+  * 1.1.1 Trainee Project Scope & Engineering Ownership
   * 1.2 Document Conventions
   * 1.3 Intended Audience and Reading Suggestions
   * 1.4 Abbreviation
@@ -93,12 +94,13 @@
   * 7.3 System 2 Development Plan
 * **8. Architecture <optional>**
   * 8.1 System 1: Domain 1 Architecture (Hardware Power Stage)
-  * 8.2 System 1: Domain 2 Architecture (Firmware & Control Loop)
+  * 8.2 System 1: Domain 2 Architecture (Mechanical Enclosure & Thermal Architecture)
+  * 8.3 System 2: Domain 1 Architecture (Embedded Software Multitasking FreeRTOS Architecture)
 * **9. Bill Of Material <optional>**
   * 9.1 System 1: Product BOM
 * **10. Out of Scope**
 * **11. Open Items**
-* **Appendix: Fresher's Mentor Walkthrough & Q&A Cheatsheet**
+* **Appendix: Power Electronics Engineer Trainee Mentor Walkthrough & Q&A Cheatsheet**
 
 ---
 
@@ -109,10 +111,50 @@ The purpose of this Product Requirement Document (PRD) is to define all engineer
 
 In simple terms, this product is an **intelligent, compact benchtop and test fixture power supply**. It plugs directly into a standard wall socket anywhere in the world ($85\,\text{V} \dots 265\,\text{V}$ AC) and generates a clean, stable DC voltage that the user can set anywhere between **$5.0\,\text{V}$ and $20.0\,\text{V}$ DC** at up to **$3.0\,\text{A}$** continuous load ($60\,\text{W}$ maximum power).
 
-This document serves as the authoritative technical baseline for the client, hardware engineering team, firmware team, layout team, and quality assurance (QA) team throughout the design, testing, and production phases.
+This document serves as the authoritative technical baseline for the client, senior hardware mentors, the hardware engineering team, firmware team, layout team, and quality assurance (QA) team throughout the design, testing, and production phases.
 
 > [!IMPORTANT]
 > The requirements captured in this document supersede any previous informal discussions or draft notes. This PRD is the agreed reference baseline for engineering acceptance and milestone sign-off.
+
+### 1.1.1 Trainee Project Scope & Engineering Ownership
+
+This project is executed within the scope of a **Power Electronics Engineer Trainee (Graduate Engineer Trainee - GET, Hardware Engineering)** at VVDN Technologies, under the technical mentorship of the Senior Hardware Architect and BU SME (Power Electronics).
+
+#### 1. Primary Hardware Ownership (Direct Trainee Scope)
+The trainee directly owns the electrical power conversion design, circuit calculations, component selection, Altium schematic capture, PCB layout rules, engineering BOM, and laboratory bench bring-up:
+* **Stage 1 AC-DC Quasi-Resonant Flyback Converter**:
+  * Calculation and design of the primary flyback power stage converting $85\,\text{V} \dots 265\,\text{V}$ AC to a $+24.0\,\text{V}$ DC intermediate bus ($72\,\text{W}$).
+  * Transformer design using Ferroxcube PQ26/20 ferrite core (3C95 grade), calculating magnetizing inductance ($L_p = 220\,\mu\text{H}$), primary/secondary turns ratio ($N_p:N_s = 6:1$), auxiliary winding turns, and specifying Furukawa TEX-E triple-insulated secondary wire for certified $3000\,\text{V}$ RMS safety isolation.
+  * Selection of primary switching MOSFET (Infineon IPB80R290P7, $800\,\text{V}, 0.29\,\Omega$) and secondary synchronous rectifier (Infineon BSC052N06NS, $60\,\text{V}, 5.2\,\text{m}\Omega$) with MP6908 smart driver.
+* **Stage 2 Synchronous 4-Switch Buck-Boost Post-Regulator**:
+  * Sizing and loss analysis of the LM5176 4-switch Buck-Boost stage converting $+24\,\text{V}$ DC into the user-selected $5.0\,\text{V} \dots 20.0\,\text{V}$ DC at $3.0\,\text{A}$.
+  * Power inductor selection (Wurth Elektronik 7443321000 flat-wire inductor, $10.0\,\mu\text{H}, 8.5\,\text{A}_{\text{RMS}}, I_{sat} = 11.5\,\text{A}$) ensuring Continuous Conduction Mode (CCM) across operating points.
+  * Sizing output capacitor bank ($4\times 22\,\mu\text{F}$ X7R ceramic MLCCs $+ 1\times 100\,\mu\text{F} / 25\,\text{V}$ Panasonic OS-CON polymer capacitor with $\text{ESR} = 12\,\text{m}\Omega$) to guarantee sub-$25\,\text{mV}$ peak-to-peak output voltage ripple.
+* **Analog DAC Feedback Summing & Hardware CC Protection**:
+  * Precision resistor network calculations ($R_{\text{top}} = 49.9\,\text{k}\Omega, R_{\text{DAC}} = 11.0\,\text{k}\Omega, R_{\text{bot}} = 3.65\,\text{k}\Omega$) for 12-bit DAC voltage steering, providing $3.65\,\text{mV}$ LSB step resolution.
+  * Autonomous hardware Constant Current (CC) protection circuit using a $10\,\text{m}\Omega$ precision current shunt, INA240A2 current amplifier ($50\,\text{V/V}$), and TLV3501 high-speed analog comparator pulling down the LM5176 `COMP` pin in $< 5\,\mu\text{s}$ during short-circuit or overload.
+* **Altium Schematics & 4-Layer PCB Layout Guidelines**:
+  * Creation of hierarchical multi-sheet schematics adhering to VVDN library and derating guidelines.
+  * 4-layer PCB layout execution: establishing strict separation between Hot Primary Ground and Cold Secondary Ground, minimizing high-$di/dt$ switching loop areas, Kelvin sensing across the current shunt, and placing a physical $\ge 6.4\,\text{mm}$ milled isolation creepage slot beneath the transformer and optocoupler barriers.
+* **BOM & Prototype Procurement**:
+  * Formulating the master engineering BOM with active manufacturer part numbers, verified footprints, and second-source alternatives.
+* **Benchtop Bring-Up & Design Verification Testing (DVT)**:
+  * Safe benchtop power-up protocol: primary cold resistance checks, secondary resistance checks, Variac gradual AC voltage ramp-up ($0\,\text{V} \rightarrow 85\,\text{V} \rightarrow 230\,\text{V} \rightarrow 265\,\text{V}$ AC), and intermediate bus verification.
+  * Performing line/load regulation sweeps, dynamic load transient tests ($1.5\,\text{A} \rightarrow 3.0\,\text{A}$ load step), ripple and noise measurements using $20\,\text{MHz}$ tip-and-barrel oscilloscope probe technique, and efficiency mapping ($P_{\text{DC}} / P_{\text{AC}}$).
+  * Authoring the DVT Test Report and documenting design changes for Revision B.
+
+#### 2. Cross-Functional Interfaces (Trainee Boundary Responsibilities)
+The trainee defines technical interfaces with adjacent disciplines, while respective domain teams execute domain-specific implementations:
+* **Embedded Firmware Interface**: The trainee defines hardware register maps, pin assignments, DAC scaling formulas ($V_{\text{DAC}}$ vs $V_{\text{OUT}}$ lookup formulas), shunt amplifier gain ratios, ADC sampling ranges, and comparator fault trip voltage levels. The Embedded Firmware team implements the FreeRTOS multitasking kernel, SCPI USB-CDC parser, and OLED display graphics.
+* **Mechanical & Thermal Interface**: The trainee specifies component heights ($< 35\,\text{mm}$), board mounting hole coordinates, terminal connector placements (IEC C14 inlet, 4mm binding posts, USB-C, OLED bezel), estimated power dissipation ($P_{\text{loss}} \approx 7.5\,\text{W}$ at full 60W load), and thermal gap pad contact zones. The Mechanical Engineering team designs the extruded aluminum 6063-T5 enclosure tooling.
+* **Compliance & Safety Interface**: The trainee designs the PCB to meet IEC 62368-1 reinforced isolation (creepage $\ge 6.4\,\text{mm}$) and incorporates CISPR 32 Class B EMI filtering. The trainee performs preliminary benchtop pre-compliance checks (dielectric Hipot check, near-field sniffer probe) before senior compliance teams submit the unit to certified test chambers.
+
+#### 3. Mentor Review Gates & Verification Sign-Off
+To ensure engineering excellence and safety, the trainee's work progresses through four mandatory mentor gates:
+1. **Gate 1 - Topology & Calculations Sign-Off**: Verification of Flyback transformer equations, Buck-Boost inductor sizing, and component stress derating with BU SME (Power Electronics).
+2. **Gate 2 - Schematic & Derating Review**: Altium schematic review against VVDN component derating guidelines (voltage $\le 80\%$, current $\le 70\%$, junction temperature $\le 105^\circ\text{C}$).
+3. **Gate 3 - PCB Layout & Safety Review**: Review of high-voltage creepage slots, high-frequency current loops, and thermal relief with Senior Layout Lead.
+4. **Gate 4 - Laboratory Bring-Up Authorization**: Cold check sign-off and supervised Variac power-up in the high-voltage power electronics laboratory.
 
 ### 1.2 Document Conventions
 To make requirements simple, clear, and unambiguous, standard keywords are used:
@@ -126,10 +168,11 @@ This document is structured so that different stakeholders can quickly find what
 | Stakeholder | Key Sections to Focus On | Purpose |
 | :--- | :--- | :--- |
 | **Client / Program Managers** | Sections 1, 2, 7, 10 | Project scope, deliverables schedule, and feature boundaries. |
-| **Hardware Engineers & Layout** | Sections 2.2, 4.1, 8.1, 9.1 | Circuit topologies, component selection, safety creepage, and BOM. |
-| **Embedded Firmware Engineers** | Sections 2.4.2, 4.2, 8.2 | DAC voltage setting, SCPI command parser, and data logging. |
+| **Senior Hardware Mentors & BU SMEs** | Sections 1.1.1, 4.1, 8.1, 9.1 | Review trainee design calculations, component derating, and safety. |
+| **Power Electronics Trainee (Author)** | Entire Document | Primary hardware design ownership, schematic capture, layout, and bring-up. |
+| **Embedded Firmware Engineers** | Sections 2.4.2, 4.2, 8.3 | DAC voltage setting equations, SCPI command parser, and data logging. |
+| **Mechanical & Thermal Engineers** | Sections 2.4.1, 8.2 | Enclosure envelope, connector placement, thermal loss dissipation. |
 | **QA & Compliance Engineers** | Sections 4.1, 7.2 | Hipot safety test, CISPR 32 EMI limits, and load transient testing. |
-| **Freshers & Trainees** | Section 2.2, Section 8, Appendix | Block diagram flow, simple stage explanations, and mentor Q&A. |
 
 ### 1.4 Abbreviation
 
@@ -444,10 +487,16 @@ The development of the power supply spans four core engineering domains working 
 #### Table 6: Domain Allocation
 | Engineering Domain | System 1 (Hardware Module) | System 2 (Firmware & Software) | Core Team Responsibilities |
 | :--- | :---: | :---: | :--- |
-| **Hardware Engineering (HW)** | **Yes** | No | AC protection, transformer sizing, 4-switch Buck-Boost layout, schematics, PCB design. |
-| **Mechanical Engineering (ME)**| **Yes** | No | Extruded aluminum enclosure, thermal heatsink mounting, front-panel bezel, airflow. |
-| **Embedded Firmware (FW)** | No | **Yes** | STM32 FreeRTOS tasks, DAC control algorithms, INA226 drivers, SCPI command parser. |
-| **Quality & Compliance (QA)** | **Yes** | **Yes** | Hipot dielectric safety testing, CISPR 32 EMC testing, load step validation, thermal soak test. |
+| **Hardware Engineering (HW)** | **Primary Trainee Ownership** | No | Trainee owns AC protection, transformer sizing, 4-switch Buck-Boost, schematics, PCB layout, BOM, and bring-up under BU SME guidance. |
+| **Mechanical Engineering (ME)**| Cross-Functional | No | Extruded aluminum enclosure, thermal heatsink mounting, front-panel bezel, airflow. Trainee provides 3D PCB STEP model and thermal loss figures. |
+| **Embedded Firmware (FW)** | No | **Cross-Functional** | STM32 FreeRTOS tasks, DAC control algorithms, INA226 drivers, SCPI command parser. Trainee specifies register maps and DAC scaling equations. |
+| **Quality & Compliance (QA)** | Joint Validation | Joint Validation | Hipot dielectric safety testing, CISPR 32 EMC testing, load step validation, thermal soak test. Trainee leads bench pre-compliance checks. |
+
+> [!NOTE]
+> **Engineering Ownership Summary**:
+> * **System 1 (Hardware Module)**: **Direct Trainee Ownership**. The Power Electronics Engineer Trainee is the primary designer for all electrical power conversion circuits, magnetics, Altium schematics, PCB layout rules, BOM, and bench bring-up under BU SME mentorship.
+> * **System 2 (Firmware & Software)**: **Cross-Functional Domain**. Owned by the Embedded Firmware team. The trainee provides interface specifications, DAC transfer formulas, sensor calibration values, and hardware interrupt definitions.
+> * **Mechanical & Thermal**: **Cross-Functional Domain**. Owned by the Mechanical Engineering team. The trainee provides PCB keep-outs, 3D STEP models of the PCBA, thermal loss dissipations, and gap pad contact coordinates.
 
 ---
 
@@ -551,19 +600,23 @@ The project follows VVDN's standard 4-phase product development lifecycle:
 
 ### 7.2 System 1 Development Plan (Hardware & Software Releases)
 
+> [!IMPORTANT]
+> **Trainee Engineering Deliverables Boundary**:
+> The column **Hardware Deliverable [HW]** encompasses the primary engineering deliverables directly authored, calculated, designed, and verified by the **Power Electronics Engineer Trainee (GET - Hardware Engineering)**. Deliverables in the **Mechanical [ME]** and **Embedded Software [FW]** columns are produced by collaborating domain teams based on the trainee's hardware interface specifications, register maps, and mechanical keep-outs.
+
 #### Table 7: System 1 Development Plan
-| Release ID | Hardware Deliverable [HW] | Mechanical Deliverable [ME] | Embedded Software Deliverable [FW] |
+| Release ID | Hardware Deliverable [HW] *(Trainee Ownership)* | Mechanical Deliverable [ME] *(Cross-Functional)* | Embedded Software Deliverable [FW] *(Cross-Functional)* |
 | :---: | :--- | :--- | :--- |
-| **1** | Hardware Design Document (HDD) | Industrial Design (ID) Concept | Software Design Document (SDD) |
-| **2** | Component Schematics (Altium) | Initial Enclosure 3D Model | Board Support Package (BSP) Drivers |
-| **3** | 4-Layer PCB Layout & DRC Checks | Enclosure CAD (STEP format) | Control State Machine & DAC Loop |
-| **4** | Gerber Package & Master BOM | Thermal & Heatsink Fab Package | FreeRTOS Telemetry Task & I2C |
-| **5** | Assembled Rev A Prototype PCBA | 3D Printed Prototype Bezel | SCPI Command Parser v1.0 |
-| **6** | Cold Checks & Variac Bring-Up | Enclosure Mechanical Fit Check | OLED Display GUI Driver |
-| **7** | Dynamic Load Step Test Report | Thermal Soak Test (FLIR Camera) | MicroSD FAT32 Logger Engine |
-| **8** | EMC & Safety Pre-Compliance Rep.| Drop & Vibration Test Report | Production Firmware Release 1.0 |
-| **9** | Rev B Schematics & Layout Fixes| Extruded Aluminum Enclosure Tool| Production Calibration Firmware |
-| **10**| Final Rev B Production PCBA | Mass Production Packaging | Final Golden Firmware Release v2.0 |
+| **1** | Hardware Design Document (HDD) & Topologies Math | Industrial Design (ID) Concept | Software Design Document (SDD) |
+| **2** | Component Schematics (Altium Designer) | Initial Enclosure 3D Model | Board Support Package (BSP) Drivers |
+| **3** | 4-Layer PCB Layout & Isolation DRC Checks | Enclosure CAD (STEP format) | Control State Machine & DAC Loop |
+| **4** | Gerber Package & Master Engineering BOM | Thermal & Heatsink Fab Package | FreeRTOS Telemetry Task & I2C |
+| **5** | Prototype Rev A PCBA Inspection & Cold Checks | 3D Printed Prototype Bezel | SCPI Command Parser v1.0 |
+| **6** | Variac Bring-Up & Power Rail Verification | Enclosure Mechanical Fit Check | OLED Display GUI Driver |
+| **7** | Dynamic Load Step & Ripple Test Report | Thermal Soak Test (FLIR Camera) | MicroSD FAT32 Logger Engine |
+| **8** | EMC & Safety Pre-Compliance Report | Drop & Vibration Test Report | Production Firmware Release 1.0 |
+| **9** | Rev B Schematics & Layout ECO Fixes | Extruded Aluminum Enclosure Tool| Production Calibration Firmware |
+| **10**| Final Rev B PCBA Bring-Up & Acceptance Pack | Mass Production Packaging | Final Golden Firmware Release v2.0 |
 
 ---
 
@@ -679,12 +732,18 @@ The embedded firmware executes on the STM32G474 ARM Cortex-M4F microcontroller u
 ---
 
 ## 10. Out of Scope
-To maintain focused project execution and budget, the following items are explicitly excluded from this release:
+To maintain focused project execution and budget, the following product items are explicitly excluded from this release:
 1. **Three-Phase AC Mains**: Module operates exclusively from single-phase $85\,\text{V} \dots 265\,\text{V}$ AC.
 2. **Active PFC Stage**: Active boost power factor pre-regulator is excluded (passive filtering meets all harmonics standards for $< 75\,\text{W}$ class equipment).
 3. **Negative Output Rails**: System delivers single positive polarity ($+5\,\text{V} \dots +20\,\text{V}$ DC); dual-rail $\pm 15\,\text{V}$ outputs are not supported.
 4. **Wireless Connectivity**: Onboard Wi-Fi and Bluetooth are excluded; communication is wired via USB-C and MicroSD.
 5. **Bidirectional Power Sinking**: The module is a forward sourcing power supply, not a 4-quadrant active electronic load.
+
+### 10.1 Out of Scope for Trainee Direct Deliverables
+To establish clear boundary accountability within VVDN's engineering organization:
+* **Firmware Implementation**: The trainee is not responsible for writing RTOS kernel tasks, USB protocol stacks, or display drivers (owned by Embedded Firmware).
+* **Mechanical Tooling & Extrusion Dies**: The trainee is not responsible for designing aluminum extrusion dies or manufacturing tooling (owned by Mechanical).
+* **Accredited Third-Party Agency Testing**: Official regulatory filing with certification bodies (e.g., UL/TÜV) is handled by the Compliance Certification department after trainee pre-compliance verification.
 
 ---
 
@@ -696,12 +755,12 @@ The following engineering items are currently under active evaluation for Revisi
 
 ---
 
-## Appendix: Fresher's Mentor Walkthrough & Q&A Cheatsheet
+## Appendix: Power Electronics Engineer Trainee Mentor Walkthrough & Q&A Cheatsheet
 
-Use these quick talking points when presenting and walking your mentor through this PRD:
+Use these structured talking points when presenting and defending your engineering design to senior mentors, BU SMEs, and BU heads:
 
 ### Q1: Why did you choose a 2-stage architecture instead of converting AC directly to 5–20V?
-* **Your Answer**: *"Direct single-stage AC-to-DC conversion across a wide 5V to 20V output range is inefficient and difficult to stabilize because transformer turn ratios and duty cycles would have to vary wildly. By splitting the design into Stage 1 (an isolated Flyback that produces a fixed +24V intermediate rail) and Stage 2 (a non-isolated 4-switch Buck-Boost post-regulator), Stage 1 handles safety isolation and high-voltage rectification, while Stage 2 provides fast, tight voltage tuning with sub-25mV ripple and over 95% efficiency."*
+* **Your Answer**: *"Direct single-stage AC-to-DC conversion across a wide 5V to 20V output range is inefficient and difficult to stabilize because transformer turns ratios and duty cycles would have to vary wildly. By splitting the design into Stage 1 (an isolated Flyback that produces a fixed +24V intermediate rail) and Stage 2 (a non-isolated 4-switch Buck-Boost post-regulator), Stage 1 handles safety isolation and high-voltage rectification, while Stage 2 provides fast, tight voltage tuning with sub-25mV ripple and over 95% efficiency."*
 
 ### Q2: How is galvanic safety isolation achieved, and what standard applies?
 * **Your Answer**: *"We comply strictly with IEC 62368-1 for reinforced safety isolation. We use a custom transformer wound with triple-insulated Furukawa TEX-E wire, optocouplers for feedback, and an AMC1311 isolated modulator for AC voltage sensing. The PCB includes a 6.4mm physical milled air slot to maintain safety creepage distance between the hot primary side and the cold secondary side. It withstands a 3000V RMS Hipot dielectric test for 1 minute."*
@@ -715,5 +774,11 @@ Use these quick talking points when presenting and walking your mentor through t
 ### Q5: How is electrical efficiency calculated in real time?
 * **Your Answer**: *"We have dual-domain power metering. On the primary AC side, an isolated AMC1311 modulator measures RMS voltage, and a 1000:1 current transformer measures RMS current to compute true active AC input power (P_AC). On the secondary DC side, a high-precision 16-bit INA226 monitor measures DC output voltage and current to compute output power (P_DC). At a 10Hz rate, the MCU calculates Efficiency = (P_DC / P_AC) * 100% and displays it live on the OLED and logs it to the MicroSD card."*
 
-### Q6: What are the main deliverables you are responsible for in this project?
-* **Your Answer**: *"Following VVDN's standard development plan across 4 phases and 10 release milestones, our deliverables include: the Hardware Design Document (HDD), Altium schematics, 4-layer PCB layout with Gerber files, master BOM, prototype bring-up cold checks and Variac testing, dynamic load transient test reports, CISPR 32 EMC and Hipot safety reports, and final Rev B production-ready documentation."*
+### Q6: What are the main deliverables you are responsible for as a Power Electronics Trainee?
+* **Your Answer**: *"Following VVDN's standard development plan across 4 phases and 10 release milestones, my primary hardware deliverables are: the Hardware Design Document (HDD), Flyback and Buck-Boost calculations, PQ26/20 transformer design, Altium schematics, 4-layer PCB layout with safety creepage slots, master engineering BOM, prototype bring-up cold checks and Variac testing, dynamic load transient test reports, CISPR 32 EMC and Hipot safety pre-compliance reports, and final Rev B production documentation."*
+
+### Q7: How do you interface with the firmware and mechanical teams?
+* **Your Answer**: *"For the firmware team, I define hardware register mappings, DAC scaling formulas (target voltage to DAC code), INA226/AMC1311 gain constants, and comparator fault trip lines. For the mechanical team, I specify the 3D STEP PCBA model, connector keep-outs, thermal loss figures (7.5W max at 60W load), and thermal gap pad placement locations."*
+
+### Q8: How did you calculate the transformer magnetics and verify safety creepage?
+* **Your Answer**: *"For the Flyback transformer, I selected a Ferroxcube PQ26/20 ferrite core with 3C95 material. At 85V AC minimum input (120V DC bulk) and 72W output power, I calculated a primary inductance Lp of 220µH to operate in quasi-resonant valley switching with a 6:1 turns ratio. To comply with IEC 62368-1 reinforced isolation (3000V RMS), I specified triple-insulated Furukawa TEX-E wire on the secondary winding. On the PCB layout, I routed a 6.4mm wide milled air slot beneath the transformer and optocoupler barriers to prevent surface tracking."*
