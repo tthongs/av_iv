@@ -88,6 +88,34 @@ The complete embedded hardware schematic-level architecture showing gate drivers
 
 ---
 
+### 2.1 Internal Sub-Block Diagrams (The 4 Stages in Detail)
+
+#### Stage 1: Mains Supply & Input Protection Subsystem
+Takes raw AC mains (85V–265V AC RMS), provides inrush current limiting (10Ω NTC), lightning surge suppression (14D471K MOV), and conducted EMI suppression (2-Stage Common Mode Chokes + X2/Y1 filter caps).
+<p align="center">
+  <img src="diagram_inside_stage1_mains.png" alt="Inside Stage 1: Mains Supply Subsystem" width="100%"/>
+</p>
+
+#### Stage 2: Bridge Rectifier & High-Voltage Bulk Filter Subsystem
+Full-wave rectification via GBU606 bridge (600V, 6A) and energy smoothing via 100µF/450V 105°C electrolytic bulk capacitor, generating a high-voltage DC bus (+120V to +375V DC) with > 10ms holdup.
+<p align="center">
+  <img src="diagram_inside_stage2_rectifier.png" alt="Inside Stage 2: Rectifier & Bulk Subsystem" width="100%"/>
+</p>
+
+#### Stage 3: Converter DC-DC (Isolated Quasi-Resonant Flyback Subsystem)
+TI UCC28740 QR valley-switching controller, 800V CoolMOS IPB80R290P7, and custom PQ26/20 transformer stepping down power with certified 3000V RMS reinforced safety isolation to a +24.0V DC intermediate rail (72W) using synchronous rectification (MP6908 + BSC052N06NS).
+<p align="center">
+  <img src="diagram_inside_stage3_flyback.png" alt="Inside Stage 3: Converter DC-DC Flyback Subsystem" width="100%"/>
+</p>
+
+#### Stage 4: Final Stage (Synchronous 4-Switch Buck-Boost Post-Regulator Subsystem)
+TI LM5176 modulating four 40V MOSFETs (BSC034N04LS) through a 10µH flat-wire power inductor. Features 10mV DAC voltage steering (5V–20V DC), sub-25mV ripple, and < 5µs autonomous hardware CC clamping feeding 4mm gold binding posts.
+<p align="center">
+  <img src="diagram_inside_stage4_final_stage.png" alt="Inside Stage 4: 4-Switch Buck-Boost Post-Regulator Subsystem" width="100%"/>
+</p>
+
+---
+
 ## 3. Two-Stage Power Architecture Rationale
 
 Why is a two-stage cascaded architecture (**Universal AC-DC Flyback + Synchronous Buck-Boost**) vastly superior to a single-stage variable flyback for a precision programmable bench supply?

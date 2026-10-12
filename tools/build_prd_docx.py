@@ -778,19 +778,19 @@ def generate_prd_docx():
         p_uc_caption.text = "Table 3: Hardware Operational Modes Summary"
 
     fig2_steps = [
-        ("1", "AC Grid Mains", "Delivers 85V–265V AC RMS through IEC C14 inlet and input protection (2A Fuse, 10Ω NTC, MOV)."),
-        ("2", "Bridge Rectifier", "GBU606 full-wave rectifies line AC into raw DC; 100µF/450V bulk cap filters high-voltage bus (+120V to +375V DC)."),
-        ("3", "UCC28740 Controller", "Drives Infineon 800V Superjunction MOSFET with quasi-resonant valley switching at 80kHz."),
-        ("4", "PQ26/20 Transformer", "Steps down power across 6:1 turns ratio with 3000V RMS reinforced isolation (Furukawa TEX-E wire)."),
-        ("5", "Synchronous Rectifier", "MP6908 smart driver and BSC052N06NS MOSFET generate rock-solid +24.0V DC intermediate bus (72W).")
+        ("1", "Mains AC Input", "Delivers 85V–265V AC RMS through IEC C14 inlet and input protection (2A Fuse, 10Ω NTC, MOV, 2-Stage Filter)."),
+        ("2", "Rectifier & Bulk", "GBU606 full-wave bridge and 100µF/450V bulk cap generate high-voltage DC bus (+120V to +375V DC)."),
+        ("3", "Isolated DC-DC Flyback", "TI UCC28740 and PQ26/20 transformer step down power with 3000V RMS reinforced isolation to +24.0V DC (72W)."),
+        ("4", "4-Switch Buck-Boost", "TI LM5176 modulates 4x 40V MOSFETs through 10µH inductor to regulate 5.0V–20.0V DC at up to 3.0A with < 25mV ripple."),
+        ("5", "Device Output", "Delivers clean, tightly clamped DC power to target device via heavy-duty 4mm binding posts.")
     ]
 
     fig3_steps = [
-        ("1", "Intermediate Bus", "Supplies clean, low-ripple +24.0V DC into the LM5176 4-switch H-bridge stage."),
-        ("2", "DAC Voltage Steering", "12-bit DAC injects steering current into FB resistor network (R_top=49.9kΩ, R_DAC=11.0kΩ, R_bot=3.65kΩ)."),
-        ("3", "LM5176 Controller", "Modulates 4-switch PWM at 300kHz through 10µH flat-wire inductor (Wurth 7443321000)."),
-        ("4", "Low-ESR Filter Bank", "4x 22µF ceramic MLCCs + 100µF OS-CON polymer filter attenuate output ripple strictly below 25mV pk-pk."),
-        ("5", "Output Binding Posts", "Delivers tightly regulated, current-clamped 5.0V–20.0V DC at up to 3.0A (60W max) to target device.")
+        ("1", "AC Inlet & Fuse", "IEC 320-C14 inlet feeds 85V–265V AC through 2A ceramic time-lag fuse F1 (I²t >= 18 A²s)."),
+        ("2", "Inrush & Surge Suppression", "10Ω NTC thermistor limits cold turn-on surge < 30A; 14D471K MOV clamps spikes up to 4.5kA."),
+        ("3", "Common Mode Choke 1", "L_CM1 (15mH, 1.1A) provides high-attenuation filtering for low-frequency EMI (150kHz–2MHz)."),
+        ("4", "Common Mode Choke 2", "L_CM2 (4.7mH, 1.6A) provides high-frequency common mode suppression (2MHz–30MHz)."),
+        ("5", "Safety X2 & Y1 Filtering", "0.22µF X2 film cap and 2x 2.2nF Y1 caps ensure full compliance with CISPR 32 Class B limits.")
     ]
 
     # Insert Figure 2 cleanly right after its intro
@@ -806,15 +806,15 @@ def generate_prd_docx():
             p_fig2_ins._p.addnext(p_pic2._p)
             cursor2 = p_pic2._p
 
-        tbl_fig2 = create_workflow_table(doc, "POWER STAGE 1: AC-DC FLYBACK CONVERSION SEQUENCE", fig2_steps, header_color="1A365D")
+        tbl_fig2 = create_workflow_table(doc, "MASTER 4-STAGE POWER CONVERSION SEQUENCE", fig2_steps, header_color="1A365D")
         cursor2.addnext(tbl_fig2._tbl)
     if p_fig2_cap is not None:
         p_fig2_cap.text = "Figure 2: Master Embedded Hardware Architecture Block Diagram"
 
     # Insert Figure 3 cleanly right after its intro
     if p_fig3_ins is not None:
-        p_fig3_ins.text = "The Stage 1 Quasi-Resonant Flyback power stage architecture is shown in Figure 3 and Table 3.2 below:"
-        diag3_path = "smart_programmable_power_supply/block_diagram_stage1_flyback.png"
+        p_fig3_ins.text = "The internal architecture of Stage 1 (Mains AC Input & Protection Subsystem) is shown in Figure 3 and Table 3.2 below:"
+        diag3_path = "smart_programmable_power_supply/diagram_inside_stage1_mains.png"
         cursor3 = p_fig3_ins._p
         if os.path.exists(diag3_path):
             p_pic3 = doc.add_paragraph()
@@ -824,10 +824,10 @@ def generate_prd_docx():
             p_fig3_ins._p.addnext(p_pic3._p)
             cursor3 = p_pic3._p
 
-        tbl_fig3 = create_workflow_table(doc, "POWER STAGE 2: 4-SWITCH SYNCHRONOUS BUCK-BOOST REGULATION SEQUENCE", fig3_steps, header_color="234E52")
+        tbl_fig3 = create_workflow_table(doc, "STAGE 1: MAINS AC INPUT & PROTECTION SEQUENCE", fig3_steps, header_color="234E52")
         cursor3.addnext(tbl_fig3._tbl)
     if p_fig3_cap is not None:
-        p_fig3_cap.text = "Figure 3: Stage 1 Isolated Quasi-Resonant Flyback Power Converter Architecture"
+        p_fig3_cap.text = "Figure 3: Inside Stage 1 - Mains AC Input & Protection Subsystem Architecture"
 
     # Update Table of Figures text cleanly
     for p in doc.paragraphs[:100]:
@@ -836,13 +836,13 @@ def generate_prd_docx():
         elif "Figure 2:" in p.text:
             p.text = "Figure 2: Master Embedded Hardware Architecture Block Diagram\t10"
         elif "Figure 3:" in p.text:
-            p.text = "Figure 3: Stage 1 Isolated Quasi-Resonant Flyback Power Converter Architecture\t10"
+            p.text = "Figure 3: Inside Stage 1 - Mains AC Input & Protection Subsystem Architecture\t11"
         elif "Figure 4:" in p.text:
-            p.text = "Figure 4: Dual-Closed-Loop Control & Real-Time Hardware Protection Flow Diagram\t15"
+            p.text = "Figure 4: Inside Stage 2 - Bridge Rectifier & Bulk DC Stage Subsystem Architecture\t15"
         elif "Figure 5:" in p.text:
-            p.text = "Figure 5: Stage 2 4-Switch Synchronous Buck-Boost Post-Regulator Architecture\t16"
+            p.text = "Figure 5: Inside Stage 3 - Converter DC-DC (Isolated Flyback) Subsystem Architecture\t16"
         elif "Figure 6:" in p.text:
-            p.text = "Figure 6: Analog Closed-Loop Control & Hardware Protection Architecture\t18"
+            p.text = "Figure 6: Inside Stage 4 - 4-Switch Buck-Boost Post-Regulator Subsystem Architecture\t18"
         elif "Figure 7:" in p.text:
             p.text = "Figure 7: Dual-Domain Power Telemetry & Sensing Frontend Architecture\t19"
         elif "Figure 8:" in p.text:
@@ -1013,31 +1013,57 @@ def generate_prd_docx():
         cursor = t_ctrl._tbl
 
     # --------------------------------------------------------------------------
-    # 17. INSERT FLOW DIAGRAM, WIREFRAMES & ARCHITECTURE BLOCK DIAGRAMS
+    # 17. INSERT INSIDE SUB-BLOCK DIAGRAMS & ARCHITECTURE BLOCK DIAGRAMS
     # --------------------------------------------------------------------------
-    # Figure 4: Control Flow Diagram insertion (Section 4.1 System 1)
+    fig4_steps = [
+        ("1", "Filtered AC Input", "Takes 85V–265V AC RMS sinusoidal voltage from Stage 1 EMI filter."),
+        ("2", "Full-Wave Rectification", "GBU606 single-phase bridge rectifies AC into 100Hz/120Hz unipolar DC pulses (120Vpk–375Vpk)."),
+        ("3", "Bulk Capacitive Filtering", "100µF/450V electrolytic cap smooths ripple and guarantees > 10ms holdup time across line dropouts."),
+        ("4", "High-Frequency Decoupling", "100nF/630V ceramic cap bypasses fast 80kHz primary switching edge ringing."),
+        ("5", "Safety Discharge Bleeder", "3x 330kΩ resistor string drains bulk capacitor to < 50V SELV within 60s per IEC 62368-1.")
+    ]
+
+    fig5_steps = [
+        ("1", "High-Voltage DC Input", "Receives +120V to +375V DC bulk bus into primary switching cell."),
+        ("2", "Quasi-Resonant Switching", "TI UCC28740 valley-switching controller modulates 800V CoolMOS at resonant minimums to slash Coss loss."),
+        ("3", "3000V RMS Safety Barrier", "PQ26/20 transformer (Lp=220µH) with Furukawa TEX-E wire provides reinforced galvanic isolation."),
+        ("4", "Synchronous Rectification", "MP6908 smart driver and BSC052N06NS 60V/5.2mΩ FET replace Schottky diode, saving 1.65W heat dissipation."),
+        ("5", "+24.0V DC Intermediate Rail", "Low-ESR LC filter delivers stable +24.0V DC (72W) with optocoupled feedback regulation.")
+    ]
+
+    fig6_steps = [
+        ("1", "+24.0V DC Rail Input", "Accepts +24.0V DC intermediate rail from Stage 3 Flyback."),
+        ("2", "4-Switch Synchronous Bridge", "TI LM5176 modulates four 40V MOSFETs in H-bridge around a 10µH flat-wire power inductor."),
+        ("3", "Seamless Mode Transitions", "Operates in pure Buck mode for 5V–18V outputs (>96% eff) and 4-switch Buck-Boost mode near 20V (>95% eff)."),
+        ("4", "Precision DAC Steering", "Resistor summing network (R_top=49.9kΩ, R_bot=3.65kΩ, R_DAC=11kΩ) steers output from 5V to 20V in 10mV steps."),
+        ("5", "Sub-5µs Hardware Protection", "10mΩ shunt, INA240A2 (50V/V), and TLV3501 (4.5ns comparator) pull COMP pin low in < 5µs on overcurrent.")
+    ]
+
+    # Figure 4: Inside Stage 2 Subsystem Architecture (Section 4.1 System 1)
     p_flow_wire = None
     p_flow_cap = None
     for p in doc.paragraphs[100:]:
         txt = p.text.strip()
         if p.style.name == "Heading 4" and "Mobile UI Screens/Wireframes" in txt and p_flow_wire is None:
             p_flow_wire = p
-        elif ("Figure : Flow Diagram" in txt or "Figure 4: Flow Diagram" in txt) and p.style.name == "Caption" and p_flow_cap is None:
+        elif ("Figure : Flow Diagram" in txt or "Figure 4: Flow Diagram" in txt or "Figure 4: Inside Stage 2" in txt) and p.style.name == "Caption" and p_flow_cap is None:
             p_flow_cap = p
             break
 
     if p_flow_wire is not None:
-        p_flow_wire.text = "Dual-Closed-Loop Control & Real-Time Protection Flow"
+        p_flow_wire.text = "Inside Stage 2: Bridge Rectifier & High-Voltage Bulk DC Subsystem"
     if p_flow_cap is not None:
-        p_flow_cap.text = "Figure 4: Dual-Closed-Loop Control & Hardware Protection Flow Diagram"
-        diag4_path = "smart_programmable_power_supply/diagram_control_protection_flow.png"
+        p_flow_cap.text = "Figure 4: Inside Stage 2 - Bridge Rectifier & Bulk DC Stage Subsystem Architecture"
+        diag4_path = "smart_programmable_power_supply/diagram_inside_stage2_rectifier.png"
         if os.path.exists(diag4_path):
             p_pic4 = p_flow_cap.insert_paragraph_before()
             p_pic4.alignment = WD_ALIGN_PARAGRAPH.CENTER
             r4 = p_pic4.add_run()
             r4.add_picture(diag4_path, width=Inches(6.47))
+        tbl_fig4 = create_workflow_table(doc, "STAGE 2: BRIDGE RECTIFIER & BULK FILTER SEQUENCE", fig4_steps, header_color="7B341E")
+        p_flow_cap._p.addnext(tbl_fig4._tbl)
 
-    # Figure 5: OLED Wireframe insertion (Section 4.2 System 2)
+    # Figure 5: Inside Stage 3 Subsystem Architecture (Section 4.2 System 2)
     p_oled_wire = None
     p_oled_cap = None
     found_sys2 = False
@@ -1053,15 +1079,17 @@ def generate_prd_docx():
                 break
 
     if p_oled_wire is not None:
-        p_oled_wire.text = "Stage 2 4-Switch Synchronous Buck-Boost Post-Regulator Architecture"
+        p_oled_wire.text = "Inside Stage 3: Converter DC-DC (Isolated Quasi-Resonant Flyback) Subsystem"
     if p_oled_cap is not None:
-        diag5_path = "smart_programmable_power_supply/block_diagram_stage2_buckboost.png"
+        diag5_path = "smart_programmable_power_supply/diagram_inside_stage3_flyback.png"
         if os.path.exists(diag5_path):
             p_pic5 = p_oled_cap.insert_paragraph_before()
             p_pic5.alignment = WD_ALIGN_PARAGRAPH.CENTER
             r5 = p_pic5.add_run()
             r5.add_picture(diag5_path, width=Inches(6.47))
-        p_oled_cap.text = "Figure 5: Stage 2 4-Switch Synchronous Buck-Boost Post-Regulator Architecture"
+        p_oled_cap.text = "Figure 5: Inside Stage 3 - Converter DC-DC (Isolated Flyback) Subsystem Architecture"
+        tbl_fig5 = create_workflow_table(doc, "STAGE 3: ISOLATED FLYBACK DC-DC CONVERTER SEQUENCE", fig5_steps, header_color="1C4532")
+        p_oled_cap._p.addnext(tbl_fig5._tbl)
 
     # Section 8 Architecture 8.1, 8.2, 8.3
     p_arch1 = None
@@ -1077,8 +1105,8 @@ def generate_prd_docx():
             p_arch3 = p
 
     if p_arch1 is not None:
-        p_arch1.text = "8.1 System 1: Analog Closed-Loop Control & Hardware Protection Architecture"
-        diag6_path = "smart_programmable_power_supply/block_diagram_control_feedback.png"
+        p_arch1.text = "8.1 System 1: Inside Stage 4 (Synchronous 4-Switch Buck-Boost Post-Regulator Subsystem)"
+        diag6_path = "smart_programmable_power_supply/diagram_inside_stage4_final_stage.png"
         p_pic6 = None
         if os.path.exists(diag6_path):
             p_pic6 = doc.add_paragraph()
@@ -1086,8 +1114,9 @@ def generate_prd_docx():
             r6 = p_pic6.add_run()
             r6.add_picture(diag6_path, width=Inches(6.47))
 
-        cap6 = doc.add_paragraph("Figure 6: Analog Closed-Loop Control & Hardware Protection Architecture")
+        cap6 = doc.add_paragraph("Figure 6: Inside Stage 4 - 4-Switch Buck-Boost Post-Regulator Subsystem Architecture")
         cap6.style = "Caption"
+        tbl_fig6 = create_workflow_table(doc, "STAGE 4: 4-SWITCH BUCK-BOOST POST-REGULATOR SEQUENCE", fig6_steps, header_color="2A4365")
         note6_1 = doc.add_paragraph("Note: This is the proposed architecture and it might get changed during the design stage.")
         note6_1.runs[0].font.italic = True
         note6_2 = doc.add_paragraph("Note: Component selection must strictly comply with VVDN derating guidelines.")
@@ -1096,10 +1125,12 @@ def generate_prd_docx():
         if p_pic6 is not None:
             p_arch1._p.addnext(p_pic6._p)
             p_pic6._p.addnext(cap6._p)
-            cap6._p.addnext(note6_1._p)
+            cap6._p.addnext(tbl_fig6._tbl)
+            tbl_fig6._tbl.addnext(note6_1._p)
         else:
             p_arch1._p.addnext(cap6._p)
-            cap6._p.addnext(note6_1._p)
+            cap6._p.addnext(tbl_fig6._tbl)
+            tbl_fig6._tbl.addnext(note6_1._p)
         note6_1._p.addnext(note6_2._p)
 
     if p_arch2 is not None:

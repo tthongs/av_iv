@@ -1,0 +1,164 @@
+digraph InsideStage1Mains {
+    graph [
+        rankdir=LR,
+        bgcolor="#FFFFFF",
+        compound=true,
+        fontname="Helvetica, Arial, sans-serif",
+        fontsize=12,
+        nodesep=0.40,
+        ranksep=0.60,
+        pad="0.25,0.25",
+        splines=true
+    ];
+
+    node [
+        fontname="Helvetica, Arial, sans-serif",
+        fontsize=9.5,
+        shape=box,
+        style="filled,rounded",
+        margin="0.16,0.12",
+        penwidth=1.6
+    ];
+
+    edge [
+        fontname="Helvetica, Arial, sans-serif",
+        fontsize=8.5,
+        penwidth=2.0,
+        arrowsize=0.8
+    ];
+
+    subgraph cluster_mains_subsystem {
+        label = "INTERNAL ARCHITECTURE: STAGE 1 - MAINS AC INPUT & PROTECTION SUBSYSTEM";
+        style = "filled,rounded";
+        fillcolor = "#FAFAFA";
+        color = "#37474F";
+        penwidth = 1.8;
+
+        inlet [
+            label = <<table border="0" cellborder="0" cellspacing="2">
+                <tr><td><b>AC INLET</b></td></tr>
+                <tr><td><font color="#455A64">IEC 320-C14</font></td></tr>
+                <hr/>
+                <tr><td align="left">• 85V – 265V AC RMS</td></tr>
+                <tr><td align="left">• 47Hz – 63Hz Grid</td></tr>
+                <tr><td align="left">• Line, Neutral, Earth</td></tr>
+            </table>>,
+            fillcolor = "#ECEFF1",
+            color = "#37474F"
+        ];
+
+        fuse [
+            label = <<table border="0" cellborder="0" cellspacing="2">
+                <tr><td><b>OVERCURRENT</b></td></tr>
+                <tr><td><font color="#D32F2F">F1: 2.0A / 250V AC</font></td></tr>
+                <hr/>
+                <tr><td align="left">• Time-Lag Ceramic</td></tr>
+                <tr><td align="left">• 5x20mm Cartridge</td></tr>
+                <tr><td align="left">• I²t ≥ 18 A²s Surge</td></tr>
+            </table>>,
+            fillcolor = "#FFEBEE",
+            color = "#C62828"
+        ];
+
+        ntc [
+            label = <<table border="0" cellborder="0" cellspacing="2">
+                <tr><td><b>INRUSH LIMITER</b></td></tr>
+                <tr><td><font color="#E65100">NTC1: 10Ω Cold</font></td></tr>
+                <hr/>
+                <tr><td align="left">• TDK B57236S</td></tr>
+                <tr><td align="left">• Restricts I_inrush &lt; 30A</td></tr>
+                <tr><td align="left">• Drops to &lt; 0.4Ω hot</td></tr>
+            </table>>,
+            fillcolor = "#FFF3E0",
+            color = "#EF6C00"
+        ];
+
+        mov [
+            label = <<table border="0" cellborder="0" cellspacing="2">
+                <tr><td><b>SURGE CLAMP</b></td></tr>
+                <tr><td><font color="#B71C1C">MOV1: 14D471K</font></td></tr>
+                <hr/>
+                <tr><td align="left">• 300V RMS Clamping</td></tr>
+                <tr><td align="left">• 4.5kA (8/20µs) Peak</td></tr>
+                <tr><td align="left">• IEC 61000-4-5 Level 3</td></tr>
+            </table>>,
+            fillcolor = "#FFCDD2",
+            color = "#B71C1C"
+        ];
+
+        x_cap1 [
+            label = <<table border="0" cellborder="0" cellspacing="2">
+                <tr><td><b>X2 CAPACITOR 1</b></td></tr>
+                <tr><td><font color="#1565C0">C_X1: 0.22µF 310V</font></td></tr>
+                <hr/>
+                <tr><td align="left">• Safety Class X2 Film</td></tr>
+                <tr><td align="left">• Across L &amp; N lines</td></tr>
+                <tr><td align="left">• Attenuates diff noise</td></tr>
+            </table>>,
+            fillcolor = "#E3F2FD",
+            color = "#1565C0"
+        ];
+
+        cm_choke1 [
+            label = <<table border="0" cellborder="0" cellspacing="2">
+                <tr><td><b>CM CHOKE 1</b></td></tr>
+                <tr><td><font color="#2E7D32">L_CM1: 15mH / 1.1A</font></td></tr>
+                <hr/>
+                <tr><td align="left">• Wurth 744823215</td></tr>
+                <tr><td align="left">• Toroidal Ferrite Core</td></tr>
+                <tr><td align="left">• Attenuates 150k-2MHz</td></tr>
+            </table>>,
+            fillcolor = "#E8F5E9",
+            color = "#2E7D32"
+        ];
+
+        cm_choke2 [
+            label = <<table border="0" cellborder="0" cellspacing="2">
+                <tr><td><b>CM CHOKE 2</b></td></tr>
+                <tr><td><font color="#2E7D32">L_CM2: 4.7mH / 1.6A</font></td></tr>
+                <hr/>
+                <tr><td align="left">• Wurth 744822472</td></tr>
+                <tr><td align="left">• High-frequency choke</td></tr>
+                <tr><td align="left">• Attenuates 2MHz-30MHz</td></tr>
+            </table>>,
+            fillcolor = "#E8F5E9",
+            color = "#2E7D32"
+        ];
+
+        y_caps [
+            label = <<table border="0" cellborder="0" cellspacing="2">
+                <tr><td><b>Y1 SAFETY CAPS</b></td></tr>
+                <tr><td><font color="#6A1B9A">C_Y1, C_Y2: 2.2nF</font></td></tr>
+                <hr/>
+                <tr><td align="left">• 400V AC Y1 Ceramic</td></tr>
+                <tr><td align="left">• Shunts L &amp; N to Earth</td></tr>
+                <tr><td align="left">• CISPR 32 Class B Pass</td></tr>
+            </table>>,
+            fillcolor = "#F3E5F5",
+            color = "#6A1B9A"
+        ];
+
+        output_clean [
+            label = <<table border="0" cellborder="0" cellspacing="2">
+                <tr><td><b>FILTERED AC OUT</b></td></tr>
+                <tr><td><font color="#1B5E20">To Rectifier Stage</font></td></tr>
+                <hr/>
+                <tr><td align="left">• L_FILT &amp; N_FILT lines</td></tr>
+                <tr><td align="left">• Surge &amp; EMI Cleared</td></tr>
+                <tr><td align="left">• Feeds GBU606 Bridge</td></tr>
+            </table>>,
+            fillcolor = "#C8E6C9",
+            color = "#1B5E20"
+        ];
+    }
+
+    inlet -> fuse [label="Line AC"];
+    fuse -> ntc [label="Protected Line"];
+    ntc -> mov [label="Inrush Limited"];
+    inlet -> mov [label="Neutral AC", style=dashed, color="#78909C"];
+    mov -> x_cap1 [label="Clamped AC"];
+    x_cap1 -> cm_choke1 [label="Diff Filtered"];
+    cm_choke1 -> cm_choke2 [label="Stage 1 CM"];
+    cm_choke2 -> y_caps [label="Stage 2 CM"];
+    y_caps -> output_clean [label="Clean AC", color="#2E7D32", penwidth=2.4];
+}

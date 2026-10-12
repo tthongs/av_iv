@@ -1,0 +1,137 @@
+digraph InsideStage2Rectifier {
+    graph [
+        rankdir=LR,
+        bgcolor="#FFFFFF",
+        compound=true,
+        fontname="Helvetica, Arial, sans-serif",
+        fontsize=12,
+        nodesep=0.42,
+        ranksep=0.65,
+        pad="0.25,0.25",
+        splines=true
+    ];
+
+    node [
+        fontname="Helvetica, Arial, sans-serif",
+        fontsize=9.5,
+        shape=box,
+        style="filled,rounded",
+        margin="0.16,0.12",
+        penwidth=1.6
+    ];
+
+    edge [
+        fontname="Helvetica, Arial, sans-serif",
+        fontsize=8.5,
+        penwidth=2.0,
+        arrowsize=0.8
+    ];
+
+    subgraph cluster_rectifier_subsystem {
+        label = "INTERNAL ARCHITECTURE: STAGE 2 - BRIDGE RECTIFIER & HIGH-VOLTAGE BULK STAGE";
+        style = "filled,rounded";
+        fillcolor = "#FAFAFA";
+        color = "#E65100";
+        penwidth = 1.8;
+
+        ac_in [
+            label = <<table border="0" cellborder="0" cellspacing="2">
+                <tr><td><b>FILTERED AC IN</b></td></tr>
+                <tr><td><font color="#455A64">From Stage 1 Filter</font></td></tr>
+                <hr/>
+                <tr><td align="left">• 85V – 265V AC RMS</td></tr>
+                <tr><td align="left">• 50Hz / 60Hz Sinusoid</td></tr>
+                <tr><td align="left">• Clean Conductors</td></tr>
+            </table>>,
+            fillcolor = "#ECEFF1",
+            color = "#37474F"
+        ];
+
+        bridge [
+            label = <<table border="0" cellborder="0" cellspacing="2">
+                <tr><td><b>BRIDGE RECTIFIER</b></td></tr>
+                <tr><td><font color="#BF360C">GBU606 (Glass Pass.)</font></td></tr>
+                <hr/>
+                <tr><td align="left">• 4x Silicon Diodes</td></tr>
+                <tr><td align="left">• 600V Breakdown VRRM</td></tr>
+                <tr><td align="left">• 6.0A Average Current</td></tr>
+                <tr><td align="left">• Full-Wave Rectification</td></tr>
+            </table>>,
+            fillcolor = "#FFE0B2",
+            color = "#E65100"
+        ];
+
+        dc_raw [
+            label = <<table border="0" cellborder="0" cellspacing="2">
+                <tr><td><b>PULSED DC BUS</b></td></tr>
+                <tr><td><font color="#D84315">100Hz / 120Hz Pulses</font></td></tr>
+                <hr/>
+                <tr><td align="left">• Peak: 120V – 375V pk</td></tr>
+                <tr><td align="left">• 2x Mains Frequency</td></tr>
+                <tr><td align="left">• Unfiltered DC</td></tr>
+            </table>>,
+            fillcolor = "#FFCCBC",
+            color = "#D84315"
+        ];
+
+        bulk_cap [
+            label = <<table border="0" cellborder="0" cellspacing="2">
+                <tr><td><b>BULK ELECTROLYTIC</b></td></tr>
+                <tr><td><font color="#C2185B">C_BULK1: 100µF / 450V</font></td></tr>
+                <hr/>
+                <tr><td align="left">• Nichicon 105°C Snap-in</td></tr>
+                <tr><td align="left">• Energy: E = ½ C V² (7.0J)</td></tr>
+                <tr><td align="left">• Holds V_bulk &gt; 90V @ 10ms</td></tr>
+                <tr><td align="left">• Ripple &lt; 18V pk-pk @ 72W</td></tr>
+            </table>>,
+            fillcolor = "#FCE4EC",
+            color = "#C2185B"
+        ];
+
+        hf_decoupling [
+            label = <<table border="0" cellborder="0" cellspacing="2">
+                <tr><td><b>HF CERAMIC DECOUPLING</b></td></tr>
+                <tr><td><font color="#1565C0">C_HF: 100nF / 630V</font></td></tr>
+                <hr/>
+                <tr><td align="left">• High-Voltage X7R Ceramic</td></tr>
+                <tr><td align="left">• Low ESR &amp; ESL</td></tr>
+                <tr><td align="left">• Bypasses 80kHz switching spikes</td></tr>
+            </table>>,
+            fillcolor = "#E3F2FD",
+            color = "#1565C0"
+        ];
+
+        bleeder [
+            label = <<table border="0" cellborder="0" cellspacing="2">
+                <tr><td><b>SAFETY BLEEDER STRING</b></td></tr>
+                <tr><td><font color="#455A64">R_BLEED: 3x 330kΩ (1MΩ)</font></td></tr>
+                <hr/>
+                <tr><td align="left">• Vishay Dale 1206 SMD</td></tr>
+                <tr><td align="left">• Discharges cap &lt; 50V in 60s</td></tr>
+                <tr><td align="left">• IEC 62368-1 Shock Safety</td></tr>
+            </table>>,
+            fillcolor = "#CFD8DC",
+            color = "#455A64"
+        ];
+
+        hvdc_out [
+            label = <<table border="0" cellborder="0" cellspacing="2">
+                <tr><td><b>HIGH-VOLTAGE DC OUT</b></td></tr>
+                <tr><td><font color="#B71C1C">+120V to +375V DC Bus</font></td></tr>
+                <hr/>
+                <tr><td align="left">• Stable High-Voltage Rail</td></tr>
+                <tr><td align="left">• Low-impedance supply</td></tr>
+                <tr><td align="left">• Feeds Flyback Primary</td></tr>
+            </table>>,
+            fillcolor = "#FFCDD2",
+            color = "#B71C1C"
+        ];
+    }
+
+    ac_in -> bridge [label="AC Line & Neutral", color="#37474F"];
+    bridge -> dc_raw [label="Rectified Pulses", color="#E65100"];
+    dc_raw -> bulk_cap [label="Filter Charge"];
+    bulk_cap -> hf_decoupling [label="Smoothed DC"];
+    bulk_cap -> bleeder [label="Safety Bleed", style=dotted, color="#78909C"];
+    hf_decoupling -> hvdc_out [label="+HVDC Bus", color="#B71C1C", penwidth=2.4];
+}
