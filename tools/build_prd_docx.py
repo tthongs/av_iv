@@ -23,8 +23,9 @@ VVDN Product Requirement Document (PRD) .docx Generator v3.5
 import os
 import sys
 
-# Ensure python-docx from venv can be imported
-sys.path.insert(0, os.path.abspath("tools/.venv/lib/python3.14/site-packages"))
+# Ensure python-docx from venv can be imported if present
+if os.path.exists("tools/.venv/lib/python3.14/site-packages"):
+    sys.path.insert(0, os.path.abspath("tools/.venv/lib/python3.14/site-packages"))
 
 import docx
 from docx.shared import Inches, Pt, RGBColor
@@ -189,6 +190,25 @@ def create_callout_box(doc, text_content, font_name="Consolas", font_size=Pt(8.0
     run.font.name = font_name
     run.font.size = font_size
     run.font.color.rgb = RGBColor(20, 25, 35)
+    return t
+
+def create_workflow_table(doc, title, steps, header_color="1A365D", total_width_inches=6.47, col_widths=None):
+    """Creates a clean, styled workflow sequence table for Use Cases instead of ASCII boxes."""
+    if col_widths is None:
+        col_widths = [Inches(0.9), Inches(1.8), Inches(3.77)]
+    t = doc.add_table(rows=1, cols=len(col_widths))
+    apply_table_geometry(t, col_widths, total_width_inches)
+    set_table_borders(t, color="CBD5E0", sz="4")
+    set_cell_background(t.rows[0].cells[0], header_color)
+    set_cell_text(t.rows[0].cells[0], title, bold=True, color_rgb=(255, 255, 255), font_size=Pt(9))
+    t.rows[0].cells[0].merge(t.rows[0].cells[-1])
+    for step_num, actor, desc in steps:
+        r = t.add_row()
+        set_cell_background(r.cells[0], "EDF2F7")
+        set_cell_text(r.cells[0], f"Step {step_num}", bold=True, align=WD_ALIGN_PARAGRAPH.CENTER, font_size=Pt(8.5))
+        set_cell_text(r.cells[1], actor, bold=True, font_size=Pt(8.5))
+        set_cell_text(r.cells[2], desc, font_size=Pt(8.5))
+    apply_table_geometry(t, col_widths, total_width_inches)
     return t
 
 # ==============================================================================
@@ -832,32 +852,52 @@ def generate_prd_docx():
         "+--------------------------------------------------------------------------------------------------+"
     )
 
+    fig2_steps = [
+        ("1", "Operator / Host PC", "Adjusts front rotary optical encoder knob or transmits SCPI command ':VOLT 12.0' over USB-C interface."),
+        ("2", "STM32G474 MCU Core", "Decodes setpoint in < 2ms, calculates DAC voltage, and programs internal 12-Bit DAC1 to 1.76 V."),
+        ("3", "Feedback Summing Network", "DAC injects steering current into LM5176 FB node via precision 0.1% divider (R_top=49.9kΩ, R_DAC=11.0kΩ, R_bot=3.65kΩ)."),
+        ("4", "LM5176 Buck-Boost Stage", "Modulates 4-switch PWM duty cycle; output voltage stabilizes to 12.00 V ± 10 mV in < 100 µs with < 25 mV ripple."),
+        ("5", "Dual-Domain Telemetry & UI", "INA226 samples new VOUT/IOUT; MCU updates live 1.3\" OLED dashboard and pushes timestamped record to MicroSD card.")
+    ]
+
+    fig3_steps = [
+        ("1", "Automated ATE / Host PC", "Sends standard SCPI batch command over USB-CDC: ':VOLT 15.000;:CURR 2.000;:OUTP ON' at 115200 baud."),
+        ("2", "SCPI Parser Task", "FreeRTOS task verifies command syntax, adjusts DAC1 (15V) and DAC2 (2A limit), and enables power output."),
+        ("3", "Automated ATE / Host PC", "Transmits telemetry query command ':MEAS:EFF?' to audit conversion efficiency during device test."),
+        ("4", "Efficiency Math Engine", "Samples AMC1311 AC power (Pac) and INA226 DC power (Pdc), computes η = (Pdc/Pac) × 100%, and replies '91.2%' in < 2ms."),
+        ("5", "Data Logger Task", "Autonomous FatFs task records complete measurement telemetry into FAT32 CSV file on physical MicroSD card.")
+    ]
+
     # Insert Figure 2 cleanly right after its intro
     if p_fig2_ins is not None:
-        p_fig2_ins.text = "The benchtop operational voltage tuning sequence is illustrated in Figure 2 below:"
-        box2 = create_callout_box(doc, diag2_text)
-        p_fig2_ins._p.addnext(box2._tbl)
+        p_fig2_ins.text = "The benchtop operational voltage tuning sequence is summarized in Figure 2 below:"
+        tbl_fig2 = create_workflow_table(doc, "MAJOR USE CASE 1: VOLTAGE SETPOINT TUNING SEQUENCE", fig2_steps, header_color="1A365D")
+        p_fig2_ins._p.addnext(tbl_fig2._tbl)
     if p_fig2_cap is not None:
-        p_fig2_cap.text = "Figure 2: Major Use Case 1 - Precision Benchtop Supply Voltage Tuning Sequence"
+        p_fig2_cap.text = "Figure 2: Major Use Case 1 - Precision Benchtop Supply Voltage Tuning Workflow"
 
     # Insert Figure 3 cleanly right after its intro
     if p_fig3_ins is not None:
-        p_fig3_ins.text = "The automated ATE SCPI instrumentation and telemetry logging flow is illustrated in Figure 3 below:"
-        box3 = create_callout_box(doc, diag3_text)
-        p_fig3_ins._p.addnext(box3._tbl)
+        p_fig3_ins.text = "The automated ATE SCPI instrumentation and telemetry logging flow is summarized in Figure 3 below:"
+        tbl_fig3 = create_workflow_table(doc, "MAJOR USE CASE 2: AUTOMATED ATE SCPI & TELEMETRY FLOW", fig3_steps, header_color="234E52")
+        p_fig3_ins._p.addnext(tbl_fig3._tbl)
     if p_fig3_cap is not None:
-        p_fig3_cap.text = "Figure 3: Major Use Case 2 - Automated ATE Instrumentation SCPI Control & Telemetry Flow"
+        p_fig3_cap.text = "Figure 3: Major Use Case 2 - Automated ATE Instrumentation SCPI Control & Telemetry Workflow"
 
     # Boundary Diagram
     p_diag1_cap = None
     for p in doc.paragraphs:
-        if "Figure : Boundary Diagram" in p.text or "Figure 1: Boundary Diagram" in p.text:
+        if "Figure : Boundary Diagram" in p.text or "Figure 1: Boundary Diagram" in p.text or "Figure 1: System Boundary" in p.text:
             p_diag1_cap = p
             break
     if p_diag1_cap is not None:
-        p_diag1_cap.text = "Figure 1: System Boundary & Interconnect Block Diagram"
-        box1 = create_callout_box(doc, diag1_text)
-        p_diag1_cap._p.addprevious(box1._tbl)
+        p_diag1_cap.text = "Figure 1: System Boundary & Master Architecture Block Diagram"
+        diagram_img_path = "smart_programmable_power_supply/smart_programmable_power_supply_system_block_diagram.png"
+        if os.path.exists(diagram_img_path):
+            p_img = p_diag1_cap.insert_paragraph_before()
+            p_img.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            r_img = p_img.add_run()
+            r_img.add_picture(diagram_img_path, width=Inches(6.47))
 
     # --------------------------------------------------------------------------
     # 16. INSERT SYSTEM 1 & SYSTEM 2 REQUIREMENT TABLES INTO SECTION 4
@@ -1147,17 +1187,28 @@ def generate_prd_docx():
             p_arch3 = p
 
     if p_arch1 is not None:
-        box6 = create_callout_box(doc, diag6_text)
-        cap6 = doc.add_paragraph("Figure 6: System 1 Domain 1 (Hardware) Power & Control Architecture")
+        diagram_img_path = "smart_programmable_power_supply/smart_programmable_power_supply_system_block_diagram.png"
+        p_pic6 = None
+        if os.path.exists(diagram_img_path):
+            p_pic6 = doc.add_paragraph()
+            p_pic6.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            r6 = p_pic6.add_run()
+            r6.add_picture(diagram_img_path, width=Inches(6.47))
+
+        cap6 = doc.add_paragraph("Figure 6: System 1 Domain 1 (Hardware) Power & Control Architecture Block Diagram")
         cap6.style = "Caption"
         note6_1 = doc.add_paragraph("Note: This is the proposed architecture and it might get changed during the design stage.")
         note6_1.runs[0].font.italic = True
         note6_2 = doc.add_paragraph("Note: Ensure the license compliance for usage of open source tools.")
         note6_2.runs[0].font.italic = True
         
-        p_arch1._p.addnext(box6._tbl)
-        box6._tbl.addnext(cap6._p)
-        cap6._p.addnext(note6_1._p)
+        if p_pic6 is not None:
+            p_arch1._p.addnext(p_pic6._p)
+            p_pic6._p.addnext(cap6._p)
+            cap6._p.addnext(note6_1._p)
+        else:
+            p_arch1._p.addnext(cap6._p)
+            cap6._p.addnext(note6_1._p)
         note6_1._p.addnext(note6_2._p)
 
     if p_arch2 is not None:
