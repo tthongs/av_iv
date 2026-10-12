@@ -53,7 +53,8 @@ flowchart LR
 | **Stage 3: Converter DC-DC** | <img src="smart_programmable_power_supply/diagram_inside_stage3_flyback.png" width="450"/> | TI UCC28740 QR Flyback, 800V CoolMOS, PQ26/20 core, 3000V RMS barrier, Sync Rectifier (BSC052N06NS) -> +24V DC (72W). |
 | **Stage 4: Final Stage** | <img src="smart_programmable_power_supply/diagram_inside_stage4_final_stage.png" width="450"/> | TI LM5176 4-switch Buck-Boost, 10µH inductor, 10mV DAC steering (5V–20V), < 5µs CC clamp, 4mm binding posts. |
 
-- 📄 **Hardware PRD**: [PRODUCT_REQUIREMENT_DOCUMENT_PRD.md](smart_programmable_power_supply/PRODUCT_REQUIREMENT_DOCUMENT_PRD.md)
+- 📄 **Hardware PRD (High-Level Requirements)**: [PRODUCT_REQUIREMENT_DOCUMENT_PRD.md](smart_programmable_power_supply/PRODUCT_REQUIREMENT_DOCUMENT_PRD.md)
+- 📐 **Hardware Design Document (HDD) Deep Technical Reference**: [HARDWARE_DESIGN_TECHNICAL_DETAILS_FOR_HDD.md](smart_programmable_power_supply/HARDWARE_DESIGN_TECHNICAL_DETAILS_FOR_HDD.md)
 - 📥 **Word Deliverables**: [PRODUCT_REQUIREMENT_DOCUMENT_PRD.docx](smart_programmable_power_supply/PRODUCT_REQUIREMENT_DOCUMENT_PRD.docx) | [PRD.docx](smart_programmable_power_supply/PRD.docx)
 - 📂 **Full Hardware Architecture Dossiers**: [smart_programmable_power_supply/](smart_programmable_power_supply/)
 

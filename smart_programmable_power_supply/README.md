@@ -33,6 +33,11 @@ The **Smart Programmable Power Supply Module** is an intelligent, digitally cont
 └────────────────────────────┴─────────────────────────────┴────────────────────────┘
 ```
 
+### Primary Engineering Documentation
+* 📄 **Product Requirement Document (High-Level PRD)**: [`PRODUCT_REQUIREMENT_DOCUMENT_PRD.md`](PRODUCT_REQUIREMENT_DOCUMENT_PRD.md)
+* 📐 **Hardware Design Document (HDD) Deep Technical Reference**: [`HARDWARE_DESIGN_TECHNICAL_DETAILS_FOR_HDD.md`](HARDWARE_DESIGN_TECHNICAL_DETAILS_FOR_HDD.md)
+* 📥 **Official Word Deliverables**: [`PRODUCT_REQUIREMENT_DOCUMENT_PRD.docx`](PRODUCT_REQUIREMENT_DOCUMENT_PRD.docx) | [`PRD.docx`](PRD.docx)
+
 ---
 
 ## 2. High-Level Architectural Block Diagram

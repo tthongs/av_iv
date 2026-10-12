@@ -1198,8 +1198,10 @@ def generate_prd_docx():
     p_app_h1.style = "Heading 1"
 
     p_app_intro = doc.add_paragraph(
-        "This appendix provides structured technical defense rationales for the Power Electronics Engineer Trainee (GET) "
-        "when defending the embedded hardware design, circuit calculations, component derating, and safety boundaries before the cross-mentor review panel:"
+        "This appendix provides structured high-level technical defense rationales for the Power Electronics Engineer Trainee (GET) "
+        "when defending the hardware requirements, architecture, and safety boundaries before the cross-mentor review panel. "
+        "Note: Detailed circuit equations, transformer magnetics derivations, snubber sizing, component deratings, and bench bring-up protocols "
+        "are formally documented in the companion Hardware Design Document (HDD) reference: HARDWARE_DESIGN_TECHNICAL_DETAILS_FOR_HDD.md."
     )
 
     qa_list = [
