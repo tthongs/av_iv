@@ -347,7 +347,7 @@ def generate_prd_docx():
         ("CV", "Constant Voltage Mode (Precision Voltage Regulation)"),
         ("LSB", "Least Significant Bit (Digital Precision Step)"),
         ("RMS", "Root Mean Square (Mains AC Voltage / Current Metric)"),
-        ("SCPI", "Standard Commands for Programmable Instruments (IEEE 488.2)"),
+        ("DVT", "Design Verification Testing (Hardware Laboratory Validation)"),
         ("SELV", "Safety Extra-Low Voltage (< 60V DC Output Limit per IEC 62368-1)"),
         ("SR", "Synchronous Rectification (Active Secondary MOSFET Drive)"),
         ("UVLO", "Under-Voltage Lockout (Supply Protection Threshold)"),
@@ -385,7 +385,7 @@ def generate_prd_docx():
         ("4", "IEC 61000-4-5: Testing and measurement techniques - Surge immunity test (Level 3: 2kV Common Mode, 1kV Diff)"),
         ("5", "Texas Instruments LM5176: High-Performance 4-Switch Synchronous Buck-Boost Controller Datasheet (SNVSAR4)"),
         ("6", "Texas Instruments UCC28740: Constant-Voltage Constant-Current Flyback Controller with Optocoupler (SLUSBL2)"),
-        ("7", "IEEE 488.2 / SCPI Standard: Standard Commands for Programmable Instruments Specification Consortium"),
+        ("7", "IEC 61000-3-2: Electromagnetic Compatibility (EMC) - Limits for Harmonic Current Emissions (< 75W Exemption)"),
         ("8", "VVDN Hardware Design Document (HDD): Smart Programmable Voltage Supply Module Architecture & Schematics")
     ]
     set_cell_background(t5.rows[0].cells[0], "BFBFBF")
@@ -403,16 +403,16 @@ def generate_prd_docx():
     # --------------------------------------------------------------------------
     t6 = doc.tables[6]
     use_cases = [
-        ("1", "Precision Bench Supply Voltage Tuning: Operator adjusts rotary encoder or sends SCPI command (:VOLT 12.0). MCU updates 12-bit DAC; Buck-Boost settles to 12.00V in < 100µs with sub-25mV ripple."),
-        ("2", "Dynamic Load Step Regulation: Connected DUT surges from 0.5A to 3.0A. LM5176 Type-II loop restores output voltage within 120µs with < 250mV transient sag, maintaining continuous stability."),
-        ("3", "Autonomous Hardware Constant-Current (CC) Clamping: DUT encounters short circuit. Analog comparator pulls down COMP pin in < 5µs, clamping current strictly at setpoint without MCU software latency."),
-        ("4", "Real-Time Dual-Domain Power & Efficiency Logging: System samples AC mains input power and DC load power at 10Hz, computes true efficiency (η = Pdc/Pac), and writes timestamped CSV records to MicroSD card."),
-        ("5", "Automated ATE SCPI Control: Host PC controls power supply over USB-C CDC interface, querying real-time electrical metrics, logging data, and sequencing voltage ramps during qualification tests.")
+        ("1", "Universal AC Mains Inrush & Rectification: GBU606 bridge rectifier converts 85V–265V AC into high-voltage DC bus (+120V to +375V DC), with 10Ω NTC limiting cold inrush < 30A."),
+        ("2", "Stage 1 Quasi-Resonant Flyback Conversion: UCC28740 steps down high-voltage bus across PQ26/20 transformer (6:1 turns, 3000V RMS isolation), delivering +24.0V DC intermediate bus (72W)."),
+        ("3", "Stage 2 4-Switch Synchronous Buck-Boost Regulation: LM5176 modulates 4x 40V MOSFETs at 300kHz through 10µH inductor, regulating output between 5.0V and 20.0V DC at up to 3.0A with < 25mV ripple."),
+        ("4", "Autonomous Hardware Constant-Current (CC) Clamping: 10mΩ shunt + INA240A2 (50V/V) + TLV3501 analog comparator pulls down LM5176 COMP pin in < 5µs during overload, with zero software latency."),
+        ("5", "Dual-Domain Analog Power Sensing: AMC1311 isolated delta-sigma modulator samples AC line power and INA226 samples DC output power, enabling 10Hz live efficiency auditing.")
     ]
     set_cell_background(t6.rows[0].cells[0], "BFBFBF")
     set_cell_background(t6.rows[0].cells[1], "BFBFBF")
     set_cell_text(t6.rows[0].cells[0], "Sl. No.", bold=True)
-    set_cell_text(t6.rows[0].cells[1], "Use Case Description", bold=True)
+    set_cell_text(t6.rows[0].cells[1], "Hardware Operational Mode & Use Case Description", bold=True)
     for r_idx in range(1, min(len(t6.rows), len(use_cases) + 1)):
         set_cell_text(t6.rows[r_idx].cells[0], use_cases[r_idx - 1][0], bold=True, align=WD_ALIGN_PARAGRAPH.CENTER)
         set_cell_text(t6.rows[r_idx].cells[1], use_cases[r_idx - 1][1])
@@ -432,11 +432,11 @@ def generate_prd_docx():
     hw_interfaces = [
         ("1", "AC Grid Mains", "SPPS Module", "IEC 320-C14 Inlet", "85V–265V AC RMS, 47–63Hz, 3-prong grounded input with integrated 2A fuse holder."),
         ("2", "SPPS Module", "DUT / Load", "4mm Gold Binding Posts", "Heavy-duty 15A Red (+) and Black (-) terminals supporting banana plugs, spade lugs, or bare wire."),
-        ("3", "SPPS Module", "Host PC / ATE", "USB Type-C Receptacle", "USB 2.0 Full-Speed Virtual COM Port for SCPI commands, data streaming, and automated testing."),
-        ("4", "SPPS Module", "Storage Media", "Push-Push MicroSD Socket", "SPI / 4-bit SDIO interface supporting FAT32 flash cards up to 32GB for autonomous logging."),
-        ("5", "SPPS Module", "Local Operator", "Dual Rotary Encoders", "Optical rotary encoders with push-button for setting voltage (10mV) and current (10mA)."),
-        ("6", "SPPS Module", "Local Operator", "1.3\" Monochrome OLED", "128x64 graphical display showing real-time meters (V, I, P, η, Temp) and CV/CC mode annunciator."),
-        ("7", "SPPS Module", "Local Operator", "Output Enable Push-Button", "Tactile switch with dual-color LED (Green: Output Active, Red: Tripped/Fault, Dark: Standby).")
+        ("3", "SPPS Module", "Local Operator", "Dual Rotary Encoders", "Rotary controls for steering voltage (10mV steps) and hardware current limit setpoint."),
+        ("4", "SPPS Module", "Local Operator", "1.3\" Monochrome OLED", "128x64 display showing real-time electrical meters (V, I, P, η, Temp) and CV/CC mode annunciator."),
+        ("5", "SPPS Module", "Local Operator", "Output Enable Push-Button", "Tactile switch pulling LM5176 EN pin high or low with dual-color status LED (Green: Active, Red: Fault)."),
+        ("6", "SPPS Module", "Lab Instruments", "Hardware Test Points", "Dedicated PCB test points for line AC, bulk DC, drain waveforms, +24V bus, Vout, COMP, and current sense."),
+        ("7", "SPPS Module", "Isolation Barrier", "6.4mm Milled Creepage Slot", "Physical 2mm wide air slot routed through PCB substrate beneath transformer and optocoupler barriers.")
     ]
     for cell in t7.rows[0].cells:
         set_cell_background(cell, "BFBFBF")
@@ -459,15 +459,16 @@ def generate_prd_docx():
     set_table_borders(t7)
 
     # --------------------------------------------------------------------------
-    # 9. POPULATE SOFTWARE INTERFACES (Table 8)
+    # 9. POPULATE HARDWARE ELECTRICAL & CONTROL INTERFACES (Table 8)
     # --------------------------------------------------------------------------
     t8 = doc.tables[8]
     sw_interfaces = [
-        ("1", "Host ATE", "SPPS Module", "USB-CDC Virtual COM", "IEEE 488.2 SCPI", "Accepts standard instrument commands (:VOLT, :CURR, :OUTP, :MEAS:EFF?) at 115200 baud, 8N1."),
-        ("2", "Telemetry Task", "MicroSD Card", "SPI / FatFs", "FAT32 CSV Schema", "Non-blocking ring-buffered logging of timestamped records at 10Hz rate."),
-        ("3", "Metering Task", "Primary AMC1311", "Hardware Sinc3 Filter", "Differential Bitstream", "Synchronous digital filtering converting isolated modulations into true RMS AC power."),
-        ("4", "Metering Task", "Secondary INA226", "I2C Bus (400 kHz)", "Register Protocol", "Reads DC bus voltage (1.25mV/LSB) and shunt current (100µA/LSB) every 100ms."),
-        ("5", "Display Task", "OLED Controller", "I2C Bus (400 kHz)", "SSD1306/SH1106 Driver", "Updates real-time graphical dashboard and efficiency bar at 10 frames/sec.")
+        ("1", "AC Grid Mains", "GBU606 Bridge", "AC Line Conductors", "85V–265V AC RMS", "Protected through 2A ceramic time-lag fuse and 10Ω NTC inrush thermistor."),
+        ("2", "Bridge Rectifier", "Bulk Electrolytic", "High-Voltage DC Trace", "+120V to +375V DC", "Filtered by 100µF/450V 105°C capacitor; bulk ripple < 18V pk-pk under full 72W load."),
+        ("3", "Stage 1 Flyback", "Stage 2 Buck-Boost", "Intermediate DC Bus", "+24.0V DC ± 1.0%", "Isolated 72W intermediate rail; 3000V RMS reinforced isolation per IEC 62368-1."),
+        ("4", "Stage 2 Buck-Boost", "Device Under Test", "Heavy-Duty Binding Posts", "5.0V–20.0V / 3.0A DC", "Tightly regulated DC power (60W max); output ripple < 25mV pk-pk at 20MHz bandwidth."),
+        ("5", "12-Bit DAC", "LM5176 FB Node", "Resistor Summing Network", "0V to 3.3V DC Analog", "Injects current via R_top=49.9kΩ, R_DAC=11kΩ, R_bot=3.65kΩ to steer Vout in 10mV steps."),
+        ("6", "10mΩ Current Shunt", "LM5176 COMP Pin", "Analog CC Protection Loop", "< 5.0 µs Reaction", "INA240A2 (50V/V) + TLV3501 comparator overrides COMP pin to collapse duty cycle during short.")
     ]
     for cell in t8.rows[0].cells:
         set_cell_background(cell, "BFBFBF")
@@ -475,8 +476,8 @@ def generate_prd_docx():
     set_cell_text(t8.rows[0].cells[1], "Entity 1", bold=True)
     set_cell_text(t8.rows[0].cells[2], "Entity 2", bold=True)
     set_cell_text(t8.rows[0].cells[3], "Interface", bold=True)
-    set_cell_text(t8.rows[0].cells[4], "Protocol / Mode", bold=True)
-    set_cell_text(t8.rows[0].cells[5], "Usage Description", bold=True)
+    set_cell_text(t8.rows[0].cells[4], "Voltage / Rating", bold=True)
+    set_cell_text(t8.rows[0].cells[5], "Electrical Function & Circuit Role", bold=True)
 
     for r_idx in range(1, min(len(t8.rows), len(sw_interfaces) + 1)):
         item = sw_interfaces[r_idx - 1]
@@ -492,20 +493,20 @@ def generate_prd_docx():
     t9 = doc.tables[9]
     for cell in t9.rows[0].cells:
         set_cell_background(cell, "BFBFBF")
-    set_cell_text(t9.rows[0].cells[0], "Domain Names", bold=True)
-    set_cell_text(t9.rows[0].cells[1], "System 1 (HW Power Module)", bold=True)
-    set_cell_text(t9.rows[0].cells[2], "System 2 (Firmware & GUI)", bold=True)
-    set_cell_text(t9.rows[0].cells[3], "System 3 (PC Telemetry Suite)", bold=True)
+    set_cell_text(t9.rows[0].cells[0], "Hardware Engineering Discipline", bold=True)
+    set_cell_text(t9.rows[0].cells[1], "Trainee Responsibility Scope", bold=True)
+    set_cell_text(t9.rows[0].cells[2], "Mentor Review Mechanism", bold=True)
+    set_cell_text(t9.rows[0].cells[3], "Deliverable Baseline", bold=True)
 
     matrix = [
-        ("Hardware - HW (Trainee Ownership)", "Yes (Primary)", "No", "No"),
-        ("Mechanical - ME (Cross-Functional)", "Yes (Interface)", "No", "No"),
-        ("Embedded Firmware - FW (Cross-Functional)", "No", "Yes (Primary)", "No"),
-        ("Software / App - SW (Cross-Functional)", "No", "No", "Yes (Primary)"),
-        ("Cloud / Backend", "No", "No", "No"),
-        ("Quality Assurance - QA (Joint)", "Yes (Joint)", "Yes (Joint)", "Yes (Joint)"),
-        ("Production / Operations", "Yes", "No", "No"),
-        ("Safety & Certification", "Yes (Pre-comp)", "No", "No")
+        ("Power Converter Topologies & Sizing (HW)", "Yes (100% Primary Trainee Scope)", "Gate 1 Review (BU SME)", "HDD Math & Formulations"),
+        ("Magnetics & PQ26/20 Transformer Design (HW)", "Yes (100% Primary Trainee Scope)", "Gate 1 Review (BU SME)", "Transformer Spec & TEX-E Wire"),
+        ("Analog Closed-Loop Control & Protection (HW)", "Yes (100% Primary Trainee Scope)", "Gate 2 Review (Senior Architect)", "DAC Steering & Shunt Schematics"),
+        ("Altium Multi-Sheet Schematics Capture (HW)", "Yes (100% Primary Trainee Scope)", "Gate 2 Review (Senior Architect)", "Altium Schematics Package"),
+        ("4-Layer PCB Layout & Isolation Routing (HW)", "Yes (Trainee with Layout Lead)", "Gate 3 Review (Layout Lead)", "4-Layer Gerbers & 6.4mm Slots"),
+        ("Bench Bring-Up & Variac Ramp-up Testing (HW)", "Yes (100% Primary Trainee Scope)", "Gate 4 Lab Sign-Off (Lab Mentor)", "Variac Bring-Up Test Report"),
+        ("Safety Galvanic Isolation (IEC 62368-1) (HW)", "Yes (Trainee with Lab Mentor)", "Pre-Compliance Lab Review", "3000V RMS Hipot Report"),
+        ("Conducted EMC Pre-Compliance (CISPR 32) (HW)", "Yes (Trainee with Lab Mentor)", "Pre-Compliance Lab Review", "Conducted EMI LISN Plots")
     ]
     for r_idx, (dname, s1, s2, s3) in enumerate(matrix):
         if r_idx + 1 < len(t9.rows):
@@ -524,25 +525,25 @@ def generate_prd_docx():
     for cell in t10.rows[0].cells:
         set_cell_background(cell, "BFBFBF")
     set_cell_text(t10.rows[0].cells[0], "Sl.No", bold=True)
-    set_cell_text(t10.rows[0].cells[1], "Domain 1 [HW - Trainee]", bold=True)
-    set_cell_text(t10.rows[0].cells[2], "Domain 2 [ME - Support]", bold=True)
-    set_cell_text(t10.rows[0].cells[3], "Domain 3 [FW - Support]", bold=True)
-    set_cell_text(t10.rows[0].cells[4], "Domain 4 [QA - Joint]", bold=True)
+    set_cell_text(t10.rows[0].cells[1], "Domain 1 [Power Topologies]", bold=True)
+    set_cell_text(t10.rows[0].cells[2], "Domain 2 [Schematics & Stress]", bold=True)
+    set_cell_text(t10.rows[0].cells[3], "Domain 3 [PCB Layout & DFM]", bold=True)
+    set_cell_text(t10.rows[0].cells[4], "Domain 4 [Lab DVT & Verification]", bold=True)
 
     deliverables = [
-        ("1", "Hardware Design Document (HDD)", "Industrial Design (ID) Outline", "Software Design Document (SDD)", "DVT Test Plan & Traceability Matrix"),
-        ("2", "Flyback & Buck-Boost Schematics", "Enclosure 3D CAD Models (MDD)", "STM32 BSP & Low-Level Drivers", "Component Stress Analysis (Derating)"),
-        ("3", "4-Layer PCB Layout & Stackup", "Thermal Heatsink CAD Models", "Closed-Loop Control Algorithms", "Creepage & Clearance Verification"),
-        ("4", "Gerber Files & Production BOM", "Fabrication & Assembly Package", "SCPI Command Parser Engine", "Power Stage Bench Bring-up Plan"),
-        ("5", "Prototype PCB Rev A Fabrication", "3D-Printed Prototype Shell", "Dual-Domain Telemetry & FatFs", "Functional Test Protocol Release"),
-        ("6", "Assembled Prototype Boards (5 pcs)", "Extruded Aluminum Enclosure", "SSD1306 OLED GUI Dashboard", "Line & Load Regulation Bench Report"),
-        ("7", "Bench Bring-up & Tuning Report", "Enclosure Assembly Verification", "Firmware Alpha Image Release", "Transient Load Step & Ripple Test"),
-        ("8", "Hardware DVT Verification Test", "Mechanical Shock & Vibe Test", "Firmware Beta Image Release", "Thermal Chamber Profile (+50°C)"),
-        ("9", "Rev B HDD (Design Optimizations)", "Rev B Enclosure Final Spec", "Firmware RC Image Release", "Surge Immunity Testing (IEC 61000-4-5)"),
-        ("10", "Rev B Schematics & PCB Layout", "Production Tooling Spec", "Firmware Production Release", "Conducted & Radiated EMI (CISPR 32)"),
-        ("11", "Rev B Gerber & Master BOM", "Final Packaging Drawings", "Automated ATE Self-Test Suite", "Safety Certification Pack (IEC 62368-1)"),
-        ("12", "Rev B Assembled Boards (Pilot Run)", "Pilot Run Enclosure Units", "Production Flashing Utility", "Final Pilot Production Acceptance"),
-        ("13", "Final Hardware Acceptance Sign-Off", "Final Mechanical Acceptance", "Final Gold Master Firmware", "Final QA Compliance Certificate")
+        ("1", "Hardware Design Document (HDD)", "Altium Schematics (Rev A)", "4-Layer Stackup & Placement", "DVT Test Plan & Traceability"),
+        ("2", "Flyback Transformer PQ26/20 Math", "Gate Driver Schematics", "Power Switching Loops Layout", "Component Stress Derating Analysis"),
+        ("3", "Buck-Boost Inductor Sizing Math", "Analog Feedback Schematics", "Ground Plane Zone Partitioning", "High-Voltage Creepage Verification"),
+        ("4", "Output Capacitor ESR Ripple Math", "Hardware Protection Schematics", "6.4mm Milled Isolation Slot", "Cold Check Bring-up Protocol"),
+        ("5", "Thermal Loss & Copper Area Math", "Dual-Domain Sense Schematics", "Gerber RS-274X Package", "Variac Gradual Bring-up Test"),
+        ("6", "Auxiliary Bias Rails Design", "Master BOM Formulation", "NC Drill & Netlist ODB++", "+24V Intermediate Bus Verification"),
+        ("7", "Component Derating Calculations", "Peer Schematic Review Gate", "Fabrication DRC Sign-Off", "Line & Load Regulation Report"),
+        ("8", "Prototype PCBA Assembly (5 pcs)", "BOM Sourcing & Alternates", "Board Assembly Inspection", "Dynamic 50-100% Load Step Report"),
+        ("9", "Bench Bring-Up Tuning Report", "Protection Threshold Tuning", "Thermal Relief Optimization", "Output Ripple <25mV Report"),
+        ("10", "Hardware DVT Verification Report", "Rev B Schematics (ECO Fixes)", "Rev B Layout (ECO Fixes)", "Thermal Camera Soak (+50°C) Report"),
+        ("11", "Hipot 3kV RMS Dielectric Report", "Rev B Master BOM Release", "Rev B Gerbers Release", "Conducted EMI (CISPR 32) Report"),
+        ("12", "Rev B Prototype Pilot Run (5 pcs)", "Manufacturing Assembly Pack", "Production Panelization", "Surge Immunity (IEC 61000-4-5)"),
+        ("13", "Final Hardware Acceptance Sign-Off", "Final Production Schematics", "Final Production Layout", "Final DVT Certificate & Review")
     ]
     for r_idx, d_row in enumerate(deliverables):
         if r_idx + 1 < len(t10.rows):
@@ -555,49 +556,28 @@ def generate_prd_docx():
     # --------------------------------------------------------------------------
     # 12. POPULATE SYSTEM 1 PRODUCT BOM (Table 11) WITH SUBSYSTEM HEADERS
     # --------------------------------------------------------------------------
+    # 12. POPULATE SYSTEM 1 PRODUCT BOM (Table 11) - PRIMARY STAGE & FLYBACK
+    # --------------------------------------------------------------------------
     t11 = doc.tables[11]
     bom1_subsystems = [
-        ("Subsystem 1: AC-DC Isolated Flyback Power Stage (Electrical)", [
+        ("Subsystem 1: AC Mains Protection, EMI Filtering & Rectifier Stage (Electrical)", [
             ("1", "Time-Lag Ceramic Fuse 2A / 250V AC 5x20mm", "1", "Littelfuse", "0218002.MXP"),
             ("2", "Inrush Current Limiter NTC 10Ω 3.2A", "1", "TDK / EPCOS", "B57236S0100M000"),
             ("3", "Metal Oxide Varistor 300V RMS 4.5kA 14mm", "1", "Bourns", "MOV-14D471K"),
             ("4", "Common Mode Choke 15mH 1.1A / 4.7mH 1.6A", "2", "Wurth Elektronik", "744823215 / 744822472"),
             ("5", "Safety X2 Capacitor 0.22µF 310V AC & Y1 2.2nF", "3", "KEMET", "R46KI32200001M / PHE850"),
             ("6", "Bridge Rectifier Glass Passivated 600V 6A GBU", "1", "Diodes Inc.", "GBU606"),
-            ("7", "Primary Bulk Electrolytic Cap 100µF 450V 105°C", "1", "Nichicon", "LGW2W101MELZ25"),
-            ("8", "Flyback Transformer PQ26/20 220µH 72W", "1", "Custom / Ferroxcube", "3C95-PQ2620-72W"),
+            ("7", "Primary Bulk Electrolytic Cap 100µF 450V 105°C", "1", "Nichicon", "LGW2W101MELZ25")
+        ]),
+        ("Subsystem 2: Quasi-Resonant Flyback Power Stage & Galvanic Isolation (Electrical)", [
+            ("8", "Flyback Transformer PQ26/20 220µH 72W (TEX-E Wire)", "1", "Custom / Ferroxcube", "3C95-PQ2620-72W"),
             ("9", "Superjunction Power MOSFET 800V 0.29Ω D2PAK", "1", "Infineon", "IPB80R290P7"),
             ("10", "Quasi-Resonant Flyback Controller IC SOIC-7", "1", "Texas Instruments", "UCC28740DR"),
             ("11", "Smart Synchronous Rectifier Driver TSOT23-6", "1", "Monolithic Power", "MP6908GJ"),
-            ("12", "Synchronous N-MOSFET 60V 5.2mΩ SuperSO8", "1", "Infineon", "BSC052N06NS")
-        ]),
-        ("Subsystem 2: 4-Switch Synchronous Buck-Boost Post-Regulator (Electrical)", [
-            ("13", "4-Switch Synchronous Buck-Boost Controller", "1", "Texas Instruments", "LM5176PWPR (HTSSOP-28)"),
-            ("14", "Power N-MOSFET 40V 3.4mΩ Logic-Level SuperSO8", "4", "Infineon", "BSC034N04LS"),
-            ("15", "Flat-Wire High-Current Power Inductor 10µH 8.5A", "1", "Wurth Elektronik", "7443321000 (12.5x12.5mm)"),
-            ("16", "Precision Current Shunt Resistor 10mΩ 0.1% 3W", "1", "Bourns", "CSS2H-2512R-L010F"),
-            ("17", "Multi-Layer Ceramic Capacitors 22µF 25V X7R 1210", "4", "Murata", "GRM32ER71E226KE15L"),
-            ("18", "Aluminum Solid Polymer Capacitor 100µF 25V", "1", "Panasonic", "25SVPF100M (8x12mm)"),
-            ("19", "Thin-Film Feedback Resistors 49.9k, 11k, 3.65k 0.1%", "3", "Vishay Dale", "TNPW0805 Series 25ppm/°C"),
-            ("20", "Ceramic Bootstrap Capacitors 0.1µF 50V X7R 0603", "2", "Murata", "GRM188R71H104KA93D"),
-            ("21", "Compensation Network Caps & Resistors Type-II", "4", "Murata / Yageo", "C0G & 0.1% Thin Film SMD")
-        ]),
-        ("Subsystem 3: Dual-Domain Real-Time Telemetry & MCU Core (Electrical)", [
-            ("22", "32-Bit ARM Cortex-M4F MCU 170MHz 512KB Flash", "1", "STMicroelectronics", "STM32G474RET6 (LQFP-64)"),
-            ("23", "Isolated Delta-Sigma Modulator SOIC-8 (AC Sense)", "1", "Texas Instruments", "AMC1311DWVR"),
-            ("24", "Toroidal Current Transformer 1000:1 (AC Current)", "1", "Talema", "AC1005 (PCB Mount)"),
-            ("25", "16-Bit I2C Power Monitor IC VSSOP-10 (DC Rail)", "1", "Texas Instruments", "INA226AIDGSR"),
-            ("26", "High-Speed Analog Comparator 4.5ns SOT-23-6", "1", "Texas Instruments", "TLV3501AIDBVR"),
-            ("27", "Precision Current Sense Amplifier 50V/V SC70", "1", "Texas Instruments", "INA240A2EDCKR"),
-            ("28", "ESD Protection Diode Array USB-C & I/O Lines", "2", "Semtech", "RClamp0524P (SLP2510P8)")
-        ]),
-        ("Subsystem 4: Mechanical, Thermal & Interconnect Hardware", [
-            ("29", "Anodized Extruded Aluminum Enclosure 130x85x42mm", "1", "Hammond Mfg", "1455N1201BK"),
-            ("30", "Heavy-Duty 4mm Gold-Plated Binding Posts (Red/Blk)", "2", "Pomona Electronics", "3770-0 / 3770-2"),
-            ("31", "IEC 320-C14 AC Inlet Receptacle with Fuse Drawer", "1", "Schurter", "6200.2100"),
-            ("32", "Push-Push MicroSD Card Socket SMD", "1", "Molex", "104031-0811"),
-            ("33", "1.3\" Monochrome 128x64 I2C Graphic OLED Display", "1", "Adafruit / WiseChip", "UG-2864HSWEG01"),
-            ("34", "Extruded Aluminum Heatsinks with Thermal Gap Pads", "2", "Aavid Thermalloy", "576802B00000G / Bergquist")
+            ("12", "Synchronous N-MOSFET 60V 5.2mΩ SuperSO8", "1", "Infineon", "BSC052N06NS"),
+            ("13", "Phototransistor Optocoupler 5000V RMS Isolation SMD-4", "1", "Everlight", "EL817(S)(TA)"),
+            ("14", "RCD Snubber Ultra-Fast Diode 1000V 1A SMA", "1", "Diodes Inc.", "US1M-13-F"),
+            ("15", "Auxiliary Bias Electrolytic Cap 22µF 50V Low-ESR", "1", "Panasonic", "EEU-FC1H220")
         ])
     ]
 
@@ -631,20 +611,30 @@ def generate_prd_docx():
     set_table_borders(t11)
 
     # --------------------------------------------------------------------------
-    # 13. POPULATE SYSTEM 2 PRODUCT BOM (Table 12)
+    # 13. POPULATE SYSTEM 2 PRODUCT BOM (Table 12) - BUCK-BOOST & ANALOG CONTROL
     # --------------------------------------------------------------------------
     t12 = doc.tables[12]
     bom2_subsystems = [
-        ("Subsystem 1: Core Firmware, Real-Time OS & Drivers", [
-            ("1", "FreeRTOS Real-Time Kernel v10.4 (Preemptive Multitasking)", "1", "Amazon Web Services", "Open Source MIT"),
-            ("2", "STM32CubeG4 HAL & Low-Layer (LL) Driver Library", "1", "STMicroelectronics", "MCD-ST Liberty"),
-            ("3", "ChaN's FatFs File System Module R0.15 (FAT32 SD Logging)", "1", "ChaN", "Open Source BSD"),
-            ("4", "SSD1306 / SH1106 Monolithic OLED Graphics Driver", "1", "VVDN Embedded", "VVDN Proprietary")
+        ("Subsystem 1: 4-Switch Synchronous Buck-Boost Post-Regulator (Electrical)", [
+            ("1", "4-Switch Synchronous Buck-Boost Controller", "1", "Texas Instruments", "LM5176PWPR (HTSSOP-28)"),
+            ("2", "Power N-MOSFET 40V 3.4mΩ Logic-Level SuperSO8", "4", "Infineon", "BSC034N04LS"),
+            ("3", "Flat-Wire High-Current Power Inductor 10µH 8.5A", "1", "Wurth Elektronik", "7443321000 (12.5x12.5mm)"),
+            ("4", "Multi-Layer Ceramic Capacitors 22µF 25V X7R 1210", "4", "Murata", "GRM32ER71E226KE15L"),
+            ("5", "Aluminum Solid Polymer Capacitor 100µF 25V 12mΩ", "1", "Panasonic", "25SVPF100M (8x12mm)"),
+            ("6", "Thin-Film Feedback Resistors 49.9k, 11k, 3.65k 0.1%", "3", "Vishay Dale", "TNPW0805 Series 25ppm/°C"),
+            ("7", "Ceramic Bootstrap Capacitors 0.1µF 50V X7R 0603", "2", "Murata", "GRM188R71H104KA93D"),
+            ("8", "Compensation Network Type-II Caps & Resistors", "4", "Murata / Yageo", "C0G & 0.1% Thin Film SMD")
         ]),
-        ("Subsystem 2: Instrumentation Protocols & Telemetry Stack", [
-            ("5", "IEEE 488.2 SCPI Command Parser Stack (USB-CDC Interface)", "1", "VVDN Embedded", "VVDN Proprietary"),
-            ("6", "Dual-Domain True RMS & Efficiency Computing Engine", "1", "VVDN Embedded", "VVDN Proprietary"),
-            ("7", "Autonomous Closed-Loop State Machine & Protection Engine", "1", "VVDN Embedded", "VVDN Proprietary")
+        ("Subsystem 2: Analog Closed-Loop Control, Sensing & Protection (Electrical)", [
+            ("9", "Precision Current Shunt Resistor 10mΩ 0.1% 3W 2512", "1", "Bourns", "CSS2H-2512R-L010F"),
+            ("10", "Precision Current Sense Amplifier 50V/V SC70", "1", "Texas Instruments", "INA240A2EDCKR"),
+            ("11", "High-Speed Analog Comparator 4.5ns SOT-23-6", "1", "Texas Instruments", "TLV3501AIDBVR"),
+            ("12", "Mixed-Signal MCU & 12-Bit DAC Core LQFP-64", "1", "STMicroelectronics", "STM32G474RET6"),
+            ("13", "Isolated Delta-Sigma Modulator SOIC-8 (AC Sense)", "1", "Texas Instruments", "AMC1311DWVR"),
+            ("14", "Toroidal Current Transformer 1000:1 (AC Current)", "1", "Talema", "AC1005 (PCB Mount)"),
+            ("15", "16-Bit I2C Power Monitor IC VSSOP-10 (DC Rail)", "1", "Texas Instruments", "INA226AIDGSR"),
+            ("16", "Heavy-Duty 4mm Gold-Plated Binding Posts (Red/Blk)", "2", "Pomona Electronics", "3770-0 / 3770-2"),
+            ("17", "IEC 320-C14 AC Inlet Receptacle with Fuse Drawer", "1", "Schurter", "6200.2100")
         ])
     ]
 
@@ -655,10 +645,10 @@ def generate_prd_docx():
     for cell in t12.rows[0].cells:
         set_cell_background(cell, "BFBFBF")
     set_cell_text(t12.rows[0].cells[0], "Sl.No", bold=True)
-    set_cell_text(t12.rows[0].cells[1], "Software Package / Firmware Component", bold=True)
+    set_cell_text(t12.rows[0].cells[1], "Description", bold=True)
     set_cell_text(t12.rows[0].cells[2], "Qty", bold=True)
-    set_cell_text(t12.rows[0].cells[3], "Provider / Origin", bold=True)
-    set_cell_text(t12.rows[0].cells[4], "License / Version", bold=True)
+    set_cell_text(t12.rows[0].cells[3], "Mfg", bold=True)
+    set_cell_text(t12.rows[0].cells[4], "Mfg Part No", bold=True)
 
     for sub_title, items in bom2_subsystems:
         sub_row = t12.add_row()
@@ -683,40 +673,40 @@ def generate_prd_docx():
     replacements = {
         "<CCCC_PPPP>": "VVDN_SPPS_2026",
         "<Project Name>": "Smart Programmable Voltage Supply Module (85–265 V AC In, 5–20 V / 3 A DC Out)",
-        "<Current Revision Number>": "Rev 1.0",
+        "<Current Revision Number>": "Rev 1.0 (Hardware Release)",
         "<Date of Release>": "12 Oct 2026",
         "<Author>": "Power Electronics Engineer Trainee (GET - Hardware Engineering)",
         "<BU SME>": "BU SME (Power Electronics)",
         "<BU Head>": "BU Head (Embedded Hardware)",
-        "<Briefly describe the purpose": "This Product Requirement Document (PRD) defines all engineering, electrical, mechanical, safety, firmware, and telemetry requirements for the Smart Programmable Voltage Supply Module (85–265 V AC In, 5–20 V / 3 A DC Out). Prepared within the scope of a Power Electronics Engineer Trainee (Graduate Engineer Trainee - GET, Hardware Engineering) under BU SME mentorship, this document serves as the authoritative technical baseline across design, verification, safety compliance, and prototype bring-up.\n\nTrainee Project Scope & Engineering Ownership:\nThe project is explicitly bounded to develop industrial-grade power electronics hardware design mastery within the graduate trainee scope. The trainee directly owns the power conversion design: Stage 1 AC-DC Quasi-Resonant Flyback calculations (PQ26/20 transformer magnetics, 3kV RMS reinforced isolation, Furukawa TEX-E wire), Stage 2 Synchronous 4-Switch Buck-Boost post-regulator design (LM5176 inductor sizing, MOSFET selection, low-ESR ripple filtering), analog DAC voltage steering feedback calculations, autonomous hardware CC protection (< 5µs response), Altium Designer multi-sheet schematics, 4-layer PCB layout execution (Kelvin sensing, high-voltage creepage slot >= 6.4mm), master engineering BOM, bench bring-up cold checks with safe Variac ramp-up, and Design Verification Testing (DVT). Adjacent domains—embedded firmware (FreeRTOS, SCPI parser) and mechanical tooling (aluminum extrusion, ID)—are cross-functional supporting domains with which the trainee defines hardware interfaces, pin mappings, scaling equations, and mechanical keep-outs.",
-        "Explicitly mention that the requirements": "The requirements captured in this PRD supersede any previous documents, customer RFQs, preliminary proposals, and meeting discussions. This document shall be taken as the sole authoritative reference baseline for design acceptance and sign-off.",
+        "<Briefly describe the purpose": "This Product Requirement Document (PRD) establishes the complete engineering, electrical, schematic, PCB layout, and bench testing baseline for the Smart Programmable Voltage Supply Module (85–265 V AC In, 5–20 V / 3 A DC Out). Formulated strictly within the Embedded Hardware and Power Electronics Engineering domain for a Power Electronics Engineer Trainee (GET) under BU SME mentorship, this document serves as the authoritative technical baseline for circuit calculations, Altium schematics, 4-layer PCB layout rules, Bill of Materials (BOM), and laboratory validation.\n\nHardware Project Scope & 4-Stage Power Conversion Chain:\nThe power conversion hardware executes in four sequential hardware stages: (1) Mains AC Input (85V–265V AC RMS with 2A Fuse, 10Ω NTC, and 2-stage EMI filter); (2) Bridge Rectifier & Bulk Filter (GBU606 bridge + 100µF/450V capacitor producing high-voltage DC bus +120V to +375V DC); (3) Isolated DC-DC Converter (Quasi-Resonant Flyback stage with UCC28740, custom PQ26/20 transformer, and 3000V RMS reinforced safety isolation delivering +24.0V DC intermediate bus at 72W); and (4) Final Post-Regulator Stage (4-switch synchronous Buck-Boost stage with LM5176, precision DAC voltage steering, and sub-5µs analog hardware constant-current clamping delivering 5.0V–20.0V DC at up to 3.0A to the device under test).",
+        "Explicitly mention that the requirements": "The requirements captured in this PRD supersede any previous draft notes and informal discussions. This document shall be taken as the sole authoritative reference baseline for hardware design acceptance, schematic review gates, and cross-mentor technical defense.",
         "<Describe any standards or typographical": "Requirements marked with [MUST] are mandatory non-negotiable specifications essential for safety, electrical regulation, and compliance. Requirements marked with [SHOULD] represent performance targets where trade-offs require SME approval. Requirements marked with [MAY] represent optional enhancements. All electrical units follow SI conventions.",
-        "<Describe the different types of reader": "This document is intended for Client Engineering & Management (scope sign-off), Senior Hardware Mentors & BU SMEs (design calculations, stress derating, and safety sign-off), the Power Electronics Engineer Trainee (author and hardware design owner), Embedded Software Teams (control loops and SCPI interfaces), Mechanical Teams (enclosure and thermal interfaces), and Quality Assurance (EMC & safety verification).",
+        "<Describe the different types of reader": "This document is intended for the Cross-Mentor Review Panel (hardware technical defense), BU SME (Power Electronics) & Senior Hardware Mentors (design calculations, stress derating, and safety sign-off), the Power Electronics Engineer Trainee (author and hardware design owner), PCB Layout & DFM Engineers (stackup, creepage slots), and Quality Assurance (Hipot dielectric & conducted EMC pre-compliance verification).",
         "<Define all the terms necessary to properly interpret the PRD": "The following table defines the engineering acronyms, abbreviations, and electrical nomenclature utilized throughout this Product Requirement Document:",
         "<List any other documents or web addresses that this PRD refers": "The following industry standards, manufacturer component datasheets, and project architecture documents serve as normative references for this PRD:",
         "<Provide a short description of the product being specified and its purpose": "The Smart Programmable Voltage Supply Module is an intelligent, high-density bench and industrial power supply delivering a tightly regulated, programmable DC voltage output from 5.0 V to 20.0 V at currents up to 3.0 A (60 W continuous output power) from universal mains AC input (85 V – 265 V AC RMS, 47 Hz – 63 Hz).",
-        "Describe the context and origin of the product": "The product eliminates bulky, expensive legacy bench supplies by integrating universal mains Quasi-Resonant Flyback isolation, an ultra-efficient 4-switch synchronous Buck-Boost post-regulator, dual-domain real-time efficiency monitoring, and autonomous MicroSD logging in a compact form factor.",
+        "Describe the context and origin of the product": "The product eliminates bulky legacy 50Hz bench supplies by integrating universal mains Quasi-Resonant Flyback isolation, an ultra-efficient 4-switch synchronous Buck-Boost post-regulator, dual-domain real-time efficiency monitoring, and autonomous hardware constant-current protection in a compact form factor.",
         "< Broad view of the boundary of project": "The system comprises an isolated primary QR Flyback stage converting 85-265V AC into a rock-solid +24.0V DC bus (72W max), followed by a 4-switch synchronous Buck-Boost post-regulator (LM5176) stepping the rail up or down to 5.0V-20.0V DC at up to 3.0A with sub-25mV ripple. Dual-domain power metering continuously tracks AC input power and DC load power across reinforced isolation.",
-        "< Small description of different systems within the product": "The product comprises two principal hardware subsystems: Subsystem 1 (Universal AC-DC Isolated Flyback Power Stage) and Subsystem 2 (4-Switch Synchronous Buck-Boost Post-Regulator with STM32G474 digital supervisor). External entities include AC Grid Mains (85–265V AC), Device Under Test (DUT / Load), Host PC / ATE Automation Test Rig, MicroSD logging card, and the human bench operator.",
-        "<Describe the physical and logical interfaces": "Physical interfaces include an IEC 320-C14 AC inlet, heavy-duty 4mm gold binding posts, USB Type-C virtual COM port, push-push MicroSD socket, dual optical rotary encoders, a 1.3\" monochrome OLED display, and a tactile output enable push-button.",
-        "<Describe the physical characteristics of each interface": "The hardware interfaces provide ergonomic local control and automated rack integration. Binding posts carry 3.0A continuous load current; USB-C delivers full SCPI instrumentation telemetry; MicroSD card provides autonomous FAT32 data logging.",
-        "<. Describe the communication between different systems": "Software communication uses standard IEEE 488.2 SCPI protocol over USB-CDC at 115200 baud (8N1). An internal FreeRTOS telemetry task logs CSV records to MicroSD every 100ms and updates the local 1.3\" OLED display at 10 frames/sec.",
-        "<List all the systems involved and the domains": "System 1 represents the Hardware Power Supply Module (HW, ME, QA); System 2 represents the Embedded Firmware & Display Controller (BSP, SAP, FW); System 3 represents the Host PC Telemetry Application (PAP).",
-        "<There are some requirements that cannot be captured": "Specific hardware mechanical constraints require a compact extruded aluminum chassis (130 x 85 x 42 mm) with front-panel binding posts and rear-panel AC inlet. A minimum 6.4 mm isolation slot is milled across the PCB under the transformer and optocoupler barriers to ensure reinforced safety clearance.",
+        "< Small description of different systems within the product": "The product is designed as a unified Embedded Hardware Power Supply Module (System 1). Primary hardware stages include AC Mains Protection & EMI Filter, GBU606 Bridge Rectifier & Bulk Capacitor (+120V to +375V DC), Stage 1 Isolated Quasi-Resonant Flyback Converter (+24V DC, 72W), Stage 2 Synchronous 4-Switch Buck-Boost Post-Regulator (5V–20V / 3A DC), and Analog DAC Steering & Fast Hardware Protection Loops.",
+        "<Describe the physical and logical interfaces": "Physical hardware interfaces include an IEC 320-C14 AC inlet with integrated fuse drawer, heavy-duty 4mm gold binding posts, dual optical rotary encoders for voltage and current limit tuning, a tactile output enable push-button with status LED, a 1.3\" monochrome OLED display, and dedicated PCB bring-up test points.",
+        "<Describe the physical characteristics of each interface": "The hardware interfaces provide rugged, low-impedance connections: binding posts carry 3.0A continuous load current with < 5mΩ contact resistance; IEC inlet provides 250V / 10A rating with earth grounding; test points allow high-voltage differential probing across all switching nodes.",
+        "<. Describe the communication between different systems": "Hardware control utilizes a precision resistor summing network where a 12-bit DAC injects steering current into the LM5176 feedback node. Dual-domain sensing utilizes an AMC1311 isolated modulator for AC mains and an INA226 monitor for DC output power.",
+        "<List all the systems involved and the domains": "System 1 represents the unified Embedded Hardware Power Supply Module, encompassing Power Converter Topologies, Magnetics Design, Analog Feedback & Protection, 4-Layer PCB Layout, and Bench Bring-Up Testing.",
+        "<There are some requirements that cannot be captured": "Specific hardware layout constraints mandate a physical 6.4 mm surface creepage distance and a 2.0 mm milled air slot through the PCB substrate beneath the transformer and optocoupler barriers to guarantee IEC 62368-1 reinforced safety isolation.",
         "<UI/UX design or wireframes that will define": "The 1.3\" monochrome OLED display presents a real-time operational dashboard with large-digit output voltage and current meters, power readout, true system efficiency bar graph, and operating status annunciators (CV, CC, FLT).",
         "<List any assumed factors": "Assumptions: Grid AC mains is nominal sinusoidal waveform with THD ≤ 5%; Operating ambient temperature is -20°C to +50°C under natural convection; Secondary DC ground is floating with reinforced galvanic isolation (≥ 3000V RMS) from Earth and AC mains.",
-        "<Identify any dependencies the project has on external factors": "Dependencies: Component supply chain availability for TI LM5176, UCC28740, INA226, AMC1311, and STM32G474; Custom transformer tooling on Ferroxcube PQ26/20 ferrite cores with triple-insulated secondary wire; Compliance laboratory access for CISPR 32 Class B EMC testing.",
-        "<All standard deliverable documents of each domain": "The development lifecycle encompasses standard engineering deliverables across Hardware (HW), Mechanical (ME), Embedded Software (FW), and Quality Assurance (QA). As the primary hardware design owner, the Power Electronics Trainee directly owns Domain 1 deliverables (HDD, schematics, PCB layout, BOM, bring-up, and DVT reports), collaborating with cross-functional teams for firmware and mechanical releases. The phase-wise deliverables and formal release order are summarized in Table 10 below:",
-        "<Top level development plan": "The project follows a 4-phase lifecycle spanning 18 weeks: Phase 1 (Weeks 1-3: PRD & Architecture Sign-Off); Phase 2 (Weeks 4-7: HDD, Schematic & PCB Layout); Phase 3 (Weeks 8-12: Rev A Fabrication, Bring-Up & Functional Tuning); Phase 4 (Weeks 13-18: DVT, EMC Pre-Compliance, Thermal Chamber Testing & Rev B Release).",
-        "<Fill as applicable>": "System 2 (Embedded Software & Telemetry) development plan comprises four key software milestones: Alpha Release (BSP bring-up, DAC/ADC low-level drivers), Beta Release (Type-II feedback loop tuning, OLED dashboard, 10Hz dual-domain calculation), RC Release (SCPI parser over USB-CDC, FAT32 MicroSD ring-buffered logger), and Final Production Gold Release (full DVT pass, self-test diagnostics, and calibrated look-up tables).",
+        "<Identify any dependencies the project has on external factors": "Dependencies: Component supply chain availability for TI LM5176, UCC28740, INA226, AMC1311, INA240, and TLV3501; Custom transformer tooling on Ferroxcube PQ26/20 ferrite cores with triple-insulated Furukawa TEX-E secondary wire.",
+        "<All standard deliverable documents of each domain": "The development lifecycle encompasses standard hardware engineering deliverables across Power Topologies, Schematics Capture, PCB Layout, and Lab DVT. The phase-wise deliverables and formal release order are summarized in Table 10 below:",
+        "<Top level development plan": "The project follows a 4-phase lifecycle spanning 18 weeks: Phase 1 (Weeks 1-3: PRD & Architecture Sign-Off); Phase 2 (Weeks 4-7: HDD, Schematics & PCB Layout); Phase 3 (Weeks 8-12: Rev A Fabrication, Cold Checks & Variac Bring-Up); Phase 4 (Weeks 13-18: DVT, EMC Pre-Compliance, Thermal Chamber Testing & Rev B Release).",
+        "<Fill as applicable>": "The hardware validation plan comprises four rigorous test gates: Cold Checks (impedance & isolation resistance), Supervised Variac Bring-Up (gradual AC ramp from 0V to 265V), Dynamic Regulation (line/load regulation and 50% to 100% transient steps), and Safety/Thermal Soak (3000V RMS Hipot and FLIR thermal soak at 50°C).",
         "<Architecture section is optional to mention": "The architecture comprises two galvanically isolated power conversion stages followed by dual-domain digital telemetry and autonomous analog hardware protection.",
         "<Insert System level BOM>": "Refer to detailed bill of materials in the respective system table below.",
         "Out of scope point 1": "Three-phase 400V/480V AC industrial grid input operation.",
         "Out of scope point 2": "Active Power Factor Correction (Active PFC boost stage). System utilizes passive EMI filtering with PF ~ 0.62.",
-        "Out of scope point 3": "Negative/bipolar voltage rails (system provides positive 5.0V to 20.0V DC only). Wireless connectivity (Wi-Fi/Bluetooth) is excluded. Trainee direct boundaries: firmware kernel implementation, custom aluminum extrusion die tooling, and accredited regulatory laboratory filing are executed by collaborating cross-functional teams.",
-        "Open Item 1": "Mechanical enclosure extrusion profile selection (finalizing 130x85x42mm profile vs 140x90x50mm based on binding post clearance).",
-        "Open Item 2": "Current shunt value trade-off (evaluating 5mΩ vs 10mΩ for thermal dissipation vs ADC low-current resolution).",
-        "Open Item 3": "Auxiliary DC-in barrel jack option (evaluating 24V DC auxiliary input to bypass AC mains in vehicle/field environments)."
+        "Out of scope point 3": "Negative/bipolar voltage rails (system provides positive 5.0V to 20.0V DC only). Wireless connectivity (Wi-Fi/Bluetooth), software RTOS protocol coding, and mechanical extrusion tooling dies are explicitly excluded.",
+        "Open Item 1": "Current shunt value trade-off (evaluating 5mΩ vs 10mΩ for thermal dissipation vs low-current sensing resolution).",
+        "Open Item 2": "Auxiliary DC-in barrel jack option (evaluating 24V DC auxiliary input to bypass AC mains in vehicle/field environments).",
+        "Open Item 3": "Secondary heatsink copper area optimization (evaluating 2oz vs 3oz copper pours for D2PAK primary FET)."
     }
 
     for p in doc.paragraphs:
@@ -746,67 +736,67 @@ def generate_prd_docx():
         txt = p.text.strip()
         if txt == "Use Cases" and p.style.name == "Heading 2":
             p_use_cases_h2 = p
-        elif p_use_cases_h2 and p_uc_144 is None and ("<Summarize the major functions" in p.text or "The primary operational functions" in p.text):
+        elif p_use_cases_h2 and p_uc_144 is None and ("<Summarize the major functions" in p.text or "The primary operational functions" in p.text or "The Smart Programmable Voltage Supply Module performs high-efficiency" in p.text):
             p_uc_144 = p
         elif p_use_cases_h2 and p_uc_145 is None and "A picture of the major groups" in p.text:
             p_uc_145 = p
-        elif p_use_cases_h2 and p_uc_146 is None and ("<Provide the brief description about the interaction" in p.text or "The bench operator interacts through" in p.text):
+        elif p_use_cases_h2 and p_uc_146 is None and ("<Provide the brief description about the interaction" in p.text or "The bench operator interacts through" in p.text or "The benchtop operator interacts with" in p.text):
             p_uc_146 = p
-        elif p_use_cases_h2 and p_uc_147 is None and ("the different mode of operation of the product" in p.text or "The module operates in" in p.text):
+        elif p_use_cases_h2 and p_uc_147 is None and ("the different mode of operation of the product" in p.text or "The module operates in" in p.text or "The power supply module operates in" in p.text):
             p_uc_147 = p
         elif p_use_cases_h2 and p_uc_148 is None and ("Describe the major functionality of the product" in p.text or "In CV mode, LM5176 seamlessly" in p.text):
             p_uc_148 = p
-        elif txt == "Table : Use Case":
+        elif txt == "Table : Use Case" or "Table 3: Primary Use Case Summary" in txt:
             p_uc_caption = p
-        elif "<Insert Major Use Case 1 Diagram here>" in txt or "The benchtop operational tuning flow is illustrated" in txt:
+        elif "<Insert Major Use Case 1 Diagram here>" in txt or "The benchtop operational tuning flow is illustrated" in txt or "The master embedded hardware architecture" in txt:
             p_fig2_ins = p
-        elif "Figure 2: Major Use Case 1" in txt:
+        elif "Figure 2: Major Use Case 1" in txt or "Figure 2: Master Embedded Hardware" in txt:
             p_fig2_cap = p
-        elif "<Insert Major Use Case 2 Diagram here>" in txt or "The automated ATE SCPI communication" in txt:
+        elif "<Insert Major Use Case 2 Diagram here>" in txt or "The automated ATE SCPI communication" in txt or "The Stage 1 Quasi-Resonant Flyback" in txt:
             p_fig3_ins = p
-        elif "Figure 3: Major Use Case 1" in txt or "Figure 3: Major Use Case 2" in txt:
+        elif "Figure 3: Major Use Case 1" in txt or "Figure 3: Major Use Case 2" in txt or "Figure 3: Stage 1 Isolated" in txt:
             p_fig3_cap = p
         elif "Also, if the product comprises" in p.text:
             p.text = ""
         elif "A diagram showing various systems" in p.text:
             p.text = ""
         elif "< Small description of different systems" in p.text:
-            p.text = "The product comprises two principal hardware subsystems: Subsystem 1 (Universal AC-DC Isolated Flyback Power Stage) and Subsystem 2 (4-Switch Synchronous Buck-Boost Post-Regulator with STM32G474 digital supervisor). External entities include AC Grid Mains (85–265V AC), Device Under Test (DUT / Load), Host PC / ATE Automation Test Rig, MicroSD logging card, and the human bench operator."
+            p.text = "The product is designed as a unified Embedded Hardware Power Supply Module (System 1). Primary hardware stages include AC Mains Protection & EMI Filter, GBU606 Bridge Rectifier & Bulk Capacitor (+120V to +375V DC), Stage 1 Isolated Quasi-Resonant Flyback Converter (+24V DC, 72W), Stage 2 Synchronous 4-Switch Buck-Boost Post-Regulator (5V–20V / 3A DC), and Analog DAC Steering & Fast Hardware Protection Loops."
 
     # Clean narrative texts completely
     if p_uc_144 is not None:
-        p_uc_144.text = "The Smart Programmable Voltage Supply Module performs high-efficiency AC-DC power conversion with digital voltage regulation, fast hardware current limiting, real-time power metering, and remote automation control. The major functional use cases are summarized in Table 3 below:"
+        p_uc_144.text = "The Smart Programmable Voltage Supply Module performs high-efficiency AC-DC power conversion across four hardware stages: AC mains rectification, isolated Flyback step-down, 4-switch Buck-Boost post-regulation, and precision load delivery. The core hardware functional operations are summarized in Table 3 below:"
     if p_uc_145 is not None:
         p_uc_145.text = ""
     if p_uc_146 is not None:
-        p_uc_146.text = "The benchtop operator interacts with the power supply using front-panel dual rotary optical encoders and a 1.3\" graphical OLED display. Automated test equipment (ATE) and host PCs communicate via USB Type-C using standard SCPI instrumentation commands. Power is delivered to the device under test (DUT) via heavy-duty 4mm binding posts, and operational telemetry is autonomously logged to an onboard MicroSD card."
+        p_uc_146.text = "The benchtop operator interacts with the power supply using front-panel dual rotary controls and a 1.3\" graphical OLED display. Power is delivered to the device under test (DUT) via heavy-duty 4mm binding posts, and operational status is indicated via front-panel mode LEDs."
     if p_uc_147 is not None:
-        p_uc_147.text = "The power supply module operates in four primary operating modes: Constant Voltage (CV) Mode for stable voltage regulation across varying loads; Constant Current (CC) Mode for ultra-fast hardware clamping during overload or short-circuit; Autonomous Dual-Domain Telemetry Mode for 10Hz power and efficiency logging; and Automated ATE Remote Control Mode for external script-driven testing."
+        p_uc_147.text = "The power supply module operates in four primary hardware modes: Constant Voltage (CV) Mode for stable voltage regulation across varying loads; Constant Current (CC) Mode for ultra-fast hardware clamping during overload or short-circuit; Dynamic Load Step Mode for fast recovery during surging loads; and Hardware Crowbar Shutdown for over-voltage or over-temperature protection."
     if p_uc_148 is not None:
-        p_uc_148.text = "In CV mode, the 4-switch synchronous Buck-Boost stage transitions smoothly between Buck, Buck-Boost, and Boost modes. In CC mode, an autonomous analog comparator overrides the feedback loop in less than 5 microseconds to protect the load, while the MCU logs the event."
+        p_uc_148.text = "In CV mode, the 4-switch synchronous Buck-Boost stage transitions smoothly between Buck, Buck-Boost, and Boost modes. In CC mode, an autonomous analog comparator overrides the feedback loop in less than 5 microseconds to protect the load without any software latency."
     if p_uc_caption is not None:
-        p_uc_caption.text = "Table 3: Primary Use Case Summary"
+        p_uc_caption.text = "Table 3: Hardware Operational Modes Summary"
 
     fig2_steps = [
-        ("1", "Operator / Host PC", "Adjusts front rotary optical encoder knob or transmits SCPI command ':VOLT 12.0' over USB-C interface."),
-        ("2", "STM32G474 MCU Core", "Decodes setpoint in < 2ms, calculates DAC voltage, and programs internal 12-Bit DAC1 to 1.76 V."),
-        ("3", "Feedback Summing Network", "DAC injects steering current into LM5176 FB node via precision 0.1% divider (R_top=49.9kΩ, R_DAC=11.0kΩ, R_bot=3.65kΩ)."),
-        ("4", "LM5176 Buck-Boost Stage", "Modulates 4-switch PWM duty cycle; output voltage stabilizes to 12.00 V ± 10 mV in < 100 µs with < 25 mV ripple."),
-        ("5", "Dual-Domain Telemetry & UI", "INA226 samples new VOUT/IOUT; MCU updates live 1.3\" OLED dashboard and pushes timestamped record to MicroSD card.")
+        ("1", "AC Grid Mains", "Delivers 85V–265V AC RMS through IEC C14 inlet and input protection (2A Fuse, 10Ω NTC, MOV)."),
+        ("2", "Bridge Rectifier", "GBU606 full-wave rectifies line AC into raw DC; 100µF/450V bulk cap filters high-voltage bus (+120V to +375V DC)."),
+        ("3", "UCC28740 Controller", "Drives Infineon 800V Superjunction MOSFET with quasi-resonant valley switching at 80kHz."),
+        ("4", "PQ26/20 Transformer", "Steps down power across 6:1 turns ratio with 3000V RMS reinforced isolation (Furukawa TEX-E wire)."),
+        ("5", "Synchronous Rectifier", "MP6908 smart driver and BSC052N06NS MOSFET generate rock-solid +24.0V DC intermediate bus (72W).")
     ]
 
     fig3_steps = [
-        ("1", "Automated ATE / Host PC", "Sends standard SCPI batch command over USB-CDC: ':VOLT 15.000;:CURR 2.000;:OUTP ON' at 115200 baud."),
-        ("2", "SCPI Parser Task", "FreeRTOS task verifies command syntax, adjusts DAC1 (15V) and DAC2 (2A limit), and enables power output."),
-        ("3", "Automated ATE / Host PC", "Transmits telemetry query command ':MEAS:EFF?' to audit conversion efficiency during device test."),
-        ("4", "Efficiency Math Engine", "Samples AMC1311 AC power (Pac) and INA226 DC power (Pdc), computes η = (Pdc/Pac) × 100%, and replies '91.2%' in < 2ms."),
-        ("5", "Data Logger Task", "Autonomous FatFs task records complete measurement telemetry into FAT32 CSV file on physical MicroSD card.")
+        ("1", "Intermediate Bus", "Supplies clean, low-ripple +24.0V DC into the LM5176 4-switch H-bridge stage."),
+        ("2", "DAC Voltage Steering", "12-bit DAC injects steering current into FB resistor network (R_top=49.9kΩ, R_DAC=11.0kΩ, R_bot=3.65kΩ)."),
+        ("3", "LM5176 Controller", "Modulates 4-switch PWM at 300kHz through 10µH flat-wire inductor (Wurth 7443321000)."),
+        ("4", "Low-ESR Filter Bank", "4x 22µF ceramic MLCCs + 100µF OS-CON polymer filter attenuate output ripple strictly below 25mV pk-pk."),
+        ("5", "Output Binding Posts", "Delivers tightly regulated, current-clamped 5.0V–20.0V DC at up to 3.0A (60W max) to target device.")
     ]
 
     # Insert Figure 2 cleanly right after its intro
     if p_fig2_ins is not None:
-        p_fig2_ins.text = "The benchtop operational voltage tuning sequence is summarized in Figure 2 and Table 3.1 below:"
-        diag2_path = "smart_programmable_power_supply/diagram_use_case_1_voltage_tuning.png"
+        p_fig2_ins.text = "The master embedded hardware architecture and power conversion stages are shown in Figure 2 and Table 3.1 below:"
+        diag2_path = "smart_programmable_power_supply/smart_programmable_power_supply_system_block_diagram.png"
         cursor2 = p_fig2_ins._p
         if os.path.exists(diag2_path):
             p_pic2 = doc.add_paragraph()
@@ -816,15 +806,15 @@ def generate_prd_docx():
             p_fig2_ins._p.addnext(p_pic2._p)
             cursor2 = p_pic2._p
 
-        tbl_fig2 = create_workflow_table(doc, "MAJOR USE CASE 1: VOLTAGE SETPOINT TUNING SEQUENCE", fig2_steps, header_color="1A365D")
+        tbl_fig2 = create_workflow_table(doc, "POWER STAGE 1: AC-DC FLYBACK CONVERSION SEQUENCE", fig2_steps, header_color="1A365D")
         cursor2.addnext(tbl_fig2._tbl)
     if p_fig2_cap is not None:
-        p_fig2_cap.text = "Figure 2: Major Use Case 1 - Precision Benchtop Supply Voltage Tuning Workflow"
+        p_fig2_cap.text = "Figure 2: Master Embedded Hardware Architecture Block Diagram"
 
     # Insert Figure 3 cleanly right after its intro
     if p_fig3_ins is not None:
-        p_fig3_ins.text = "The automated ATE SCPI instrumentation and telemetry logging flow is summarized in Figure 3 and Table 3.2 below:"
-        diag3_path = "smart_programmable_power_supply/diagram_use_case_2_ate_automation.png"
+        p_fig3_ins.text = "The Stage 1 Quasi-Resonant Flyback power stage architecture is shown in Figure 3 and Table 3.2 below:"
+        diag3_path = "smart_programmable_power_supply/block_diagram_stage1_flyback.png"
         cursor3 = p_fig3_ins._p
         if os.path.exists(diag3_path):
             p_pic3 = doc.add_paragraph()
@@ -834,31 +824,39 @@ def generate_prd_docx():
             p_fig3_ins._p.addnext(p_pic3._p)
             cursor3 = p_pic3._p
 
-        tbl_fig3 = create_workflow_table(doc, "MAJOR USE CASE 2: AUTOMATED ATE SCPI & TELEMETRY FLOW", fig3_steps, header_color="234E52")
+        tbl_fig3 = create_workflow_table(doc, "POWER STAGE 2: 4-SWITCH SYNCHRONOUS BUCK-BOOST REGULATION SEQUENCE", fig3_steps, header_color="234E52")
         cursor3.addnext(tbl_fig3._tbl)
     if p_fig3_cap is not None:
-        p_fig3_cap.text = "Figure 3: Major Use Case 2 - Automated ATE Instrumentation SCPI Control & Telemetry Workflow"
+        p_fig3_cap.text = "Figure 3: Stage 1 Isolated Quasi-Resonant Flyback Power Converter Architecture"
 
     # Update Table of Figures text cleanly
     for p in doc.paragraphs[:100]:
         if "Figure 1:" in p.text:
-            p.text = "Figure 1: System Boundary & Master Architecture Block Diagram\t9"
+            p.text = "Figure 1: Simplified 4-Stage Power Flow Block Diagram (Mains -> Rectifier -> Converter DC-DC -> Final Stage -> Device)\t9"
         elif "Figure 2:" in p.text:
-            p.text = "Figure 2: Major Use Case 1 - Precision Voltage Setpoint Tuning Workflow\t10"
+            p.text = "Figure 2: Master Embedded Hardware Architecture Block Diagram\t10"
         elif "Figure 3:" in p.text:
-            p.text = "Figure 3: Major Use Case 2 - Automated ATE Instrumentation SCPI Control Workflow\t10"
+            p.text = "Figure 3: Stage 1 Isolated Quasi-Resonant Flyback Power Converter Architecture\t10"
         elif "Figure 4:" in p.text:
-            p.text = "Figure 4: Dual-Closed-Loop Control & Hardware Protection Flow Diagram\t15"
+            p.text = "Figure 4: Dual-Closed-Loop Control & Real-Time Hardware Protection Flow Diagram\t15"
+        elif "Figure 5:" in p.text:
+            p.text = "Figure 5: Stage 2 4-Switch Synchronous Buck-Boost Post-Regulator Architecture\t16"
+        elif "Figure 6:" in p.text:
+            p.text = "Figure 6: Analog Closed-Loop Control & Hardware Protection Architecture\t18"
+        elif "Figure 7:" in p.text:
+            p.text = "Figure 7: Dual-Domain Power Telemetry & Sensing Frontend Architecture\t19"
+        elif "Figure 8:" in p.text:
+            p.text = "Figure 8: Auxiliary Bias Power Rail Distribution Subsystem Architecture\t20"
 
-    # Boundary Diagram (Body Caption at Index > 100)
+    # Boundary Diagram (Body Caption at Index > 100) -> Simplified 4-Stage Power Flow Diagram!
     p_diag1_cap = None
     for p in doc.paragraphs[100:]:
-        if "Figure : Boundary Diagram" in p.text or ("Boundary Diagram" in p.text and p.style.name == "Caption"):
+        if "Figure : Boundary Diagram" in p.text or ("Boundary Diagram" in p.text and p.style.name == "Caption") or "Figure 1:" in p.text:
             p_diag1_cap = p
             break
     if p_diag1_cap is not None:
-        p_diag1_cap.text = "Figure 1: System Boundary & Master Architecture Block Diagram"
-        diagram_img_path = "smart_programmable_power_supply/smart_programmable_power_supply_system_block_diagram.png"
+        p_diag1_cap.text = "Figure 1: Simplified 4-Stage Power Flow Block Diagram (Mains -> Rectifier -> Converter DC-DC -> Final Stage -> Device)"
+        diagram_img_path = "smart_programmable_power_supply/diagram_simple_power_flow.png"
         if os.path.exists(diagram_img_path):
             p_img = p_diag1_cap.insert_paragraph_before()
             p_img.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -932,8 +930,8 @@ def generate_prd_docx():
         ("TM-03", "Secondary DC Voltage Sense", "INA226 16-bit ADC (1.25mV/LSB) [MUST]", "± 0.2% measurement accuracy", "Keysight 34465A DMM"),
         ("TM-04", "Secondary DC Current Sense", "INA226 16-bit ADC (100µA/LSB) [MUST]", "± 0.5% measurement accuracy", "Precision Shunt Reference"),
         ("TM-05", "Dual-Domain Telemetry Rate", "10.0 Hz Real-Time Loop Rate [MUST]", "Pac, Pdc, and η computed at 100ms", "Timing Logic Analyzer"),
-        ("TM-06", "MicroSD Data Logging", "FAT32 CSV Autonomous Logging [MUST]", "Timestamp, Vac, Iac, Vdc, Idc, η", "MicroSD File Verification"),
-        ("TM-07", "Remote SCPI Interface", "IEEE 488.2 SCPI over USB-CDC [MUST]", "115200 baud, standard commands", "Automated Python Test Rig")
+        ("TM-06", "Galvanic Isolation Barrier", "3,000 V AC RMS (1 min) [MUST]", "Primary-to-secondary isolation", "Hi-Pot Isolation Tester"),
+        ("TM-07", "Hardware Calibration Test Points", "Dedicated PCB Test Points [MUST]", "Vout, Iout, bulk DC, and aux rails", "Keysight 34465A DMM")
     ]
 
     req_protection = [
@@ -947,13 +945,14 @@ def generate_prd_docx():
         ("PR-08", "Mean Time Between Failures", "MTBF > 50,000 Hours @ 40°C [SHOULD]", "Telcordia SR-332 Parts Count", "Reliability Calculation")
     ]
 
-    req_firmware = [
-        ("FW-01", "Real-Time Kernel", "FreeRTOS Preemptive Multitasking [MUST]", "5 concurrent RTOS tasks", "TraceX Execution Log"),
-        ("FW-02", "SCPI Parser Stack", "IEEE 488.2 Compliant Command Parser [MUST]", "Processes commands in < 2.0 ms", "USB-CDC Command Benchmark"),
-        ("FW-03", "Efficiency Computation", "Dual-Domain Math Engine (η = Pdc/Pac) [MUST]", "Low-pass digital filter at 10Hz", "Power Meter Verification"),
-        ("FW-04", "MicroSD Storage Task", "Ring-buffered FatFs CSV Logger [MUST]", "Zero frame drops during write", "Long-Duration 24h Soak"),
-        ("FW-05", "Local OLED Display GUI", "128x64 Dashboard @ 10 fps [MUST]", "V, I, P, η, Mode, and Temp meters", "Visual Verification"),
-        ("FW-06", "Rotary Encoder Servicing", "Hardware Quadrature Encoder Interrupts [MUST]", "Immediate setpoint change (< 5ms)", "Manual Tuning Test")
+    req_control = [
+        ("CT-01", "DAC Voltage Steering Network", "Resistor summing into LM5176 FB node [MUST]", "R_top=49.9kΩ, R_DAC=11kΩ, R_bot=3.65kΩ", "Line/Load Voltage Sweep"),
+        ("CT-02", "Voltage Tuning Resolution", "10.0 mV step resolution (12-bit DAC) [MUST]", "Continuous 5.0V to 20.0V DC range", "DAC Linearity Calibration"),
+        ("CT-03", "Hardware Current Sense Shunt", "10 mΩ Metal Element Shunt, 3W, 0.1% [MUST]", "4-wire Kelvin sensing layout", "Precision Milliohm Meter"),
+        ("CT-04", "Current Sense Amplification", "INA240A2 Precision Amp (50 V/V gain) [MUST]", "Enhanced PWM input spike rejection", "Differential Output Scope"),
+        ("CT-05", "Fast CC Hardware Clamping", "< 5.0 µs autonomous clamping on COMP pin [MUST]", "TLV3501 4.5ns analog comparator override", "Dead Short-Circuit Capture"),
+        ("CT-06", "Hardware Crowbar Disconnect", "High-side P-MOSFET disconnect on OVP/OTP [MUST]", "Clamps at Vset + 1.5V in < 5.0 µs", "OVP Trip Injection Test"),
+        ("CT-07", "Auxiliary Bias Regulation", "+14V Flyback VCC, +12V gate, +5V, +3.3V rails [MUST]", "Dedicated LDOs & buck off +24V bus", "DMM Multi-Rail Verification")
     ]
 
     if p_sys1 is not None:
@@ -997,17 +996,21 @@ def generate_prd_docx():
         cursor = t_pr._tbl
 
     if p_sys2 is not None:
-        p_sys2.text = "System 2 represents the Embedded Firmware, Telemetry Engine, and Local User Interface executing on the STM32G474 ARM Cortex-M4F microcontroller. The detailed software and protocol specifications are defined in Table 4.5 below:"
+        p_sys2.text = (
+            "System 2 represents the Secondary Stage 4-Switch Synchronous Buck-Boost Post-Regulator, "
+            "Analog Closed-Loop Control, DAC Steering Network, and Autonomous Hardware CC Protection Subsystem. "
+            "The detailed electrical hardware specifications are defined in Table 4.5 below:"
+        )
 
         cursor = p_sys2._p
-        cap5 = doc.add_paragraph("Table 4.5: System 2 Embedded Software & Telemetry Specifications")
+        cap5 = doc.add_paragraph("Table 4.5: Analog Closed-Loop Control, DAC Steering & Hardware Protection Specifications")
         cap5.style = "Caption"
         cursor.addnext(cap5._p)
         cursor = cap5._p
 
-        t_fw = create_req_table(req_firmware)
-        cursor.addnext(t_fw._tbl)
-        cursor = t_fw._tbl
+        t_ctrl = create_req_table(req_control)
+        cursor.addnext(t_ctrl._tbl)
+        cursor = t_ctrl._tbl
 
     # --------------------------------------------------------------------------
     # 17. INSERT FLOW DIAGRAM, WIREFRAMES & ARCHITECTURE BLOCK DIAGRAMS
@@ -1050,15 +1053,15 @@ def generate_prd_docx():
                 break
 
     if p_oled_wire is not None:
-        p_oled_wire.text = "1.3-inch Local OLED Dashboard Graphical UI Wireframe"
+        p_oled_wire.text = "Stage 2 4-Switch Synchronous Buck-Boost Post-Regulator Architecture"
     if p_oled_cap is not None:
-        diag5_path = "smart_programmable_power_supply/diagram_oled_dashboard_wireframe.png"
+        diag5_path = "smart_programmable_power_supply/block_diagram_stage2_buckboost.png"
         if os.path.exists(diag5_path):
             p_pic5 = p_oled_cap.insert_paragraph_before()
             p_pic5.alignment = WD_ALIGN_PARAGRAPH.CENTER
             r5 = p_pic5.add_run()
             r5.add_picture(diag5_path, width=Inches(6.47))
-        p_oled_cap.text = "Figure 5: 1.3-inch Local OLED Dashboard Graphical Layout & Wireframe"
+        p_oled_cap.text = "Figure 5: Stage 2 4-Switch Synchronous Buck-Boost Post-Regulator Architecture"
 
     # Section 8 Architecture 8.1, 8.2, 8.3
     p_arch1 = None
@@ -1074,19 +1077,20 @@ def generate_prd_docx():
             p_arch3 = p
 
     if p_arch1 is not None:
-        diagram_img_path = "smart_programmable_power_supply/smart_programmable_power_supply_system_block_diagram.png"
+        p_arch1.text = "8.1 System 1: Analog Closed-Loop Control & Hardware Protection Architecture"
+        diag6_path = "smart_programmable_power_supply/block_diagram_control_feedback.png"
         p_pic6 = None
-        if os.path.exists(diagram_img_path):
+        if os.path.exists(diag6_path):
             p_pic6 = doc.add_paragraph()
             p_pic6.alignment = WD_ALIGN_PARAGRAPH.CENTER
             r6 = p_pic6.add_run()
-            r6.add_picture(diagram_img_path, width=Inches(6.47))
+            r6.add_picture(diag6_path, width=Inches(6.47))
 
-        cap6 = doc.add_paragraph("Figure 6: System 1 Domain 1 (Hardware) Power & Control Architecture Block Diagram")
+        cap6 = doc.add_paragraph("Figure 6: Analog Closed-Loop Control & Hardware Protection Architecture")
         cap6.style = "Caption"
         note6_1 = doc.add_paragraph("Note: This is the proposed architecture and it might get changed during the design stage.")
         note6_1.runs[0].font.italic = True
-        note6_2 = doc.add_paragraph("Note: Ensure the license compliance for usage of open source tools.")
+        note6_2 = doc.add_paragraph("Note: Component selection must strictly comply with VVDN derating guidelines.")
         note6_2.runs[0].font.italic = True
         
         if p_pic6 is not None:
@@ -1099,7 +1103,8 @@ def generate_prd_docx():
         note6_1._p.addnext(note6_2._p)
 
     if p_arch2 is not None:
-        diag7_path = "smart_programmable_power_supply/diagram_mechanical_enclosure_thermal.png"
+        p_arch2.text = "8.2 System 1: Dual-Domain Power Telemetry & Sensing Frontend Architecture"
+        diag7_path = "smart_programmable_power_supply/block_diagram_telemetry_efficiency.png"
         p_pic7 = None
         if os.path.exists(diag7_path):
             p_pic7 = doc.add_paragraph()
@@ -1107,11 +1112,11 @@ def generate_prd_docx():
             r7 = p_pic7.add_run()
             r7.add_picture(diag7_path, width=Inches(6.47))
 
-        cap7 = doc.add_paragraph("Figure 7: System 1 Domain 2 (Mechanical) Enclosure & Thermal Architecture Block Diagram")
+        cap7 = doc.add_paragraph("Figure 7: Dual-Domain Power Telemetry & Sensing Frontend Architecture")
         cap7.style = "Caption"
         note7_1 = doc.add_paragraph("Note: This is the proposed architecture and it might get changed during the design stage.")
         note7_1.runs[0].font.italic = True
-        note7_2 = doc.add_paragraph("Note: Ensure the license compliance for usage of open source tools.")
+        note7_2 = doc.add_paragraph("Note: AMC1311 reinforced galvanic isolation barrier complies with IEC 62368-1.")
         note7_2.runs[0].font.italic = True
 
         if p_pic7 is not None:
@@ -1124,7 +1129,8 @@ def generate_prd_docx():
         note7_1._p.addnext(note7_2._p)
 
     if p_arch3 is not None:
-        diag8_path = "smart_programmable_power_supply/diagram_freertos_firmware_architecture.png"
+        p_arch3.text = "8.3 System 2: Auxiliary Bias Power Rail Distribution Subsystem Architecture"
+        diag8_path = "smart_programmable_power_supply/block_diagram_aux_power_distribution.png"
         p_pic8 = None
         if os.path.exists(diag8_path):
             p_pic8 = doc.add_paragraph()
@@ -1132,11 +1138,11 @@ def generate_prd_docx():
             r8 = p_pic8.add_run()
             r8.add_picture(diag8_path, width=Inches(6.47))
 
-        cap8 = doc.add_paragraph("Figure 8: System 2 Domain 1 (Embedded Software) Multitasking FreeRTOS Architecture Block Diagram")
+        cap8 = doc.add_paragraph("Figure 8: Auxiliary Bias Power Rail Distribution Subsystem Architecture")
         cap8.style = "Caption"
         note8_1 = doc.add_paragraph("Note: This is the proposed architecture and it might get changed during the design stage.")
         note8_1.runs[0].font.italic = True
-        note8_2 = doc.add_paragraph("Note: Ensure the license compliance for usage of open source tools.")
+        note8_2 = doc.add_paragraph("Note: Gate driver bootstrap bias and low-noise analog LDO rails are verified during bring-up.")
         note8_2.runs[0].font.italic = True
 
         if p_pic8 is not None:
@@ -1153,41 +1159,48 @@ def generate_prd_docx():
         if "<BOM section is optional to mention" in p.text:
             p.text = "Note: This is the expected BOM and it might get changed during the design stage. The BOM does not contain any pricing/cost information."
             p.runs[0].font.italic = True
+
     # --------------------------------------------------------------------------
-    # 18. APPEND APPENDIX: TRAINEE MENTOR WALKTHROUGH & Q&A CHEATSHEET
+    # 18. APPEND APPENDIX: CROSS-MENTOR INTERVIEW PREPARATION & DEFENSE CHEATSHEET
     # --------------------------------------------------------------------------
-    p_app_h1 = doc.add_paragraph("Appendix: Power Electronics Engineer Trainee Mentor Walkthrough & Q&A Cheatsheet")
+    p_app_h1 = doc.add_paragraph("Appendix: Cross-Mentor Interview Preparation & Defense Cheatsheet")
     p_app_h1.style = "Heading 1"
 
     p_app_intro = doc.add_paragraph(
-        "This appendix provides key talking points and technical rationales for the Power Electronics Engineer Trainee (GET) "
-        "when presenting design choices, circuit calculations, component selections, and safety boundaries to senior mentors and BU leadership:"
+        "This appendix provides structured technical defense rationales for the Power Electronics Engineer Trainee (GET) "
+        "when defending the embedded hardware design, circuit calculations, component derating, and safety boundaries before the cross-mentor review panel:"
     )
 
     qa_list = [
-        ("Q1: Why did you choose a 2-stage architecture instead of converting AC directly to 5–20V?",
-         "Direct single-stage AC-to-DC conversion across a wide 5V to 20V output range is inefficient and difficult to stabilize because transformer turns ratios and duty cycles would have to vary wildly. By splitting the design into Stage 1 (an isolated Flyback that produces a fixed +24V intermediate rail) and Stage 2 (a non-isolated 4-switch Buck-Boost post-regulator), Stage 1 handles safety isolation and high-voltage rectification, while Stage 2 provides fast, tight voltage tuning with sub-25mV ripple and over 95% efficiency."),
+        ("Q1: Walk me through the complete power conversion chain from the wall to the device.",
+         "The power conversion hardware operates in four clean, sequential stages: First, universal mains AC (85V–265V AC RMS) enters through an IEC C14 inlet with a 2A time-lag ceramic fuse, 10Ω NTC inrush thermistor, MOV surge clamp, and a 2-stage common-mode EMI filter. Second, a GBU606 bridge rectifier and 100µF/450V bulk electrolytic capacitor convert AC into an unregulated high-voltage DC bus (+120V to +375V DC). Third, Stage 1 (a Quasi-Resonant Flyback converter with TI UCC28740 and a custom PQ26/20 transformer) provides certified 3000V RMS reinforced safety isolation and steps down power to a stable +24.0V DC intermediate bus (72W) using synchronous rectification (BSC052N06NS). Fourth, Stage 2 (a TI LM5176 4-switch synchronous Buck-Boost post-regulator) regulates the +24V bus down or across to the target 5.0V–20.0V DC at up to 3.0A with sub-25mV ripple, delivering clean DC to the device under test via heavy-duty 4mm binding posts."),
 
-        ("Q2: How is galvanic safety isolation achieved, and what standard applies?",
-         "We comply strictly with IEC 62368-1 for reinforced safety isolation. We use a custom transformer wound with triple-insulated Furukawa TEX-E wire, optocouplers for feedback, and an AMC1311 isolated modulator for AC voltage sensing. The PCB includes a 6.4mm physical milled air slot to maintain safety creepage distance between the hot primary side and the cold secondary side. It withstands a 3000V RMS Hipot dielectric test for 1 minute."),
+        ("Q2: Why did you use a passive filter and bridge rectifier instead of an active Boost PFC stage?",
+         "Under international standard IEC 61000-3-2, active Power Factor Correction (PFC) is legally mandated only for equipment with active input power exceeding 75W. Our module delivers a maximum continuous output of 60W (72W peak intermediate), so it falls strictly below the 75W threshold. Adding an active PFC boost stage would require an additional high-voltage MOSFET, boost diode, controller IC, and large inductor—adding approximately $4.20 to the BOM, consuming 35% more PCB area, and introducing a ~3% efficiency penalty without any regulatory requirement."),
 
-        ("Q3: How does the microcontroller set the output voltage?",
-         "We use DAC voltage steering. The LM5176 Buck-Boost controller regulates based on its feedback (FB) pin. The STM32's internal 12-bit DAC injects a small, controlled current into the feedback resistor network (R_top = 49.9kΩ, R_DAC = 11.0kΩ, R_bot = 3.65kΩ). As the DAC voltage changes, it tricks the controller into raising or lowering the output voltage between 5.0V and 20.0V in precise 10mV increments."),
+        ("Q3: How did you calculate the Flyback transformer magnetics on the PQ26/20 core?",
+         "At minimum 85V AC input, the rectified bulk bus is 120V DC. For a maximum duty cycle of 45% and 80kHz switching frequency at 72W output power, peak primary current is I_pk = 2.96A. Using L_p = (V_bulk_min * D_max) / (I_pk * f_sw), I calculated a primary inductance of 220µH. I chose a Ferroxcube PQ26/20 core in 3C95 material because its cross-sectional area Ae is 122 mm², keeping peak flux density B_max at 0.28 Tesla (well below the 0.38 Tesla saturation limit). The turns ratio is 6:1 (36 primary turns, 6 secondary turns). To guarantee IEC 62368-1 reinforced isolation (3000V RMS), the secondary is wound with Furukawa TEX-E triple-insulated wire."),
 
-        ("Q4: How does the power supply protect itself during a short circuit?",
-         "We have two layers of protection. First and most importantly, we have a fast analog hardware loop: an INA240 current sense amplifier feeds a high-speed TLV3501 analog comparator. If output current exceeds the set limit, the comparator directly pulls down the LM5176's COMP pin in under 5 microseconds, instantly throttling the duty cycle. The second layer is a software task in the STM32 that detects the persistent overload, updates the OLED to show 'CC FAULT', and disconnects the output if the fault persists."),
+        ("Q4: Why is the intermediate bus chosen at +24.0V DC instead of +12V or +48V?",
+         "+24.0V DC is the optimal design choice for a 5V to 20V output range. If we chose +12V, stepping up to 20V at 3A (60W) would require high inductor boost currents (I_in = 5.5A), creating excessive I²R conduction losses in the Buck-Boost MOSFETs. If we chose +48V, the Flyback turns ratio would decrease, increasing primary switch voltage stress, and stepping down to 5V would require an extreme duty cycle of 10%. With +24V, 5V, 12V, and 15V operate in pure Buck mode (>96% efficiency), and 20V operates near unity Buck-Boost transition with minimal switching stress."),
 
-        ("Q5: How is electrical efficiency calculated in real time?",
-         "We have dual-domain power metering. On the primary AC side, an isolated AMC1311 modulator measures RMS voltage, and a 1000:1 current transformer measures RMS current to compute true active AC input power (P_AC). On the secondary DC side, a high-precision 16-bit INA226 monitor measures DC output voltage and current to compute output power (P_DC). At a 10Hz rate, the MCU calculates Efficiency = (P_DC / P_AC) * 100% and displays it live on the OLED and logs it to the MicroSD card."),
+        ("Q5: How does the 4-switch Buck-Boost operate seamlessly between 5V and 20V?",
+         "The TI LM5176 controls four N-MOSFETs (QA, QB, QC, QD) in an H-bridge configuration around a single 10µH flat-wire inductor. When V_OUT is significantly below 24V (e.g. 5V or 12V), QC is held continuously ON and QD is OFF, so the circuit functions purely as a synchronous Buck converter with switches QA and QB. As V_OUT approaches 20V under heavy load, the controller smoothly enters 4-switch Buck-Boost mode, modulating both legs to maintain exact regulation with zero deadband or output glitching."),
 
-        ("Q6: What are the main deliverables you are responsible for as a Power Electronics Trainee?",
-         "Following VVDN's standard development plan across 4 phases and 10 release milestones, my primary hardware deliverables are: the Hardware Design Document (HDD), Flyback and Buck-Boost calculations, PQ26/20 transformer design, Altium schematics, 4-layer PCB layout with safety creepage slots, master engineering BOM, prototype bring-up cold checks and Variac testing, dynamic load transient test reports, CISPR 32 EMC and Hipot safety pre-compliance reports, and final Rev B production documentation."),
+        ("Q6: How does the DAC steer the output voltage without destabilizing the loop?",
+         "The LM5176 regulates by maintaining its feedback pin (FB) at an internal 1.20V reference. Instead of modifying the internal reference, we use a resistive summing junction: R_top (49.9kΩ) connects to V_OUT, R_bot (3.65kΩ) connects to ground, and R_DAC (11.0kΩ) connects to our 12-bit DAC. By injecting current into the FB node from the DAC, when V_DAC = 3.3V, V_OUT is steered to 5.0V. When V_DAC = 0V, V_OUT is steered to 20.0V. Because the loop's AC Type-II compensation network is connected between COMP and ground, DC setpoint steering has zero impact on high-frequency phase margin and stability."),
 
-        ("Q7: How do you interface with the firmware and mechanical teams?",
-         "For the firmware team, I define hardware register mappings, DAC scaling formulas (target voltage to DAC code), INA226/AMC1311 gain constants, and comparator fault trip lines. For the mechanical team, I specify the 3D STEP PCBA model, connector keep-outs, thermal loss figures (7.5W max at 60W load), and thermal gap pad placement locations."),
+        ("Q7: Explain how the hardware protects against a short circuit in under 5 microseconds.",
+         "Software is too slow to protect switching MOSFETs during a dead short. We implemented an autonomous analog hardware clamp: a 10mΩ metal shunt resistor feeds an INA240A2 current sense amplifier (gain = 50V/V). The amplified current signal feeds an ultra-fast TLV3501 analog comparator with 4.5ns response time. If load current exceeds the threshold (e.g. 3.2A), the comparator output immediately drives an NPN transistor that pulls down the LM5176's COMP pin to ground. This forces the PWM duty cycle to zero in under 5 microseconds, safely clamping the current before any software can even register an interrupt."),
 
-        ("Q8: How did you calculate the transformer magnetics and verify safety creepage?",
-         "For the Flyback transformer, I selected a Ferroxcube PQ26/20 ferrite core with 3C95 material. At 85V AC minimum input (120V DC bulk) and 72W output power, I calculated a primary inductance Lp of 220µH to operate in quasi-resonant valley switching with a 6:1 turns ratio. To comply with IEC 62368-1 reinforced isolation (3000V RMS), I specified triple-insulated Furukawa TEX-E wire on the secondary winding. On the PCB layout, I routed a 6.4mm wide milled air slot beneath the transformer and optocoupler barriers to prevent surface tracking.")
+        ("Q8: How is safety galvanic isolation guaranteed on the PCB?",
+         "We adhere strictly to IEC 62368-1 for reinforced insulation. Primary hot circuits and secondary touch-safe circuits are separated by a minimum physical surface creepage distance of 6.4mm. Across the isolation barrier, we route a 2.0mm wide milled air slot through the PCB substrate directly beneath the PQ26/20 transformer and optocouplers. The transformer secondary uses triple-insulated Furukawa TEX-E wire. The complete assembly is verified on the bench with a 3000V AC RMS Hipot dielectric withstand test for 60 seconds with zero breakdown."),
+
+        ("Q9: How do you verify output voltage ripple on the oscilloscope?",
+         "Standard alligator ground clips act as loop antennas that pick up radiated high-frequency magnetic noise from the 300kHz switching inductor, falsely showing 100mV+ of ripple. To measure true ripple accurately, I use the tip-and-barrel probing technique directly across the output capacitor C_OUT. I remove the oscilloscope probe hat and ground lead, wrap a short bus wire around the ground barrel, touch the tip directly to the positive pad and the barrel to the negative pad, engage 20MHz bandwidth limit and AC coupling, and verify peak-to-peak ripple is strictly below 25mV."),
+
+        ("Q10: What is your exact bench bring-up procedure using a Variac?",
+         "Before applying any AC power, I perform cold resistance checks: verifying > 100MΩ primary-to-secondary isolation resistance, checking for shorts across the bulk capacitor, and checking impedance across the +24V bus and output terminals. Next, I connect the board to an isolation transformer and an AC Variac with a 60W series current-limiting incandescent bulb. I slowly ramp AC voltage from 0V to 85V AC while monitoring bulk DC bus voltage and Flyback V_CC aux bias. Once the +24V bus stabilizes at 85V AC, I ramp to nominal 230V AC and 265V AC. Finally, I enable the LM5176 Buck-Boost stage, sweep the DAC from 5V to 20V with a precision DMM, and apply incremental electronic load steps from 0.1A to 3.0A while monitoring thermals with a FLIR thermal camera.")
     ]
 
     for q, a in qa_list:

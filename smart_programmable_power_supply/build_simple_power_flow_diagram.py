@@ -1,0 +1,190 @@
+import subprocess
+import os
+
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+
+dot_code = r"""
+digraph SimplePowerFlow {
+    graph [
+        rankdir=LR,
+        bgcolor="#FFFFFF",
+        compound=true,
+        fontname="Helvetica, Arial, sans-serif",
+        fontsize=13,
+        nodesep=0.45,
+        ranksep=0.70,
+        pad="0.25,0.25",
+        splines=true
+    ];
+
+    node [
+        fontname="Helvetica, Arial, sans-serif",
+        fontsize=10,
+        shape=box,
+        style="filled,rounded",
+        margin="0.18,0.14",
+        penwidth=1.8
+    ];
+
+    edge [
+        fontname="Helvetica, Arial, sans-serif",
+        fontsize=9,
+        penwidth=2.2,
+        arrowsize=0.85
+    ];
+
+    // =========================================================================
+    // PRIMARY HOT DOMAIN (HIGH VOLTAGE)
+    // =========================================================================
+    subgraph cluster_primary_domain {
+        label = "PRIMARY HOT DOMAIN (High-Voltage AC & DC)";
+        style = "filled,rounded,dashed";
+        fillcolor = "#FFF8E1";
+        color = "#F57F17";
+        penwidth = 1.6;
+
+        stage1_mains [
+            label = <<table border="0" cellborder="0" cellspacing="3" cellpadding="2">
+                <tr><td><font point-size="12"><b>1. MAINS SUPPLY</b></font></td></tr>
+                <tr><td><font color="#37474F"><b>Wall AC Grid Input</b></font></td></tr>
+                <hr/>
+                <tr><td align="left">• Voltage: <b>85V – 265V AC RMS</b></td></tr>
+                <tr><td align="left">• Frequency: <b>47Hz – 63Hz</b> (Universal)</td></tr>
+                <tr><td align="left">• Inlet: Standard <b>IEC 320-C14</b></td></tr>
+                <tr><td align="left">• Protection: <b>2A Fuse, NTC &amp; MOV</b></td></tr>
+                <tr><td align="left">• Filtering: <b>2-Stage EMI Filter</b></td></tr>
+            </table>>,
+            fillcolor = "#ECEFF1",
+            color = "#37474F"
+        ];
+
+        stage2_rectifier [
+            label = <<table border="0" cellborder="0" cellspacing="3" cellpadding="2">
+                <tr><td><font point-size="12"><b>2. RECTIFIER &amp; BULK STAGE</b></font></td></tr>
+                <tr><td><font color="#BF360C"><b>AC to High-Voltage DC</b></font></td></tr>
+                <hr/>
+                <tr><td align="left">• Bridge: <b>GBU606</b> (600V, 6A)</td></tr>
+                <tr><td align="left">• Bulk Cap: <b>100µF / 450V</b> (105°C)</td></tr>
+                <tr><td align="left">• Output: <b>+120V to +375V DC</b></td></tr>
+                <tr><td align="left">• Function: Full-wave rectification &amp;</td></tr>
+                <tr><td align="left">&nbsp;&nbsp;high-voltage ripple smoothing</td></tr>
+            </table>>,
+            fillcolor = "#FFF3E0",
+            color = "#E65100"
+        ];
+    }
+
+    // =========================================================================
+    // SECONDARY COLD DOMAIN (SAFE EXTRA LOW VOLTAGE - SELV)
+    // =========================================================================
+    subgraph cluster_secondary_domain {
+        label = "SECONDARY COLD DOMAIN (SELV - Safe Extra-Low Voltage, Touch-Safe)";
+        style = "filled,rounded,dashed";
+        fillcolor = "#E8F5E9";
+        color = "#2E7D32";
+        penwidth = 1.6;
+
+        stage3_flyback [
+            label = <<table border="0" cellborder="0" cellspacing="3" cellpadding="2">
+                <tr><td><font point-size="12"><b>3. ISOLATED DC-DC CONVERTER</b></font></td></tr>
+                <tr><td><font color="#1B5E20"><b>Stage 1: QR Flyback (72W)</b></font></td></tr>
+                <hr/>
+                <tr><td align="left">• Controller: <b>TI UCC28740</b> (Valley Sw.)</td></tr>
+                <tr><td align="left">• Magnetics: <b>PQ26/20 Core</b> (Lp=220µH)</td></tr>
+                <tr><td align="left">• <b>Isolation: 3000V RMS Reinforced</b></td></tr>
+                <tr><td align="left">&nbsp;&nbsp;(Furukawa TEX-E Triple Wire)</td></tr>
+                <tr><td align="left">• Rectifier: <b>Sync FET</b> (BSC052N06NS)</td></tr>
+                <tr><td align="left">• Output: <b>+24.0V DC Stable Bus</b></td></tr>
+            </table>>,
+            fillcolor = "#C8E6C9",
+            color = "#2E7D32"
+        ];
+
+        stage4_buckboost [
+            label = <<table border="0" cellborder="0" cellspacing="3" cellpadding="2">
+                <tr><td><font point-size="12"><b>4. FINAL POST-REGULATOR STAGE</b></font></td></tr>
+                <tr><td><font color="#004D40"><b>Stage 2: 4-Switch Buck-Boost</b></font></td></tr>
+                <hr/>
+                <tr><td align="left">• Controller: <b>TI LM5176</b> (300 kHz)</td></tr>
+                <tr><td align="left">• Switches: <b>4x 40V Low-Rds MOSFETs</b></td></tr>
+                <tr><td align="left">• Voltage Set: <b>12-bit DAC Steering</b></td></tr>
+                <tr><td align="left">• Protection: <b>Fast &lt;5µs CC Clamp</b></td></tr>
+                <tr><td align="left">• Filter: <b>OS-CON + MLCC (Ripple &lt;25mV)</b></td></tr>
+                <tr><td align="left">• Output: <b>5.0V – 20.0V / 3.0A (60W)</b></td></tr>
+            </table>>,
+            fillcolor = "#B2EBF2",
+            color = "#00838F"
+        ];
+    }
+
+    // =========================================================================
+    // TARGET DEVICE / LOAD
+    // =========================================================================
+    subgraph cluster_device_domain {
+        label = "APPLICATION DOMAIN";
+        style = "filled,rounded,dashed";
+        fillcolor = "#F3E5F5";
+        color = "#4A148C";
+        penwidth = 1.6;
+
+        stage5_device [
+            label = <<table border="0" cellborder="0" cellspacing="3" cellpadding="2">
+                <tr><td><font point-size="12"><b>5. TARGET DEVICE (DUT)</b></font></td></tr>
+                <tr><td><font color="#4A148C"><b>End-User Bench / Test Rack</b></font></td></tr>
+                <hr/>
+                <tr><td align="left">• Connected via <b>4mm Binding Posts</b></td></tr>
+                <tr><td align="left">• Receives Clean, Stable DC Power</td></tr>
+                <tr><td align="left">• Protected against overcurrent/short</td></tr>
+                <tr><td align="left">• Live Telemetry: <b>V, I, P, Efficiency</b></td></tr>
+                <tr><td align="left">• Applications: IoT, Auto, Lab Boards</td></tr>
+            </table>>,
+            fillcolor = "#E1BEE7",
+            color = "#6A1B9A"
+        ];
+    }
+
+    // =========================================================================
+    // CONNECTIONS & POWER FLOW
+    // =========================================================================
+    stage1_mains -> stage2_rectifier [
+        label = " AC Mains\n (85–265V AC)",
+        color = "#37474F",
+        fontcolor = "#263238"
+    ];
+
+    stage2_rectifier -> stage3_flyback [
+        label = " High-Voltage DC Bus\n (+120V to +375V DC)\n --------------------\n ⚡ 3000V RMS\n Safety Barrier",
+        color = "#C62828",
+        fontcolor = "#B71C1C",
+        style = "bold"
+    ];
+
+    stage3_flyback -> stage4_buckboost [
+        label = " Intermediate Bus\n (+24.0V DC Stable, 72W)",
+        color = "#2E7D32",
+        fontcolor = "#1B5E20"
+    ];
+
+    stage4_buckboost -> stage5_device [
+        label = " Regulated DC Output\n (5.0V – 20.0V @ 3.0A, 60W)\n Ripple < 25mV pk-pk",
+        color = "#00838F",
+        fontcolor = "#004D40"
+    ];
+}
+"""
+
+def generate():
+    base_name = "diagram_simple_power_flow"
+    dot_path = os.path.join(SCRIPT_DIR, f"{base_name}.dot")
+    png_path = os.path.join(SCRIPT_DIR, f"{base_name}.png")
+    svg_path = os.path.join(SCRIPT_DIR, f"{base_name}.svg")
+
+    with open(dot_path, "w") as f:
+        f.write(dot_code)
+
+    subprocess.run(["dot", "-Gdpi=160", "-Tpng", dot_path, "-o", png_path], check=True)
+    subprocess.run(["dot", "-Tsvg", dot_path, "-o", svg_path], check=True)
+    print(f"Generated {png_path} and {svg_path} successfully.")
+
+if __name__ == "__main__":
+    generate()
