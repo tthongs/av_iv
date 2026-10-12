@@ -704,7 +704,6 @@ def generate_prd_docx():
         "<List all the systems involved and the domains": "System 1 represents the Hardware Power Supply Module (HW, ME, QA); System 2 represents the Embedded Firmware & Display Controller (BSP, SAP, FW); System 3 represents the Host PC Telemetry Application (PAP).",
         "<There are some requirements that cannot be captured": "Specific hardware mechanical constraints require a compact extruded aluminum chassis (130 x 85 x 42 mm) with front-panel binding posts and rear-panel AC inlet. A minimum 6.4 mm isolation slot is milled across the PCB under the transformer and optocoupler barriers to ensure reinforced safety clearance.",
         "<UI/UX design or wireframes that will define": "The 1.3\" monochrome OLED display presents a real-time operational dashboard with large-digit output voltage and current meters, power readout, true system efficiency bar graph, and operating status annunciators (CV, CC, FLT).",
-        "<Refer above section>": "Refer to System 1 specific requirements and System 2 firmware wireframe specifications detailed above.",
         "<List any assumed factors": "Assumptions: Grid AC mains is nominal sinusoidal waveform with THD ≤ 5%; Operating ambient temperature is -20°C to +50°C under natural convection; Secondary DC ground is floating with reinforced galvanic isolation (≥ 3000V RMS) from Earth and AC mains.",
         "<Identify any dependencies the project has on external factors": "Dependencies: Component supply chain availability for TI LM5176, UCC28740, INA226, AMC1311, and STM32G474; Custom transformer tooling on Ferroxcube PQ26/20 ferrite cores with triple-insulated secondary wire; Compliance laboratory access for CISPR 32 Class B EMC testing.",
         "<All standard deliverable documents of each domain": "The development lifecycle encompasses standard engineering deliverables across Hardware (HW), Mechanical (ME), Embedded Software (FW), and Quality Assurance (QA). The phase-wise deliverables and formal release order are summarized in Table 10 below:",
@@ -788,70 +787,6 @@ def generate_prd_docx():
     if p_uc_caption is not None:
         p_uc_caption.text = "Table 3: Primary Use Case Summary"
 
-    # Diagrams ASCII content
-    diag1_text = (
-        "+--------------------------------------------------------------------------------------------------+\n"
-        "|                                 SPPS MODULE BOUNDARY (SYSTEM 1)                                  |\n"
-        "|                                                                                                  |\n"
-        "|  [AC Mains 85-265V] ---> [2-Stage EMI Filter] ---> [Bridge Rectifier] ---> [Primary DC Bus ~325V] |\n"
-        "|                                                                                |                 |\n"
-        "|                                                                                v                 |\n"
-        "|                                                                 [UCC28740 Quasi-Resonant Flyback] |\n"
-        "|                                                                                |                 |\n"
-        "|                                                                    (Reinforced Galvanic Isolation)|\n"
-        "|                                                                                |                 |\n"
-        "|                                                                                v                 |\n"
-        "|                                                                 [Secondary +24.0V DC Rail (72W)] |\n"
-        "|                                                                                |                 |\n"
-        "|                                                                                v                 |\n"
-        "|                                                                 [LM5176 4-Switch Sync Buck-Boost] |\n"
-        "|                                                                                |                 |\n"
-        "|                                                                                v                 |\n"
-        "|  [DUT / Load] <--- [4mm Gold Binding Posts] <--- [10mΩ Shunt] <--- [Dual LC Filter (sub-25mV)]   |\n"
-        "|                                                      |                         |                 |\n"
-        "|                                                      v                         v                 |\n"
-        "|  [Host PC / ATE] <=== [USB-C SCPI] <=== [STM32G474 MCU Core] <--- [12-Bit DAC Summing Injection]|\n"
-        "|                                                 |                                                |\n"
-        "|                                                 v                                                |\n"
-        "|                                     [1.3\" OLED Display & Dual Encoders]                          |\n"
-        "+--------------------------------------------------------------------------------------------------+"
-    )
-
-    diag2_text = (
-        "+--------------------------------------------------------------------------------------------------+\n"
-        "| MAJOR USE CASE 1: PRECISION BENCHTOP VOLTAGE TUNING & TRANSIENT REGULATION                      |\n"
-        "+--------------------------------------------------------------------------------------------------+\n"
-        "  [Operator Turn Knob] ---> [Quadrature Pulse EXTI] ---> [STM32 Updates 12-Bit DAC Setpoint]       \n"
-        "                                                                     |                             \n"
-        "                                                                     v                             \n"
-        "  [Vout Settles < 100µs] <--- [LM5176 Shifts PWM Duty] <--- [DAC Injects Current to FB Node]       \n"
-        "            |                                                                                      \n"
-        "            v                                                                                      \n"
-        "  [INA226 Samples New V/I] ---> [STM32 Computes Power & η] ---> [Updates 1.3\" OLED Display @ 10fps]\n"
-        "+--------------------------------------------------------------------------------------------------+"
-    )
-
-    diag3_text = (
-        "+--------------------------------------------------------------------------------------------------+\n"
-        "| MAJOR USE CASE 2: AUTOMATED ATE INSTRUMENTATION CONTROL & DATA LOGGING FLOW                     |\n"
-        "+--------------------------------------------------------------------------------------------------+\n"
-        "  [Host PC / Automated ATE]                                                                        \n"
-        "            |                                                                                      \n"
-        "            |--- (1) USB-CDC SCPI Command: \":VOLT 12.000;:CURR 2.500;:OUTP ON\" ---------------->   \n"
-        "            |                                            |                                         \n"
-        "            |                                            v                                         \n"
-        "            |                                 [STM32 SCPI Parser Task]                             \n"
-        "            |                                            |                                         \n"
-        "            |                                            v                                         \n"
-        "            |                                 [Configures DAC & Clamps]                            \n"
-        "            |                                            |                                         \n"
-        "            |<-- (2) SCPI Query Response: \":MEAS:EFF?\" -> \"93.45%\" ---------------------------|   \n"
-        "            |                                            |                                         \n"
-        "            v                                            v                                         \n"
-        "  [Host CSV Database]                         [MicroSD Card: Writes FAT32 Records @ 10Hz Rate]     \n"
-        "+--------------------------------------------------------------------------------------------------+"
-    )
-
     fig2_steps = [
         ("1", "Operator / Host PC", "Adjusts front rotary optical encoder knob or transmits SCPI command ':VOLT 12.0' over USB-C interface."),
         ("2", "STM32G474 MCU Core", "Decodes setpoint in < 2ms, calculates DAC voltage, and programs internal 12-Bit DAC1 to 1.76 V."),
@@ -870,24 +805,55 @@ def generate_prd_docx():
 
     # Insert Figure 2 cleanly right after its intro
     if p_fig2_ins is not None:
-        p_fig2_ins.text = "The benchtop operational voltage tuning sequence is summarized in Figure 2 below:"
+        p_fig2_ins.text = "The benchtop operational voltage tuning sequence is summarized in Figure 2 and Table 3.1 below:"
+        diag2_path = "smart_programmable_power_supply/diagram_use_case_1_voltage_tuning.png"
+        cursor2 = p_fig2_ins._p
+        if os.path.exists(diag2_path):
+            p_pic2 = doc.add_paragraph()
+            p_pic2.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            r2 = p_pic2.add_run()
+            r2.add_picture(diag2_path, width=Inches(6.47))
+            p_fig2_ins._p.addnext(p_pic2._p)
+            cursor2 = p_pic2._p
+
         tbl_fig2 = create_workflow_table(doc, "MAJOR USE CASE 1: VOLTAGE SETPOINT TUNING SEQUENCE", fig2_steps, header_color="1A365D")
-        p_fig2_ins._p.addnext(tbl_fig2._tbl)
+        cursor2.addnext(tbl_fig2._tbl)
     if p_fig2_cap is not None:
         p_fig2_cap.text = "Figure 2: Major Use Case 1 - Precision Benchtop Supply Voltage Tuning Workflow"
 
     # Insert Figure 3 cleanly right after its intro
     if p_fig3_ins is not None:
-        p_fig3_ins.text = "The automated ATE SCPI instrumentation and telemetry logging flow is summarized in Figure 3 below:"
+        p_fig3_ins.text = "The automated ATE SCPI instrumentation and telemetry logging flow is summarized in Figure 3 and Table 3.2 below:"
+        diag3_path = "smart_programmable_power_supply/diagram_use_case_2_ate_automation.png"
+        cursor3 = p_fig3_ins._p
+        if os.path.exists(diag3_path):
+            p_pic3 = doc.add_paragraph()
+            p_pic3.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            r3 = p_pic3.add_run()
+            r3.add_picture(diag3_path, width=Inches(6.47))
+            p_fig3_ins._p.addnext(p_pic3._p)
+            cursor3 = p_pic3._p
+
         tbl_fig3 = create_workflow_table(doc, "MAJOR USE CASE 2: AUTOMATED ATE SCPI & TELEMETRY FLOW", fig3_steps, header_color="234E52")
-        p_fig3_ins._p.addnext(tbl_fig3._tbl)
+        cursor3.addnext(tbl_fig3._tbl)
     if p_fig3_cap is not None:
         p_fig3_cap.text = "Figure 3: Major Use Case 2 - Automated ATE Instrumentation SCPI Control & Telemetry Workflow"
 
-    # Boundary Diagram
+    # Update Table of Figures text cleanly
+    for p in doc.paragraphs[:100]:
+        if "Figure 1:" in p.text:
+            p.text = "Figure 1: System Boundary & Master Architecture Block Diagram\t9"
+        elif "Figure 2:" in p.text:
+            p.text = "Figure 2: Major Use Case 1 - Precision Voltage Setpoint Tuning Workflow\t10"
+        elif "Figure 3:" in p.text:
+            p.text = "Figure 3: Major Use Case 2 - Automated ATE Instrumentation SCPI Control Workflow\t10"
+        elif "Figure 4:" in p.text:
+            p.text = "Figure 4: Dual-Closed-Loop Control & Hardware Protection Flow Diagram\t15"
+
+    # Boundary Diagram (Body Caption at Index > 100)
     p_diag1_cap = None
-    for p in doc.paragraphs:
-        if "Figure : Boundary Diagram" in p.text or "Figure 1: Boundary Diagram" in p.text or "Figure 1: System Boundary" in p.text:
+    for p in doc.paragraphs[100:]:
+        if "Figure : Boundary Diagram" in p.text or ("Boundary Diagram" in p.text and p.style.name == "Caption"):
             p_diag1_cap = p
             break
     if p_diag1_cap is not None:
@@ -1044,133 +1010,54 @@ def generate_prd_docx():
         cursor = t_fw._tbl
 
     # --------------------------------------------------------------------------
-    # 17. INSERT FLOW DIAGRAM, WIREFRAMES & ARCHITECTURE BOXES
+    # 17. INSERT FLOW DIAGRAM, WIREFRAMES & ARCHITECTURE BLOCK DIAGRAMS
     # --------------------------------------------------------------------------
-    diag4_text = (
-        "+--------------------------------------------------------------------------------------------------+\n"
-        "|                     DUAL-CLOSED-LOOP REAL-TIME CONTROL TOPOLOGY                                  |\n"
-        "+--------------------------------------------------------------------------------------------------+\n"
-        "  [OUTER SUPERVISORY DIGITAL LOOP - STM32G474 MCU @ 10 Hz]                                         \n"
-        "    • Step 1: Sample Isolated Mains Voltage (AMC1311) & Current (Talema CT) -> Compute True Pac   \n"
-        "    • Step 2: Sample Secondary Regulated Rail via I2C (INA226 16-Bit)       -> Compute True Pdc   \n"
-        "    • Step 3: Math Engine calculates instantaneous efficiency (η = Pdc / Pac) with digital filter  \n"
-        "    • Step 4: Monitor Board Thermal Profile via NTC -> Execute thermal power foldback if T > 85°C  \n"
-        "    • Step 5: Service SCPI Commands over USB-CDC & Flush Ring-Buffer CSV records to MicroSD card   \n"
-        "                                                                                                   \n"
-        "  [INNER ULTRA-FAST ANALOG HARDWARE LOOP - AUTONOMOUS CONTROLLER & COMPARATORS]                    \n"
-        "    • Voltage Regulation: LM5176 Type-II Compensation Network restores step transients in < 120µs  \n"
-        "    • Hardware CC Limit: Shunt -> INA240A2 (50V/V) -> TLV3501 pulls down COMP pin in < 5.0µs      \n"
-        "    • Fast OVP Crowbar: Secondary Comparator clamps COMP to GND in < 2.0µs on output disconnect   \n"
-        "+--------------------------------------------------------------------------------------------------+"
-    )
-
-    diag5_text = (
-        "+--------------------------------------------------------------------------------------------------+\n"
-        "| 1.3-INCH LOCAL OLED DASHBOARD WIREFRAME LAYOUT (128 x 64 GRAPHICAL DISPLAY)                      |\n"
-        "+--------------------------------------------------------------------------------------------------+\n"
-        "  +----------------------------------------------------------------------------------------------+ \n"
-        "  | SET: 12.00 V   3.00 A       [CV MODE]                                         STATUS: LIVE   | \n"
-        "  | -------------------------------------------------------------------------------------------- | \n"
-        "  |    VOUT:   12.04 V                          IOUT:   2.98 A                                   | \n"
-        "  |    POUT:   35.88 W                          PIN:    38.45 W                                  | \n"
-        "  |                                                                                              | \n"
-        "  |    EFFICIENCY:  [========================================>  ]  93.3 %                        | \n"
-        "  | -------------------------------------------------------------------------------------------- | \n"
-        "  |  TEMP: 42°C  |  SD: LOGGING [00:14:32]  |  USB: ATE REMOTE ACTIVE                            | \n"
-        "  +----------------------------------------------------------------------------------------------+ \n"
-        "+--------------------------------------------------------------------------------------------------+"
-    )
-
-    diag6_text = (
-        "+--------------------------------------------------------------------------------------------------+\n"
-        "| SYSTEM 1: DOMAIN 1 (HARDWARE) ELECTRICAL POWER & SENSING ARCHITECTURE                            |\n"
-        "+--------------------------------------------------------------------------------------------------+\n"
-        "  [Mains 85-265V] --> [FUSE + NTC + MOV] --> [2-Stage CMC Filter] --> [GBU606 Bridge Rectifier]    \n"
-        "                                                                          |                        \n"
-        "                                                                          v                        \n"
-        "                                                           [Primary Bulk Cap 100µF/450V]           \n"
-        "                                                                          |                        \n"
-        "                                                                          v                        \n"
-        "                                                           [UCC28740 Flyback + IPB80R290P7 FET]    \n"
-        "                                                                          |                        \n"
-        "                                                          (PQ26/20 Transformer - 3000V Isolation)  \n"
-        "                                                                          |                        \n"
-        "                                                                          v                        \n"
-        "                                                           [MP6908 + BSC052N06NS Synchronous Rect] \n"
-        "                                                                          |                        \n"
-        "                                                                          v                        \n"
-        "                                                           [Intermediate +24.0V DC Rail (72W)]     \n"
-        "                                                                          |                        \n"
-        "                                                                          v                        \n"
-        "                                                           [LM5176 4-Switch Sync Buck-Boost Stage] \n"
-        "                                                                          |                        \n"
-        "                                                           [4x BSC034N04LS FETs + 10µH Inductor]   \n"
-        "                                                                          |                        \n"
-        "                                                                          v                        \n"
-        "  [Output 5-20V / 3A] <--- [4mm Binding Posts] <--- [10mΩ Shunt] <--- [Output Dual LC Filter]      \n"
-        "+--------------------------------------------------------------------------------------------------+"
-    )
-
-    diag7_text = (
-        "+--------------------------------------------------------------------------------------------------+\n"
-        "| SYSTEM 1: DOMAIN 2 (MECHANICAL) ENCLOSURE & THERMAL ARCHITECTURE                                 |\n"
-        "+--------------------------------------------------------------------------------------------------+\n"
-        "  • Overall Dimensions: 130 mm (Width) x 85 mm (Depth) x 42 mm (Height). Natural Convection Shell. \n"
-        "  • Enclosure Material: Extruded Anodized Aluminum 6063-T5 (2.0mm wall) with internal card guides. \n"
-        "  • Front Panel: Dual 4mm Gold Binding Posts, Rotary Encoders, Output Push-button, 1.3\" OLED Window\n"
-        "  • Rear Panel: IEC 320-C14 AC Receptacle with fuse drawer, USB Type-C Receptacle, MicroSD Slot.   \n"
-        "  • Thermal Management: Flyback Primary MOSFET & Secondary Sync FET clamped to chassis bottom.     \n"
-        "  • Isolation Barrier: Milled 6.4 mm air slot across PCB beneath optocouplers and transformer.    \n"
-        "+--------------------------------------------------------------------------------------------------+"
-    )
-
-    diag8_text = (
-        "+--------------------------------------------------------------------------------------------------+\n"
-        "| SYSTEM 2: DOMAIN 1 (EMBEDDED SOFTWARE) MULTITASKING FreeRTOS ARCHITECTURE                        |\n"
-        "+--------------------------------------------------------------------------------------------------+\n"
-        "  [FreeRTOS Kernel v10.4 - Preemptive Scheduling, 1ms SysTick]                                     \n"
-        "                                                                                                   \n"
-        "  • Task 1: Protection & Fault Supervisory Task (Priority: Real-Time / Highest, Period: 1ms)       \n"
-        "            Reads ADC OVP/OTP trip lines, services emergency shutdown, controls output gate FET.   \n"
-        "                                                                                                   \n"
-        "  • Task 2: Dual-Domain Power Telemetry Task (Priority: High, Period: 100ms / 10Hz)                \n"
-        "            Reads AMC1311 AC power, INA226 DC rail, calculates true efficiency, pushes to queue.  \n"
-        "                                                                                                   \n"
-        "  • Task 3: SCPI Parser & USB-CDC Task (Priority: Medium, Event-Driven)                            \n"
-        "            Parses IEEE 488.2 commands (:VOLT, :CURR, :MEAS), formats SCPI response strings.      \n"
-        "                                                                                                   \n"
-        "  • Task 4: MicroSD FatFs Logging Task (Priority: Low, Period: 100ms)                              \n"
-        "            Dequeues telemetry records, writes buffered CSV frames to FAT32 filesystem on SD card. \n"
-        "                                                                                                   \n"
-        "  • Task 5: OLED Graphical UI & Encoder Task (Priority: Low, Period: 100ms / 10 fps)              \n"
-        "            Renders graphical dashboard, power bar graph, services quadrature encoder clicks.      \n"
-        "+--------------------------------------------------------------------------------------------------+"
-    )
-
-    # Control Flow Diagram insertion
-    for p in doc.paragraphs:
-        if "Figure : Flow Diagram" in p.text or "Figure 4: Flow Diagram" in p.text:
-            p.text = "Figure 4: Dual-Closed-Loop Control & Hardware Protection Flow Diagram"
-            box4 = create_callout_box(doc, diag4_text)
-            p._p.addprevious(box4._tbl)
+    # Figure 4: Control Flow Diagram insertion (Section 4.1 System 1)
+    p_flow_wire = None
+    p_flow_cap = None
+    for p in doc.paragraphs[100:]:
+        txt = p.text.strip()
+        if p.style.name == "Heading 4" and "Mobile UI Screens/Wireframes" in txt and p_flow_wire is None:
+            p_flow_wire = p
+        elif ("Figure : Flow Diagram" in txt or "Figure 4: Flow Diagram" in txt) and p.style.name == "Caption" and p_flow_cap is None:
+            p_flow_cap = p
             break
 
-    # OLED Wireframe
+    if p_flow_wire is not None:
+        p_flow_wire.text = "Dual-Closed-Loop Control & Real-Time Protection Flow"
+    if p_flow_cap is not None:
+        p_flow_cap.text = "Figure 4: Dual-Closed-Loop Control & Hardware Protection Flow Diagram"
+        diag4_path = "smart_programmable_power_supply/diagram_control_protection_flow.png"
+        if os.path.exists(diag4_path):
+            p_pic4 = p_flow_cap.insert_paragraph_before()
+            p_pic4.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            r4 = p_pic4.add_run()
+            r4.add_picture(diag4_path, width=Inches(6.47))
+
+    # Figure 5: OLED Wireframe insertion (Section 4.2 System 2)
     p_oled_wire = None
     p_oled_cap = None
-    for p in doc.paragraphs:
+    found_sys2 = False
+    for p in doc.paragraphs[100:]:
         txt = p.text.strip()
-        if p.style.name == "Heading 4" and "Mobile UI Screens/Wireframes" in txt and p_oled_wire is None:
-            p_oled_wire = p
-        elif txt == "<Refer above section>" and p.style.name == "Caption":
-            p_oled_cap = p
-            break
+        if "System2 Requirements" in txt and p.style.name == "Heading 2":
+            found_sys2 = True
+        if found_sys2:
+            if p.style.name == "Heading 4" and "Mobile UI Screens/Wireframes" in txt and p_oled_wire is None:
+                p_oled_wire = p
+            elif ("<Refer above section>" in txt or "Figure 5" in txt) and p.style.name == "Caption" and p_oled_cap is None:
+                p_oled_cap = p
+                break
 
     if p_oled_wire is not None:
-        p_oled_wire.text = "Enclosure Packaging & Creepage Isolation Routing"
+        p_oled_wire.text = "1.3-inch Local OLED Dashboard Graphical UI Wireframe"
     if p_oled_cap is not None:
-        box5 = create_callout_box(doc, diag5_text)
-        p_oled_cap._p.addprevious(box5._tbl)
+        diag5_path = "smart_programmable_power_supply/diagram_oled_dashboard_wireframe.png"
+        if os.path.exists(diag5_path):
+            p_pic5 = p_oled_cap.insert_paragraph_before()
+            p_pic5.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            r5 = p_pic5.add_run()
+            r5.add_picture(diag5_path, width=Inches(6.47))
         p_oled_cap.text = "Figure 5: 1.3-inch Local OLED Dashboard Graphical Layout & Wireframe"
 
     # Section 8 Architecture 8.1, 8.2, 8.3
@@ -1212,31 +1099,53 @@ def generate_prd_docx():
         note6_1._p.addnext(note6_2._p)
 
     if p_arch2 is not None:
-        box7 = create_callout_box(doc, diag7_text)
-        cap7 = doc.add_paragraph("Figure 7: System 1 Domain 2 (Mechanical) Enclosure & Thermal Architecture")
+        diag7_path = "smart_programmable_power_supply/diagram_mechanical_enclosure_thermal.png"
+        p_pic7 = None
+        if os.path.exists(diag7_path):
+            p_pic7 = doc.add_paragraph()
+            p_pic7.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            r7 = p_pic7.add_run()
+            r7.add_picture(diag7_path, width=Inches(6.47))
+
+        cap7 = doc.add_paragraph("Figure 7: System 1 Domain 2 (Mechanical) Enclosure & Thermal Architecture Block Diagram")
         cap7.style = "Caption"
         note7_1 = doc.add_paragraph("Note: This is the proposed architecture and it might get changed during the design stage.")
         note7_1.runs[0].font.italic = True
         note7_2 = doc.add_paragraph("Note: Ensure the license compliance for usage of open source tools.")
         note7_2.runs[0].font.italic = True
 
-        p_arch2._p.addnext(box7._tbl)
-        box7._tbl.addnext(cap7._p)
-        cap7._p.addnext(note7_1._p)
+        if p_pic7 is not None:
+            p_arch2._p.addnext(p_pic7._p)
+            p_pic7._p.addnext(cap7._p)
+            cap7._p.addnext(note7_1._p)
+        else:
+            p_arch2._p.addnext(cap7._p)
+            cap7._p.addnext(note7_1._p)
         note7_1._p.addnext(note7_2._p)
 
     if p_arch3 is not None:
-        box8 = create_callout_box(doc, diag8_text)
-        cap8 = doc.add_paragraph("Figure 8: System 2 Domain 1 (Embedded Software) Multitasking FreeRTOS Architecture")
+        diag8_path = "smart_programmable_power_supply/diagram_freertos_firmware_architecture.png"
+        p_pic8 = None
+        if os.path.exists(diag8_path):
+            p_pic8 = doc.add_paragraph()
+            p_pic8.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            r8 = p_pic8.add_run()
+            r8.add_picture(diag8_path, width=Inches(6.47))
+
+        cap8 = doc.add_paragraph("Figure 8: System 2 Domain 1 (Embedded Software) Multitasking FreeRTOS Architecture Block Diagram")
         cap8.style = "Caption"
         note8_1 = doc.add_paragraph("Note: This is the proposed architecture and it might get changed during the design stage.")
         note8_1.runs[0].font.italic = True
         note8_2 = doc.add_paragraph("Note: Ensure the license compliance for usage of open source tools.")
         note8_2.runs[0].font.italic = True
 
-        p_arch3._p.addnext(box8._tbl)
-        box8._tbl.addnext(cap8._p)
-        cap8._p.addnext(note8_1._p)
+        if p_pic8 is not None:
+            p_arch3._p.addnext(p_pic8._p)
+            p_pic8._p.addnext(cap8._p)
+            cap8._p.addnext(note8_1._p)
+        else:
+            p_arch3._p.addnext(cap8._p)
+            cap8._p.addnext(note8_1._p)
         note8_1._p.addnext(note8_2._p)
 
     # Section 9 BOM Note

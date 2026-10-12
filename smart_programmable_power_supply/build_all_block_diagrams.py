@@ -1,10 +1,15 @@
 import subprocess
 import os
 
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+
 def render_diagram(dot_code, base_name, dpi=150):
-    dot_file = f"{base_name}.dot"
-    png_file = f"{base_name}.png"
-    svg_file = f"{base_name}.svg"
+    base_file = os.path.basename(base_name)
+    base_path = os.path.join(SCRIPT_DIR, base_file)
+
+    dot_file = f"{base_path}.dot"
+    png_file = f"{base_path}.png"
+    svg_file = f"{base_path}.svg"
     with open(dot_file, "w") as f:
         f.write(dot_code)
     # Render PNG and SVG
@@ -681,17 +686,546 @@ digraph AuxPower {
 }
 """
 
+# ==============================================================================
+# 7. MAJOR USE CASE 1: PRECISION VOLTAGE SETPOINT TUNING SEQUENCE
+# ==============================================================================
+usecase1_dot = r"""
+digraph UseCase1_VoltageTuning {
+    graph [
+        rankdir=LR,
+        bgcolor="#FFFFFF",
+        compound=true,
+        fontname="DejaVu Sans, Arial, Helvetica, sans-serif",
+        fontsize=13,
+        nodesep=0.35,
+        ranksep=0.50,
+        pad="0.2,0.2",
+        splines=true
+    ];
+    node [
+        fontname="DejaVu Sans, Arial, Helvetica, sans-serif",
+        fontsize=9,
+        shape=box,
+        style="filled,rounded",
+        margin="0.12,0.08",
+        penwidth=1.4
+    ];
+    edge [
+        fontname="DejaVu Sans, Arial, Helvetica, sans-serif",
+        fontsize=8,
+        penwidth=1.6,
+        arrowsize=0.75
+    ];
+
+    subgraph cluster_step1 {
+        label = "STEP 1: USER / HOST SETPOINT TRIGGER";
+        style = "filled,rounded";
+        fillcolor = "#EBF8FF";
+        color = "#2B6CB0";
+        op_knob [label="Benchtop Operator\nTurns Front Voltage Knob\n(Quadrature Optical Encoder)", fillcolor="#FFFFFF", color="#2B6CB0"];
+        host_cmd [label="Host PC / ATE Automation\nIssues SCPI Command\n':VOLT 12.000' over USB-C", fillcolor="#FFFFFF", color="#2B6CB0"];
+    }
+
+    subgraph cluster_step2 {
+        label = "STEP 2: EMBEDDED CONTROLLER CORE";
+        style = "filled,rounded";
+        fillcolor = "#E6FFFA";
+        color = "#234E52";
+        mcu_decode [label="STM32G474RET6 Microcontroller\n• EXTI Decodes Pulses / SCPI Token\n• Validates Range: 5.0V to 20.0V\n• Latency < 2.0 ms", fillcolor="#B2F5EA", color="#234E52", penwidth=1.8];
+        dac_calc [label="12-Bit DAC1 Setpoint Engine\nComputes Required Injection:\nV_DAC = 1.760 V (3.65mV / LSB)", fillcolor="#FFFFFF", color="#234E52"];
+        mcu_decode -> dac_calc [label=" Program DAC", color="#234E52"];
+    }
+
+    subgraph cluster_step3 {
+        label = "STEP 3: ANALOG SUMMING & REGULATION";
+        style = "filled,rounded";
+        fillcolor = "#FAF5FF";
+        color = "#6B46C1";
+        dac_sum [label="Precision Resistor Summing Node\n• R_top: 49.9kΩ 0.1%\n• R_DAC: 11.0kΩ 0.1%\n• R_bot: 3.65kΩ 0.1%\nInjects offset current into FB pin", fillcolor="#FFFFFF", color="#6B46C1"];
+        lm5176 [label="TI LM5176 Buck-Boost Controller\n• Reference: 1.200 V Internal\n• 4-Switch SynchronMz PWM (300 kHz)\n• Duty Cycle adjusts to Buck Mode (50%)", fillcolor="#E9D8FD", color="#553C9A", penwidth=1.8];
+        dac_calc -> dac_sum [label=" 1.76V Analog", color="#6B46C1"];
+        dac_sum -> lm5176 [label=" V_FB Steering", color="#6B46C1"];
+    }
+
+    subgraph cluster_step4 {
+        label = "STEP 4: POWER STAGE DYNAMIC SETTLING";
+        style = "filled,rounded";
+        fillcolor = "#F0FFF4";
+        color = "#276749";
+        h_bridge [label="4-Switch Synchronous H-Bridge\n• BSC034N04LS Power MOSFETs\n• Wurth 10µH Flat-Wire Inductor\n• Dual LC Filter Bank", fillcolor="#FFFFFF", color="#276749"];
+        out_settle [label="DC Output Terminals\n• Voltage Settles to 12.00V ± 10mV\n• Settle Time < 100 µs\n• Ultra-Low Ripple < 25 mV pk-pk", fillcolor="#C6F6D5", color="#22543D", penwidth=2.0];
+        lm5176 -> h_bridge [label=" Gate Drives", color="#276749"];
+        h_bridge -> out_settle [label=" Regulated DC", color="#276749", penwidth=2.2];
+    }
+
+    subgraph cluster_step5 {
+        label = "STEP 5: TELEMETRY & LIVE DISPATCH";
+        style = "filled,rounded";
+        fillcolor = "#FFFAF0";
+        color = "#C05621";
+        ina226 [label="INA226 16-Bit Power Monitor\nMeasures Live VOUT & IOUT\nSends I2C Telemetry at 10 Hz", fillcolor="#FFFFFF", color="#C05621"];
+        oled_dash [label="1.3-inch Monochrome OLED GUI\nRenders '12.00 V   0.00 A'\nPower Bar & Status Gauge", fillcolor="#FEEBC8", color="#9C4221"];
+        sd_log [label="MicroSD FAT32 Logger\nRecords Telemetry CSV Frame\nTimestamped Event Log", fillcolor="#FFFFFF", color="#C05621"];
+        out_settle -> ina226 [label=" Kelvin Sense", color="#C05621"];
+        ina226 -> mcu_decode [label=" I2C Telemetry", color="#C05621"];
+        mcu_decode -> oled_dash [label=" Update GUI (10fps)", color="#C05621"];
+        mcu_decode -> sd_log [label=" Write CSV", color="#C05621"];
+    }
+
+    op_knob -> mcu_decode [label=" Quadrature Pulse", color="#2B6CB0"];
+    host_cmd -> mcu_decode [label=" USB-CDC Virtual COM", color="#2B6CB0"];
+}
+"""
+
+# ==============================================================================
+# 8. MAJOR USE CASE 2: AUTOMATED ATE SCPI INSTRUMENTATION & LOGGING FLOW
+# ==============================================================================
+usecase2_dot = r"""
+digraph UseCase2_ATEAutomation {
+    graph [
+        rankdir=LR,
+        bgcolor="#FFFFFF",
+        compound=true,
+        fontname="DejaVu Sans, Arial, Helvetica, sans-serif",
+        fontsize=13,
+        nodesep=0.35,
+        ranksep=0.55,
+        pad="0.2,0.2",
+        splines=true
+    ];
+    node [
+        fontname="DejaVu Sans, Arial, Helvetica, sans-serif",
+        fontsize=9,
+        shape=box,
+        style="filled,rounded",
+        margin="0.12,0.08",
+        penwidth=1.4
+    ];
+    edge [
+        fontname="DejaVu Sans, Arial, Helvetica, sans-serif",
+        fontsize=8,
+        penwidth=1.6,
+        arrowsize=0.75
+    ];
+
+    subgraph cluster_ate_host {
+        label = "AUTOMATED TEST EQUIPMENT (ATE) RIG";
+        style = "filled,rounded";
+        fillcolor = "#EBF8FF";
+        color = "#2B6CB0";
+        ate_pc [label="Host PC / ATE Test Rig\n• Automated Python / LabVIEW Script\n• Transmits SCPI Command Stream\n• Logs Test Pass/Fail Metrics", fillcolor="#BEE3F8", color="#2B6CB0", penwidth=1.8];
+        csv_db [label="Host Manufacturing Database\nTimestamped Verification Records\nArchived Device Test Results", fillcolor="#FFFFFF", color="#2B6CB0"];
+        ate_pc -> csv_db [label=" Store Audit Log", color="#2B6CB0"];
+    }
+
+    subgraph cluster_usb_comm {
+        label = "USB-C INSTRUMENTATION INTERFACE";
+        style = "filled,rounded";
+        fillcolor = "#EDFDFD";
+        color = "#285E61";
+        usb_phy [label="USB Type-C 16-Pin Receptacle\n• ESD Protection: USBLC6-2SC6\n• 115200 Baud / Full-Speed 12Mbps", fillcolor="#FFFFFF", color="#285E61"];
+        scpi_parser [label="FreeRTOS SCPI Parser Task\n• IEEE 488.2 Syntax Engine\n• Validates ':VOLT', ':CURR', ':OUTP'\n• Processes Commands in < 2.0 ms", fillcolor="#B2F5EA", color="#234E52", penwidth=1.8];
+        usb_phy -> scpi_parser [label=" Byte Stream", color="#285E61"];
+    }
+
+    subgraph cluster_hardware_actuation {
+        label = "POWER STAGE & PROTECTION CONTROL";
+        style = "filled,rounded";
+        fillcolor = "#FAF5FF";
+        color = "#6B46C1";
+        dac_control [label="Dual 12-Bit DAC Engine\n• DAC1: Sets 15.000V Target\n• DAC2: Sets 2.000A Hardware CC Clamp", fillcolor="#FFFFFF", color="#6B46C1"];
+        pwr_gate [label="High-Side Output Gate Switch\n• Turn-ON: Enables DC Output Rail\n• Latency < 100 µs", fillcolor="#E9D8FD", color="#553C9A", penwidth=1.6];
+        scpi_parser -> dac_control [label=" Configure Setpoints", color="#6B46C1"];
+        scpi_parser -> pwr_gate [label=" :OUTP ON Command", color="#6B46C1"];
+    }
+
+    subgraph cluster_metering_engine {
+        label = "DUAL-DOMAIN POWER & EFFICIENCY ENGINE";
+        style = "filled,rounded";
+        fillcolor = "#F0FFF4";
+        color = "#276749";
+        ac_sense [label="Primary AC Power Metering\n• Isolated AMC1311 + Sinc3 Filter\n• Talema 1000:1 Current Transformer\nSamples Active AC Power (Pac)", fillcolor="#FFFFFF", color="#276749"];
+        dc_sense [label="Secondary DC Power Metering\n• TI INA226 16-Bit I2C Monitor\n• 10mΩ Kelvin Precision Shunt\nSamples Regulated DC Power (Pdc)", fillcolor="#FFFFFF", color="#276749"];
+        eff_math [label="Real-Time Efficiency Math (10Hz)\nη = (Pdc / Pac) × 100%\nComputes '91.2%' Conversion Efficiency", fillcolor="#C6F6D5", color="#22543D", penwidth=1.8];
+        ac_sense -> eff_math [label=" Pac", color="#276749"];
+        dc_sense -> eff_math [label=" Pdc", color="#276749"];
+    }
+
+    subgraph cluster_data_storage {
+        label = "AUTONOMOUS EMBEDDED LOGGING";
+        style = "filled,rounded";
+        fillcolor = "#FFFAF0";
+        color = "#C05621";
+        sd_logger [label="MicroSD FatFs Logging Task\n• Ring-Buffered CSV Frames\n• Auto-flushes via f_sync() every 5s\n• Autonomous Zero-Data-Loss Storage", fillcolor="#FEEBC8", color="#9C4221", penwidth=1.8];
+    }
+
+    ate_pc -> usb_phy [label=" 1. ':VOLT 15.0;:CURR 2.0;:OUTP ON'", color="#1A365D", penwidth=2.0];
+    ate_pc -> usb_phy [label=" 2. Query ':MEAS:EFF?'", color="#2B6CB0", penwidth=1.8];
+    scpi_parser -> eff_math [label=" Request Live Telemetry", color="#285E61"];
+    eff_math -> scpi_parser [label=" Returns '91.2%'", color="#285E61"];
+    scpi_parser -> usb_phy [label=" Format SCPI ASCII", color="#285E61"];
+    usb_phy -> ate_pc [label=" 3. Reply '91.2%' (< 2ms)", color="#2B6CB0", penwidth=2.0];
+    eff_math -> sd_logger [label=" Write 10Hz CSV Record", color="#C05621", penwidth=1.6];
+}
+"""
+
+# ==============================================================================
+# 9. DUAL-CLOSED-LOOP CONTROL & HARDWARE PROTECTION FLOW DIAGRAM (FIGURE 4)
+# ==============================================================================
+control_flow_dot = r"""
+digraph ControlProtectionFlow {
+    graph [
+        rankdir=TB,
+        bgcolor="#FFFFFF",
+        compound=true,
+        fontname="DejaVu Sans, Arial, Helvetica, sans-serif",
+        fontsize=13,
+        nodesep=0.35,
+        ranksep=0.45,
+        pad="0.2,0.2",
+        splines=true
+    ];
+    node [
+        fontname="DejaVu Sans, Arial, Helvetica, sans-serif",
+        fontsize=9,
+        shape=box,
+        style="filled,rounded",
+        margin="0.12,0.08",
+        penwidth=1.4
+    ];
+    edge [
+        fontname="DejaVu Sans, Arial, Helvetica, sans-serif",
+        fontsize=8,
+        penwidth=1.6,
+        arrowsize=0.75
+    ];
+
+    subgraph cluster_digital_loop {
+        label = "OUTER SUPERVISORY DIGITAL CONTROL LOOP (STM32G474 MCU @ 10 Hz / 100ms PERIOD)";
+        style = "filled,rounded";
+        fillcolor = "#EBF8FF";
+        color = "#2B6CB0";
+        penwidth = 1.8;
+
+        s1 [label="Step 1: Sample Primary AC Grid\n• AMC1311 Isolated Modulator -> Hardware Sinc3 Filter\n• Talema 1000:1 CT -> ADC Channel\nComputes True RMS Vac, Iac, Active Power Pac, PF", fillcolor="#FFFFFF", color="#2B6CB0"];
+        s2 [label="Step 2: Sample Secondary DC Output Rail\n• TI INA226 16-Bit I2C ADC (400 kHz)\nReads Live VBUS, Shunt Drop, Pdc (Watts)", fillcolor="#FFFFFF", color="#2B6CB0"];
+        s3 [label="Step 3: Real-Time Dual-Domain Efficiency Engine\nη(t) = [ Pdc(t) / Pac(t) ] × 100%\nApplies 8-tap Exponential Moving Average Filter", fillcolor="#BEE3F8", color="#2B6CB0", penwidth=1.8];
+        s4 [label="Step 4: Thermal & Fault Supervisory Check\n• Samples NTC Thermistor on Primary & Secondary\n• If T > 85°C -> Digital Thermal Foldback\n• If T > 90°C -> Emergency Output Gate Shutdown", fillcolor="#FFFFFF", color="#2B6CB0"];
+        s5 [label="Step 5: Telemetry Dispatch & Data Logging\n• Renders 1.3-inch Local OLED Dashboard (10 fps)\n• Appends Timestamped Record to MicroSD FAT32 CSV\n• Services Host Queries over USB-CDC SCPI", fillcolor="#FFFFFF", color="#2B6CB0"];
+
+        s1 -> s2 -> s3 -> s4 -> s5 [color="#2B6CB0", penwidth=1.8];
+    }
+
+    subgraph cluster_analog_loop {
+        label = "INNER ULTRA-FAST ANALOG HARDWARE LOOP (AUTONOMOUS HARDWARE CIRCUITS - ZERO CPU LAG)";
+        style = "filled,rounded";
+        fillcolor = "#FFF5F5";
+        color = "#C53030";
+        penwidth = 1.8;
+
+        h_reg [label="Analog Voltage Regulation Loop\n• LM5176 Type-II Compensation Network\n• Summing Junction: R_top (49.9k), R_DAC (11k), R_bot (3.65k)\n• Restores 50% to 100% Load Steps in < 120 µs (< 250mV sag)", fillcolor="#FFFFFF", color="#C53030"];
+        h_cc [label="Ultra-Fast Hardware Constant-Current (CC) Clamp\n• 10mΩ Kelvin Shunt -> TI INA240A2 (Gain = 50 V/V, 400kHz BW)\n• TI TLV3501 High-Speed Comparator (4.5ns response)\n• Clamps LM5176 COMP Pin via BAT54 Diode in < 5.0 µs\nFolds back output voltage immediately upon short circuit!", fillcolor="#FED7D7", color="#9B2C2C", penwidth=2.0];
+        h_ovp [label="Secondary Over-Voltage Crowbar (OVP)\n• Independent Analog Window Comparator\n• Tripped if Vout > Vset + 1.5V (Latency < 2.0 µs)\n• Immediately clamps COMP to ground & turns off Gate FET", fillcolor="#FFFFFF", color="#C53030"];
+    }
+
+    subgraph cluster_power_stage {
+        label = "PHYSICAL POWER CONVERTER STAGE";
+        style = "filled,rounded";
+        fillcolor = "#F0FFF4";
+        color = "#276749";
+        pwr_hw [label="LM5176 4-Switch Synchronous Buck-Boost Power Stage\n• 4x BSC034N04LS MOSFETs + 10µH Inductor + Dual LC Filter Bank\n• 5.0V - 20.0V DC Programmable Output @ 3.0A (60W Continuous)", fillcolor="#C6F6D5", color="#22543D", penwidth=2.0];
+    }
+
+    s4 -> pwr_hw [label=" Gate Disconnect (Trip)", color="#C53030", style=dashed];
+    h_reg -> pwr_hw [label=" 4x PWM Gate Drives", color="#276749", penwidth=1.8];
+    h_cc -> pwr_hw [label=" Throttles Duty Cycle (< 5µs)", color="#9B2C2C", penwidth=2.2];
+    h_ovp -> pwr_hw [label=" Crowbar Shutdown (< 2µs)", color="#9B2C2C", penwidth=2.0];
+    pwr_hw -> s1 [label=" Grid Telemetry", color="#2B6CB0", style=dashed];
+    pwr_hw -> s2 [label=" DC Bus Telemetry", color="#2B6CB0", style=dashed];
+}
+"""
+
+# ==============================================================================
+# 10. 1.3-INCH LOCAL OLED DASHBOARD WIREFRAME LAYOUT (FIGURE 5)
+# ==============================================================================
+oled_wireframe_dot = r"""
+digraph OLED_Dashboard_Wireframe {
+    graph [
+        rankdir=TB,
+        bgcolor="#FFFFFF",
+        compound=true,
+        fontname="DejaVu Sans, Arial, Helvetica, sans-serif",
+        fontsize=13,
+        nodesep=0.30,
+        ranksep=0.40,
+        pad="0.25,0.25"
+    ];
+    node [
+        fontname="DejaVu Sans, Arial, Helvetica, sans-serif",
+        fontsize=9,
+        shape=box,
+        style="filled,rounded",
+        margin="0.12,0.08",
+        penwidth=1.4
+    ];
+    edge [
+        fontname="DejaVu Sans, Arial, Helvetica, sans-serif",
+        fontsize=8,
+        penwidth=1.5,
+        arrowsize=0.75
+    ];
+
+    subgraph cluster_display {
+        label = "1.3-INCH LOCAL OLED DASHBOARD (128 x 64 GRAPHICAL PIXEL MATRIX - SH1106 CONTROLLER)";
+        style = "filled,rounded";
+        fillcolor = "#1A202C";
+        color = "#171923";
+        penwidth = 2.5;
+
+        screen_hdr [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" COLOR="#4A5568" BGCOLOR="#2D3748">
+            <TR><TD ALIGN="LEFT"><FONT COLOR="#63B3ED" POINT-SIZE="9"><B> SET: 12.00 V   3.00 A </B></FONT></TD>
+                <TD ALIGN="CENTER"><FONT COLOR="#68D391" POINT-SIZE="9"><B> [CV MODE] </B></FONT></TD>
+                <TD ALIGN="RIGHT"><FONT COLOR="#F6E05E" POINT-SIZE="9"><B> STATUS: LIVE </B></FONT></TD></TR>
+        </TABLE>>];
+
+        screen_telemetry [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="1" CELLSPACING="4" COLOR="#4A5568" BGCOLOR="#1A202C">
+            <TR>
+                <TD ALIGN="LEFT" BGCOLOR="#2D3748" WIDTH="180"><FONT COLOR="#E2E8F0" POINT-SIZE="9"> VOUT: </FONT><FONT COLOR="#63B3ED" POINT-SIZE="13"><B> 12.04 V </B></FONT></TD>
+                <TD ALIGN="LEFT" BGCOLOR="#2D3748" WIDTH="180"><FONT COLOR="#E2E8F0" POINT-SIZE="9"> IOUT: </FONT><FONT COLOR="#FEB2B2" POINT-SIZE="13"><B>  2.98 A </B></FONT></TD>
+            </TR>
+            <TR>
+                <TD ALIGN="LEFT" BGCOLOR="#2D3748"><FONT COLOR="#E2E8F0" POINT-SIZE="9"> POUT: </FONT><FONT COLOR="#FBD38D" POINT-SIZE="11"><B> 35.88 W </B></FONT></TD>
+                <TD ALIGN="LEFT" BGCOLOR="#2D3748"><FONT COLOR="#E2E8F0" POINT-SIZE="9"> PIN:  </FONT><FONT COLOR="#CBD5E0" POINT-SIZE="11"><B> 38.45 W </B></FONT></TD>
+            </TR>
+        </TABLE>>];
+
+        screen_bar [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" COLOR="#4A5568" BGCOLOR="#2D3748">
+            <TR><TD ALIGN="LEFT"><FONT COLOR="#E2E8F0" POINT-SIZE="9"><B> EFFICIENCY: </B></FONT></TD>
+                <TD ALIGN="LEFT"><FONT COLOR="#48BB78" POINT-SIZE="10"><B>[████████████████████████████░░░░] </B></FONT></TD>
+                <TD ALIGN="RIGHT"><FONT COLOR="#68D391" POINT-SIZE="12"><B> 93.3 % </B></FONT></TD></TR>
+        </TABLE>>];
+
+        screen_ftr [shape=none, margin=0, label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" COLOR="#4A5568" BGCOLOR="#2D3748">
+            <TR><TD ALIGN="LEFT"><FONT COLOR="#CBD5E0" POINT-SIZE="8"> TEMP: 42 deg C </FONT></TD>
+                <TD ALIGN="CENTER"><FONT COLOR="#F6AD55" POINT-SIZE="8"><B> SD: LOGGING [00:14:32] </B></FONT></TD>
+                <TD ALIGN="RIGHT"><FONT COLOR="#90CDF4" POINT-SIZE="8"> USB: ATE REMOTE ACTIVE </FONT></TD></TR>
+        </TABLE>>];
+
+        screen_hdr -> screen_telemetry [style=invis];
+        screen_telemetry -> screen_bar [style=invis];
+        screen_bar -> screen_ftr [style=invis];
+    }
+
+    subgraph cluster_annotations {
+        label = "GRAPHICAL DASHBOARD ZONES & CALLOUTS";
+        style = "filled,rounded";
+        fillcolor = "#F7FAFC";
+        color = "#CBD5E0";
+
+        zone1 [label="Top Header Zone:\n• Target Setpoints (V_SET & I_LIMIT)\n• Current Operating Mode [CV / CC / FAULT]\n• Real-Time Output Status [LIVE / DISABLED]", fillcolor="#EBF8FF", color="#3182CE"];
+        zone2 [label="Primary Telemetry Matrix:\n• High-Precision Measured Output Voltage (VOUT)\n• High-Precision Measured Load Current (IOUT)\n• Real-time DC Output Power & AC Input Power", fillcolor="#FEFCBF", color="#B7791F"];
+        zone3 [label="Dynamic Efficiency Bar Gauge:\n• Real-Time η = (P_DC / P_AC) × 100%\n• 32-Segment Graphical Progress Fill\n• 10Hz Filtered Value with EMA smoothing", fillcolor="#C6F6D5", color="#276749"];
+        zone4 [label="Bottom Supervisory Status Bar:\n• Internal Power Stage Thermal Reading\n• MicroSD Autonomous CSV Logger Status\n• USB-C SCPI Remote Control Active Flag", fillcolor="#FED7D7", color="#9B2C2C"];
+    }
+
+    zone1 -> screen_hdr [color="#3182CE", style=dashed];
+    zone2 -> screen_telemetry [color="#B7791F", style=dashed];
+    zone3 -> screen_bar [color="#276749", style=dashed];
+    zone4 -> screen_ftr [color="#9B2C2C", style=dashed];
+}
+"""
+
+# ==============================================================================
+# 11. MECHANICAL ENCLOSURE & THERMAL ARCHITECTURE (FIGURE 7)
+# ==============================================================================
+mechanical_thermal_dot = r"""
+digraph MechanicalEnclosureThermal {
+    graph [
+        rankdir=LR,
+        bgcolor="#FFFFFF",
+        compound=true,
+        fontname="DejaVu Sans, Arial, Helvetica, sans-serif",
+        fontsize=13,
+        nodesep=0.35,
+        ranksep=0.55,
+        pad="0.2,0.2",
+        splines=true
+    ];
+    node [
+        fontname="DejaVu Sans, Arial, Helvetica, sans-serif",
+        fontsize=9,
+        shape=box,
+        style="filled,rounded",
+        margin="0.12,0.08",
+        penwidth=1.4
+    ];
+    edge [
+        fontname="DejaVu Sans, Arial, Helvetica, sans-serif",
+        fontsize=8,
+        penwidth=1.6,
+        arrowsize=0.75
+    ];
+
+    subgraph cluster_chassis {
+        label = "MECHANICAL ENCLOSURE HOUSING (130 x 85 x 42 mm)";
+        style = "filled,rounded";
+        fillcolor = "#EDF2F7";
+        color = "#4A5568";
+        penwidth = 2.0;
+
+        ext_shell [label="Extruded Aluminum Shell\n• Alloy 6063-T5 (2.0mm wall thickness)\n• Black Anodized Scratch-Resistant Finish\n• Integrated Card Guide Grooves (1.6mm PCB)\n• Natural Convection Radiating Surface", fillcolor="#CBD5E0", color="#2D3748", penwidth=1.8];
+        vent_slots [label="Convection Louvers\nTop & Side Air Circulation Slots\nMaintains Chassis Temp < 60°C @ 60W", fillcolor="#FFFFFF", color="#4A5568"];
+        earth_lug [label="PE Earth Ground Lug\nM4 Threaded Grounding Post\nDirectly Bonded to Enclosure Metal", fillcolor="#FFFFFF", color="#4A5568"];
+
+        ext_shell -> vent_slots [color="#4A5568"];
+        ext_shell -> earth_lug [color="#4A5568"];
+    }
+
+    subgraph cluster_front_panel {
+        label = "FRONT USER INTERFACE PANEL";
+        style = "filled,rounded";
+        fillcolor = "#EBF8FF";
+        color = "#2B6CB0";
+        penwidth = 1.6;
+
+        posts [label="Heavy-Duty Output Terminals\n• Dual 4mm Gold-Plated Binding Posts\n• Red (+) and Black (-) Floating Rail\n• 30A Continuous Current Rating", fillcolor="#FFFFFF", color="#2B6CB0"];
+        knobs [label="Dual Rotary Optical Encoders\n• Left: Voltage Setpoint (10mV / click)\n• Right: Current Limit (10mA / click)\n• Integrated Tactile Push Button", fillcolor="#FFFFFF", color="#2B6CB0"];
+        oled_win [label="1.3-inch Graphic OLED Window\n• High-Contrast Bezel Cutout\n• Polycarbonate Anti-Glare Protective Lens", fillcolor="#FFFFFF", color="#2B6CB0"];
+        pwr_btn [label="Output Enable Push-Button\n• Momentary Tactile Switch\n• Dual-Color LED Ring (Green=ON, Red=TRIP)", fillcolor="#FFFFFF", color="#2B6CB0"];
+    }
+
+    subgraph cluster_rear_panel {
+        label = "REAR POWER & INTERFACE PANEL";
+        style = "filled,rounded";
+        fillcolor = "#FFF5F5";
+        color = "#C53030";
+        penwidth = 1.6;
+
+        ac_inlet [label="AC Grid Mains Inlet\n• IEC 320-C14 3-Prong Receptacle\n• Integrated 2A Time-Lag Fuse Drawer\n• Rocker Power Switch (Double Pole)", fillcolor="#FFFFFF", color="#C53030"];
+        usb_conn [label="USB Type-C Receptacle\n• 16-Pin Mid-Mount Shielded\n• Virtual COM SCPI Remote Automation", fillcolor="#FFFFFF", color="#C53030"];
+        sd_slot [label="MicroSD Storage Slot\n• Push-Push Flush Mechanism\n• Direct Card Insertion / Removal", fillcolor="#FFFFFF", color="#C53030"];
+    }
+
+    subgraph cluster_thermal_safety {
+        label = "INTERNAL THERMAL DISSIPATION & CREEPAGE ISOLATION";
+        style = "filled,rounded";
+        fillcolor = "#FEFCBF";
+        color = "#B7791F";
+        penwidth = 1.6;
+
+        thermal_clamp [label="Thermal Clamping Scheme\n• Flyback Q1 & Sync Q_SR clamped to base\n• High-Performance Gap Pad (3.0 W/m·K)\n• Junction-to-Case θjc < 1.2 °C/W\nConducts Heat to Aluminum Shell Base", fillcolor="#FFFFFF", color="#B7791F"];
+        creepage_slot [label="Galvanic Isolation Routing\n• 6.4mm Milled Air Slot across PCB\n• 5.2mm Clearance over Optical Components\n• Meets IEC 62368-1 Reinforced Isolation", fillcolor="#FFFFFF", color="#B7791F"];
+    }
+
+    ext_shell -> thermal_clamp [label=" Heatsink Sink Base", color="#B7791F", penwidth=2.0];
+    ac_inlet -> creepage_slot [label=" Hot Side", color="#C53030"];
+    creepage_slot -> posts [label=" Isolated Cold Side", color="#2B6CB0"];
+}
+"""
+
+# ==============================================================================
+# 12. EMBEDDED SOFTWARE FreeRTOS MULTITASKING ARCHITECTURE (FIGURE 8)
+# ==============================================================================
+freertos_arch_dot = r"""
+digraph FreeRTOS_Firmware_Architecture {
+    graph [
+        rankdir=LR,
+        bgcolor="#FFFFFF",
+        compound=true,
+        fontname="DejaVu Sans, Arial, Helvetica, sans-serif",
+        fontsize=13,
+        nodesep=0.35,
+        ranksep=0.55,
+        pad="0.2,0.2",
+        splines=true
+    ];
+    node [
+        fontname="DejaVu Sans, Arial, Helvetica, sans-serif",
+        fontsize=9,
+        shape=box,
+        style="filled,rounded",
+        margin="0.12,0.08",
+        penwidth=1.4
+    ];
+    edge [
+        fontname="DejaVu Sans, Arial, Helvetica, sans-serif",
+        fontsize=8,
+        penwidth=1.6,
+        arrowsize=0.75
+    ];
+
+    subgraph cluster_hw_interrupts {
+        label = "HARDWARE PERIPHERALS & INTERRUPTS (ISRs)";
+        style = "filled,rounded";
+        fillcolor = "#EDF2F7";
+        color = "#4A5568";
+        isr_fault [label="Hardware Comparator / ADC ISR\n• Direct OVP / OTP / CC Trip Line\n• Triggers Instant Fault Event", fillcolor="#FED7D7", color="#9B2C2C", penwidth=1.8];
+        isr_encoder [label="EXTI Quadrature Encoder ISR\n• Optical Knob Rotational Clicks\n• Push-Button Press Interrupts", fillcolor="#FFFFFF", color="#4A5568"];
+        isr_usb [label="USB-CDC DMA Receive ISR\n• SCPI Command Token Packets", fillcolor="#FFFFFF", color="#4A5568"];
+    }
+
+    subgraph cluster_freertos_kernel {
+        label = "FreeRTOS PREEMPTIVE KERNEL v10.4 (1ms SysTick Timer)";
+        style = "filled,rounded";
+        fillcolor = "#EBF8FF";
+        color = "#2B6CB0";
+        penwidth = 2.0;
+
+        task1 [label="Task 1: Fault Supervisory Task\n• Priority: Real-Time (Highest)\n• Period: 1 ms\n• Evaluates OVP/OTP Limits\n• Commands Emergency Gate FET", fillcolor="#FED7D7", color="#9B2C2C", penwidth=2.0];
+        task2 [label="Task 2: Dual-Domain Power Telemetry Task\n• Priority: High (Priority 4)\n• Period: 100 ms (10 Hz)\n• Reads AMC1311 AC & INA226 DC\n• Computes η = (Pdc/Pac) × 100%\n• Pushes to Telemetry Queue", fillcolor="#C6F6D5", color="#22543D", penwidth=1.8];
+        task3 [label="Task 3: SCPI Parser & USB-CDC Task\n• Priority: Medium (Priority 3)\n• Event-Driven (USB Packet Signal)\n• Parses IEEE 488.2 Commands\n• Programs DAC Voltage & Clamp\n• Formats SCPI Response Strings", fillcolor="#BEE3F8", color="#2B6CB0", penwidth=1.8];
+        task4 [label="Task 4: MicroSD FatFs Logging Task\n• Priority: Low (Priority 2)\n• Period: 100 ms\n• Dequeues Records from Queue\n• Buffers CSV Text to Sector Buffer\n• Calls f_sync() every 5 Seconds", fillcolor="#FEFCBF", color="#B7791F", penwidth=1.6];
+        task5 [label="Task 5: OLED GUI & Encoder Task\n• Priority: Low (Priority 1)\n• Period: 100 ms (10 fps)\n• Services Debounced Encoder Steps\n• Renders 128x64 Graphical Dashboard\n• Updates Dynamic Efficiency Bar", fillcolor="#E9D8FD", color="#553C9A", penwidth=1.6];
+    }
+
+    subgraph cluster_ipc_sync {
+        label = "INTER-TASK COMMUNICATION & SYNCHRONIZATION";
+        style = "filled,rounded";
+        fillcolor = "#FAF5FF";
+        color = "#6B46C1";
+        q_telemetry [label="Telemetry Queue (xQueueTelemetry)\nRing Buffer of 10 Telemetry Records\n(Vac, Iac, Pac, Vdc, Idc, Pdc, η, Temp)", fillcolor="#FFFFFF", color="#6B46C1"];
+        mtx_setpoint [label="Setpoint Mutex (xMutexSetpoints)\nProtects Voltage & Current Setpoints\nPrevents Race Conditions", fillcolor="#FFFFFF", color="#6B46C1"];
+        evt_fault [label="Fault Event Group (xEventGroupFaults)\nInstant Emergency Shutdown Broadcast", fillcolor="#FED7D7", color="#9B2C2C", penwidth=1.8];
+    }
+
+    isr_fault -> evt_fault [label=" Signal Trip", color="#9B2C2C", penwidth=2.0];
+    evt_fault -> task1 [label=" Wakes Task", color="#9B2C2C", penwidth=2.0];
+    isr_encoder -> task5 [label=" Knob Steps", color="#553C9A"];
+    isr_usb -> task3 [label=" USB Bytes", color="#2B6CB0"];
+
+    task2 -> q_telemetry [label=" Push Record", color="#22543D", penwidth=1.8];
+    q_telemetry -> task4 [label=" Dequeue Record", color="#B7791F"];
+    q_telemetry -> task5 [label=" Read Telemetry", color="#553C9A"];
+    task3 -> mtx_setpoint [label=" Write Setpoint", color="#2B6CB0"];
+    task5 -> mtx_setpoint [label=" Write Setpoint", color="#553C9A"];
+}
+"""
+
 # Render all diagrams
 diagrams = [
+    # 1. Master System Block Diagram
     (master_dot, "smart_programmable_power_supply_system_block_diagram", 150),
+    # 2-6. Subsystem Hardware Block Diagrams
     (flyback_dot, "block_diagram_stage1_flyback", 150),
     (buckboost_dot, "block_diagram_stage2_buckboost", 150),
     (control_dot, "block_diagram_control_feedback", 150),
     (telemetry_dot, "block_diagram_telemetry_efficiency", 150),
     (aux_dot, "block_diagram_aux_power_distribution", 150),
+    # 7-8. Use Case Workflow Diagrams (Figures 2 & 3)
+    (usecase1_dot, "diagram_use_case_1_voltage_tuning", 150),
+    (usecase2_dot, "diagram_use_case_2_ate_automation", 150),
+    # 9. Control & Protection Flow Diagram (Figure 4)
+    (control_flow_dot, "diagram_control_protection_flow", 150),
+    # 10. OLED UI Wireframe Diagram (Figure 5)
+    (oled_wireframe_dot, "diagram_oled_dashboard_wireframe", 150),
+    # 11. Mechanical Enclosure & Thermal Architecture (Figure 7)
+    (mechanical_thermal_dot, "diagram_mechanical_enclosure_thermal", 150),
+    # 12. Embedded Software FreeRTOS Architecture (Figure 8)
+    (freertos_arch_dot, "diagram_freertos_firmware_architecture", 150),
 ]
 
 for dot, name, dpi in diagrams:
     render_diagram(dot, name, dpi)
 
-print("\nAll 6 Architecture Block Diagrams generated in both SVG and high-DPI PNG successfully!")
+print(f"\nAll {len(diagrams)} Architecture Block Diagrams generated in both SVG and high-DPI PNG successfully!")
+

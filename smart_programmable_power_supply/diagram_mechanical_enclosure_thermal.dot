@@ -1,0 +1,83 @@
+
+digraph MechanicalEnclosureThermal {
+    graph [
+        rankdir=LR,
+        bgcolor="#FFFFFF",
+        compound=true,
+        fontname="DejaVu Sans, Arial, Helvetica, sans-serif",
+        fontsize=13,
+        nodesep=0.35,
+        ranksep=0.55,
+        pad="0.2,0.2",
+        splines=true
+    ];
+    node [
+        fontname="DejaVu Sans, Arial, Helvetica, sans-serif",
+        fontsize=9,
+        shape=box,
+        style="filled,rounded",
+        margin="0.12,0.08",
+        penwidth=1.4
+    ];
+    edge [
+        fontname="DejaVu Sans, Arial, Helvetica, sans-serif",
+        fontsize=8,
+        penwidth=1.6,
+        arrowsize=0.75
+    ];
+
+    subgraph cluster_chassis {
+        label = "MECHANICAL ENCLOSURE HOUSING (130 x 85 x 42 mm)";
+        style = "filled,rounded";
+        fillcolor = "#EDF2F7";
+        color = "#4A5568";
+        penwidth = 2.0;
+
+        ext_shell [label="Extruded Aluminum Shell\n• Alloy 6063-T5 (2.0mm wall thickness)\n• Black Anodized Scratch-Resistant Finish\n• Integrated Card Guide Grooves (1.6mm PCB)\n• Natural Convection Radiating Surface", fillcolor="#CBD5E0", color="#2D3748", penwidth=1.8];
+        vent_slots [label="Convection Louvers\nTop & Side Air Circulation Slots\nMaintains Chassis Temp < 60°C @ 60W", fillcolor="#FFFFFF", color="#4A5568"];
+        earth_lug [label="PE Earth Ground Lug\nM4 Threaded Grounding Post\nDirectly Bonded to Enclosure Metal", fillcolor="#FFFFFF", color="#4A5568"];
+
+        ext_shell -> vent_slots [color="#4A5568"];
+        ext_shell -> earth_lug [color="#4A5568"];
+    }
+
+    subgraph cluster_front_panel {
+        label = "FRONT USER INTERFACE PANEL";
+        style = "filled,rounded";
+        fillcolor = "#EBF8FF";
+        color = "#2B6CB0";
+        penwidth = 1.6;
+
+        posts [label="Heavy-Duty Output Terminals\n• Dual 4mm Gold-Plated Binding Posts\n• Red (+) and Black (-) Floating Rail\n• 30A Continuous Current Rating", fillcolor="#FFFFFF", color="#2B6CB0"];
+        knobs [label="Dual Rotary Optical Encoders\n• Left: Voltage Setpoint (10mV / click)\n• Right: Current Limit (10mA / click)\n• Integrated Tactile Push Button", fillcolor="#FFFFFF", color="#2B6CB0"];
+        oled_win [label="1.3-inch Graphic OLED Window\n• High-Contrast Bezel Cutout\n• Polycarbonate Anti-Glare Protective Lens", fillcolor="#FFFFFF", color="#2B6CB0"];
+        pwr_btn [label="Output Enable Push-Button\n• Momentary Tactile Switch\n• Dual-Color LED Ring (Green=ON, Red=TRIP)", fillcolor="#FFFFFF", color="#2B6CB0"];
+    }
+
+    subgraph cluster_rear_panel {
+        label = "REAR POWER & INTERFACE PANEL";
+        style = "filled,rounded";
+        fillcolor = "#FFF5F5";
+        color = "#C53030";
+        penwidth = 1.6;
+
+        ac_inlet [label="AC Grid Mains Inlet\n• IEC 320-C14 3-Prong Receptacle\n• Integrated 2A Time-Lag Fuse Drawer\n• Rocker Power Switch (Double Pole)", fillcolor="#FFFFFF", color="#C53030"];
+        usb_conn [label="USB Type-C Receptacle\n• 16-Pin Mid-Mount Shielded\n• Virtual COM SCPI Remote Automation", fillcolor="#FFFFFF", color="#C53030"];
+        sd_slot [label="MicroSD Storage Slot\n• Push-Push Flush Mechanism\n• Direct Card Insertion / Removal", fillcolor="#FFFFFF", color="#C53030"];
+    }
+
+    subgraph cluster_thermal_safety {
+        label = "INTERNAL THERMAL DISSIPATION & CREEPAGE ISOLATION";
+        style = "filled,rounded";
+        fillcolor = "#FEFCBF";
+        color = "#B7791F";
+        penwidth = 1.6;
+
+        thermal_clamp [label="Thermal Clamping Scheme\n• Flyback Q1 & Sync Q_SR clamped to base\n• High-Performance Gap Pad (3.0 W/m·K)\n• Junction-to-Case θjc < 1.2 °C/W\nConducts Heat to Aluminum Shell Base", fillcolor="#FFFFFF", color="#B7791F"];
+        creepage_slot [label="Galvanic Isolation Routing\n• 6.4mm Milled Air Slot across PCB\n• 5.2mm Clearance over Optical Components\n• Meets IEC 62368-1 Reinforced Isolation", fillcolor="#FFFFFF", color="#B7791F"];
+    }
+
+    ext_shell -> thermal_clamp [label=" Heatsink Sink Base", color="#B7791F", penwidth=2.0];
+    ac_inlet -> creepage_slot [label=" Hot Side", color="#C53030"];
+    creepage_slot -> posts [label=" Isolated Cold Side", color="#2B6CB0"];
+}

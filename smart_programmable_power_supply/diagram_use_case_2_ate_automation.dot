@@ -1,0 +1,87 @@
+
+digraph UseCase2_ATEAutomation {
+    graph [
+        rankdir=LR,
+        bgcolor="#FFFFFF",
+        compound=true,
+        fontname="DejaVu Sans, Arial, Helvetica, sans-serif",
+        fontsize=13,
+        nodesep=0.35,
+        ranksep=0.55,
+        pad="0.2,0.2",
+        splines=true
+    ];
+    node [
+        fontname="DejaVu Sans, Arial, Helvetica, sans-serif",
+        fontsize=9,
+        shape=box,
+        style="filled,rounded",
+        margin="0.12,0.08",
+        penwidth=1.4
+    ];
+    edge [
+        fontname="DejaVu Sans, Arial, Helvetica, sans-serif",
+        fontsize=8,
+        penwidth=1.6,
+        arrowsize=0.75
+    ];
+
+    subgraph cluster_ate_host {
+        label = "AUTOMATED TEST EQUIPMENT (ATE) RIG";
+        style = "filled,rounded";
+        fillcolor = "#EBF8FF";
+        color = "#2B6CB0";
+        ate_pc [label="Host PC / ATE Test Rig\n• Automated Python / LabVIEW Script\n• Transmits SCPI Command Stream\n• Logs Test Pass/Fail Metrics", fillcolor="#BEE3F8", color="#2B6CB0", penwidth=1.8];
+        csv_db [label="Host Manufacturing Database\nTimestamped Verification Records\nArchived Device Test Results", fillcolor="#FFFFFF", color="#2B6CB0"];
+        ate_pc -> csv_db [label=" Store Audit Log", color="#2B6CB0"];
+    }
+
+    subgraph cluster_usb_comm {
+        label = "USB-C INSTRUMENTATION INTERFACE";
+        style = "filled,rounded";
+        fillcolor = "#EDFDFD";
+        color = "#285E61";
+        usb_phy [label="USB Type-C 16-Pin Receptacle\n• ESD Protection: USBLC6-2SC6\n• 115200 Baud / Full-Speed 12Mbps", fillcolor="#FFFFFF", color="#285E61"];
+        scpi_parser [label="FreeRTOS SCPI Parser Task\n• IEEE 488.2 Syntax Engine\n• Validates ':VOLT', ':CURR', ':OUTP'\n• Processes Commands in < 2.0 ms", fillcolor="#B2F5EA", color="#234E52", penwidth=1.8];
+        usb_phy -> scpi_parser [label=" Byte Stream", color="#285E61"];
+    }
+
+    subgraph cluster_hardware_actuation {
+        label = "POWER STAGE & PROTECTION CONTROL";
+        style = "filled,rounded";
+        fillcolor = "#FAF5FF";
+        color = "#6B46C1";
+        dac_control [label="Dual 12-Bit DAC Engine\n• DAC1: Sets 15.000V Target\n• DAC2: Sets 2.000A Hardware CC Clamp", fillcolor="#FFFFFF", color="#6B46C1"];
+        pwr_gate [label="High-Side Output Gate Switch\n• Turn-ON: Enables DC Output Rail\n• Latency < 100 µs", fillcolor="#E9D8FD", color="#553C9A", penwidth=1.6];
+        scpi_parser -> dac_control [label=" Configure Setpoints", color="#6B46C1"];
+        scpi_parser -> pwr_gate [label=" :OUTP ON Command", color="#6B46C1"];
+    }
+
+    subgraph cluster_metering_engine {
+        label = "DUAL-DOMAIN POWER & EFFICIENCY ENGINE";
+        style = "filled,rounded";
+        fillcolor = "#F0FFF4";
+        color = "#276749";
+        ac_sense [label="Primary AC Power Metering\n• Isolated AMC1311 + Sinc3 Filter\n• Talema 1000:1 Current Transformer\nSamples Active AC Power (Pac)", fillcolor="#FFFFFF", color="#276749"];
+        dc_sense [label="Secondary DC Power Metering\n• TI INA226 16-Bit I2C Monitor\n• 10mΩ Kelvin Precision Shunt\nSamples Regulated DC Power (Pdc)", fillcolor="#FFFFFF", color="#276749"];
+        eff_math [label="Real-Time Efficiency Math (10Hz)\nη = (Pdc / Pac) × 100%\nComputes '91.2%' Conversion Efficiency", fillcolor="#C6F6D5", color="#22543D", penwidth=1.8];
+        ac_sense -> eff_math [label=" Pac", color="#276749"];
+        dc_sense -> eff_math [label=" Pdc", color="#276749"];
+    }
+
+    subgraph cluster_data_storage {
+        label = "AUTONOMOUS EMBEDDED LOGGING";
+        style = "filled,rounded";
+        fillcolor = "#FFFAF0";
+        color = "#C05621";
+        sd_logger [label="MicroSD FatFs Logging Task\n• Ring-Buffered CSV Frames\n• Auto-flushes via f_sync() every 5s\n• Autonomous Zero-Data-Loss Storage", fillcolor="#FEEBC8", color="#9C4221", penwidth=1.8];
+    }
+
+    ate_pc -> usb_phy [label=" 1. ':VOLT 15.0;:CURR 2.0;:OUTP ON'", color="#1A365D", penwidth=2.0];
+    ate_pc -> usb_phy [label=" 2. Query ':MEAS:EFF?'", color="#2B6CB0", penwidth=1.8];
+    scpi_parser -> eff_math [label=" Request Live Telemetry", color="#285E61"];
+    eff_math -> scpi_parser [label=" Returns '91.2%'", color="#285E61"];
+    scpi_parser -> usb_phy [label=" Format SCPI ASCII", color="#285E61"];
+    usb_phy -> ate_pc [label=" 3. Reply '91.2%' (< 2ms)", color="#2B6CB0", penwidth=2.0];
+    eff_math -> sd_logger [label=" Write 10Hz CSV Record", color="#C05621", penwidth=1.6];
+}

@@ -371,6 +371,8 @@ When explaining this diagram to your mentor, walk through the blocks from left t
 | 5 | **UC-05** | Host PC / ATE | Automated Production Testing via SCPI | USB-C connected to PC running automated test script. | PC script sends `:VOLT 5.0; :CURR 1.0; :OUTP ON`, then queries `:MEAS:EFF?`. Unit executes commands and replies with `88.4%`. | Automated test passes and logs result with zero human intervention. |
 
 #### Figure 2: Major Use Case 1 - Precision Voltage Setpoint Tuning Sequence
+![Figure 2: Major Use Case 1 - Precision Voltage Setpoint Tuning Sequence](diagram_use_case_1_voltage_tuning.png)
+
 ```mermaid
 flowchart TD
     A["Operator Turns Knob or Host sends ':VOLT 12.0'"] --> B["STM32 MCU Decodes Setpoint & Updates 12-Bit DAC1 to 1.76V"]
@@ -381,6 +383,8 @@ flowchart TD
 ```
 
 #### Figure 3: Major Use Case 2 - Automated ATE SCPI Control & Telemetry Flow
+![Figure 3: Major Use Case 2 - Automated ATE SCPI Control & Telemetry Flow](diagram_use_case_2_ate_automation.png)
+
 ```mermaid
 sequenceDiagram
     autonumber
@@ -490,6 +494,12 @@ The development of the power supply spans four core engineering domains working 
    * **DAC Voltage Steering**: Microcontroller 12-bit DAC1 injects current into the LM5176 feedback resistor divider ($49.9\,\text{k}\Omega / 11.0\,\text{k}\Omega / 3.65\,\text{k}\Omega$), giving a smooth digital resolution of $3.65\,\text{mV}$ per step.
    * **Hardware CC Overload Clamp**: $10\,\text{m}\Omega$ precision current shunt + INA240A2 current amplifier ($50\,\text{V/V}$) + ultra-fast TLV3501 analog comparator pulling down the `COMP` pin in $< 5\,\mu\text{s}$ during overload, guaranteeing total protection before software even wakes up.
 
+#### Figure 4: Dual-Closed-Loop Control & Hardware Protection Flow Diagram
+![Figure 4: Dual-Closed-Loop Control & Hardware Protection Flow Diagram](diagram_control_protection_flow.png)
+
+#### Figure 5: 1.3-inch Local OLED Dashboard Graphical Layout & Wireframe
+![Figure 5: 1.3-inch Local OLED Dashboard Graphical Layout & Wireframe](diagram_oled_dashboard_wireframe.png)
+
 ---
 
 ### 4.2 System 2 Requirements: Embedded Control & Telemetry Software
@@ -595,30 +605,36 @@ Derives stable internal $+12\,\text{V}$, $+5\,\text{V}$, and $+3.3\,\text{V}$ bi
 
 ---
 
-### 8.2 System 1: Domain 2 Architecture (Firmware & Control Loop)
+### 8.2 System 1: Domain 2 Architecture (Mechanical Enclosure & Thermal Architecture)
 
-The firmware runs on a preemptive FreeRTOS multitasking kernel on the STM32G474 MCU:
-1. **Protection Supervisory Task ($1\,\text{ms}$ period, highest priority)**: Monitors voltage/current thresholds, thermal sensor, and controls the emergency disconnect switch.
-2. **Telemetry & Efficiency Task ($100\,\text{ms}$ period, high priority)**: Reads AMC1311 AC power and INA226 DC power, computes efficiency ($\eta$), and updates shared memory queues.
-3. **Local GUI Task ($100\,\text{ms}$ period, medium priority)**: Renders the real-time graphical dashboard on the 1.3" OLED display and services rotary encoder knob turns.
-4. **Data Logger Task ($100\,\text{ms} \dots 10\,\text{s}$, low priority)**: Writes timestamped telemetry records to the MicroSD card in FAT32 CSV format.
-5. **SCPI Parser Task (event-driven, medium priority)**: Receives commands over USB-CDC, sets DAC voltages, and sends back measurement responses.
+The mechanical enclosure protects internal electronics, provides heat sinking, and maintains IEC 62368-1 electrical isolation:
+* **Enclosure Specifications**: Heavy-duty extruded anodized aluminum 6063-T5 shell ($130\,\text{mm}\times 85\,\text{mm}\times 42\,\text{mm}$, $2.0\,\text{mm}$ wall) with card guide slots for the 1.6mm 4-layer FR-4 PCBA.
+* **Front Panel Ergonomics**: Dual gold-plated 4mm binding posts (30A rating), rotary optical encoders with push switch, illuminated output enable tactile button, and protective acrylic window for the 1.3" OLED display.
+* **Rear Panel Interfaces**: IEC 320-C14 AC inlet with integral 2A fuse drawer and double-pole power rocker switch, USB Type-C receptacle, and push-push MicroSD slot.
+* **Thermal Management**: Primary Flyback MOSFET (IPB80R290P7 D2PAK) and secondary synchronous rectifier (BSC052N06NS) thermally coupled to the chassis base via high-performance thermal gap pads ($3.0\,\text{W/m}\cdot\text{K}, \theta_{jc} < 1.2^\circ\text{C/W}$). Natural convection keeps chassis temperature $< 60^\circ\text{C}$ at full 60W load.
+* **Isolation Barrier**: Physical $6.4\,\text{mm}$ milled PCB air slot routed across the isolation boundary beneath the transformer and optocouplers, ensuring complete creepage compliance.
 
-```text
-+----------------------------------------------------------------------------------------------+
-| 1.3-INCH LOCAL OLED DASHBOARD WIREFRAME LAYOUT (128 x 64 GRAPHICAL DISPLAY)                  |
-+----------------------------------------------------------------------------------------------+
-  +------------------------------------------------------------------------------------------+ 
-  | SET: 12.00 V   3.00 A       [CV MODE]                                     STATUS: LIVE   | 
-  | ---------------------------------------------------------------------------------------- | 
-  |    VOUT:   12.04 V                          IOUT:   2.98 A                               | 
-  |    POUT:   35.88 W                          PIN:    38.45 W                              | 
-  |                                                                                          | 
-  |    EFFICIENCY:  [========================================>  ]  93.3 %                    | 
-  | ---------------------------------------------------------------------------------------- | 
-  |  TEMP: 42°C  |  SD: LOGGING [00:14:32]  |  USB: ATE REMOTE ACTIVE                        | 
-  +------------------------------------------------------------------------------------------+ 
-```
+#### Figure 7: System 1 Domain 2 (Mechanical) Enclosure & Thermal Architecture Block Diagram
+![Figure 7: System 1 Domain 2 (Mechanical) Enclosure & Thermal Architecture](diagram_mechanical_enclosure_thermal.png)
+
+---
+
+### 8.3 System 2: Domain 1 Architecture (Embedded Software Multitasking FreeRTOS Architecture)
+
+The embedded firmware executes on the STM32G474 ARM Cortex-M4F microcontroller using the FreeRTOS v10.4 preemptive multitasking kernel with a $1\,\text{ms}$ SysTick timer:
+1. **Task 1: Protection & Fault Supervisory Task (Priority: Real-Time / Highest, Period: 1ms)**:
+   Monitors ADC OVP/OTP trip thresholds, services emergency hardware shutdown line, and commands the high-side output gate disconnect FET.
+2. **Task 2: Dual-Domain Power Telemetry Task (Priority: High / 4, Period: 100ms / 10Hz)**:
+   Samples AMC1311 AC voltage/current and INA226 DC rail, executes floating-point efficiency calculation ($\eta = [P_{DC}/P_{AC}]\times 100\%$), applies 8-tap EMA filter, and pushes records to the inter-task telemetry queue.
+3. **Task 3: SCPI Parser & USB-CDC Task (Priority: Medium / 3, Event-Driven)**:
+   Consumes USB byte stream, parses IEEE 488.2 commands (`:VOLT`, `:CURR`, `:OUTP`, `:MEAS:EFF?`), writes voltage/current setpoints under mutex protection, and formats SCPI response strings.
+4. **Task 4: MicroSD FatFs Logging Task (Priority: Low / 2, Period: 100ms)**:
+   Dequeues telemetry records from `xQueueTelemetry`, buffers CSV text lines into memory sectors, and flushes to physical FAT32 flash card every 5 seconds via `f_sync()`.
+5. **Task 5: OLED Graphical UI & Encoder Task (Priority: Low / 1, Period: 100ms / 10 fps)**:
+   Renders the 128x64 display buffer, draws dynamic efficiency bar graphs, and debounces quadrature encoder knob steps.
+
+#### Figure 8: System 2 Domain 1 (Embedded Software) Multitasking FreeRTOS Architecture Block Diagram
+![Figure 8: System 2 Domain 1 (Embedded Software) Multitasking FreeRTOS Architecture](diagram_freertos_firmware_architecture.png)
 
 ---
 
