@@ -39,59 +39,52 @@ The **Smart Programmable Power Supply Module** is an intelligent, digitally cont
 
 The module adopts a two-stage cascaded conversion architecture with isolated primary control and intelligent secondary digital regulation:
 
-```text
-  85-265V AC
-  Mains In
-     │
-     ├───[ Fuse 2A ]───[ NTC Inrush ]───[ EMI Filter (X2, CMC) ]───[ Bridge Rectifier ]
-     │                                                                      │
-     │                                                                   +V_RECT (120V - 375V DC)
-     │                                                                      │
-     │   ┌──────────────────────────────────────────────────────────────────┴──────────────────┐
-     │   │                               STAGE 1: AC-DC FLYBACK CONVERTER                     │
-     │   │                                                                                     │
-     │   │  ┌──────────────┐     PQ26/20 Transformer     ┌──────────────────┐                  │
-     │   │  │ QR Flyback   ├─────[ Np ]       [ Ns ]─────┤ Synchronous      ├── +24V Intermediate
-     │   │  │ Controller   │         ││       ││         │ Rectifier        │    Bus (72W)
-     │   │  │ (UCC28740)   │     [ Aux ]      ││         │ (MP6908 + MOSFET)│         │
-     │   │  └──────┬───────┘         ││       ││         └────────┬─────────┘         │
-     │   │         │                  │       │                   │                   │
-     │   │    Primary FET             │       │              TL431 + PC817            │
-     │   │    (Superjunction)         │       │              Opto Feedback            │
-     │   └────────────────────────────┼───────┼───────────────────┬───────────────────┘
-     │                                │       │                   │
-     │     ===========================│=======│===================│========================
-     │     REINFORCED SAFETY ISOLATION│BARRIER│ (>= 6.4mm Creepage│ / 3000V RMS Hipot)
-     │     ===========================│=======│===================│========================
-     │                                │       │                   │
-     │                                │       │                   │
-     │   ┌────────────────────────────┴───────┴───────────────────┴───────────────────┐
-     │   │                      STAGE 2: SYNCHRONOUS BUCK-BOOST POST-REGULATOR        │
-     │   │                                                                            │
-     │   │  +24V In ────[ 4-Switch Sync Buck-Boost H-Bridge ]────┬────> +V_OUT (5V-20V @ 3A)
-     │   │              (Buck-Boost Inductor + 4x MOSFETs)       │      Programmable DC
-     │   │                                │                      │
-     │   │                      High-Resolution PWM /            │
-     │   │                      DAC Feedback Injection           │
-     │   └────────────────────────────────┼──────────────────────┼────────────────────┘
-     │                                    │                      │
-     │   ┌────────────────────────────────┴──────────────────────┴────────────────────┐
-     │   │                   STAGE 3: MCU CONTROL, SENSING & TELEMETRY                │
-     │   │                                                                            │
-     │   │  ┌──────────────────┐   ┌──────────────────┐   ┌─────────────────────────┐ │
-     │   │  │ AC Power Metering│   │ DC Power Metering│   │ STM32G4 / ESP32-S3 MCU  │ │
-     │   │  │ (ADE7953 /       │   │ (INA226 I2C      │   │ - 32-bit Cortex Core    │ │
-     │   │  │  AMC1311 Isolated│   │  0.1% Shunt)     │   │ - Real-time η = Pdc/Pac │ │
-     │   │  │  RMS V, I, P_ac) │   │  True V, I, P_dc │   │ - CV / CC State Machine │ │
-     │   │  └────────┬─────────┘   └────────┬─────────┘   └────────────┬────────────┘ │
-     │   │           │                      │                          │              │
-     │   │           └──────────────────────┴─────────────┬────────────┘              │
-     │   │                                                │                           │
-     │   │  ┌────────────────────┐   ┌────────────────────┴───┐   ┌─────────────────┐ │
-     │   │  │ MicroSD Logger     │   │ 1.3" OLED Display      │   │ USB-C / SCPI    │ │
-     │   │  │ (FAT32 CSV Log)    │   │ (V, I, P, η, Temp)     │   │ Telemetry & CLI │ │
-     │   └──┴────────────────────┴───┴────────────────────────┴───┴─────────────────┴─┘
+$$\text{Mains Supply } (85\text{--}265\,\text{V AC}) \longrightarrow \text{Rectifier } (+120\text{--}375\,\text{V DC}) \longrightarrow \text{Converter DC-DC (Flyback } +24\,\text{V}) \longrightarrow \text{Final Stage (Buck-Boost } 5\text{--}20\,\text{V}) \longrightarrow \text{Device (DUT)}$$
+
+### Figure 1: Simplified 4-Stage Power Conversion Block Diagram
+The primary block diagram for mentor reviews and cross-mentor technical defense:
+
+<p align="center">
+  <img src="diagram_simple_power_flow.png" alt="Figure 1: Simplified Power Flow Block Diagram" width="100%"/>
+</p>
+
+```mermaid
+flowchart LR
+    %% Domain Styles
+    classDef acStyle fill:#ECEFF1,stroke:#37474F,stroke-width:2px,color:#263238
+    classDef rectStyle fill:#FFF3E0,stroke:#E65100,stroke-width:2px,color:#BF360C
+    classDef isoStyle fill:#C8E6C9,stroke:#2E7D32,stroke-width:2px,color:#1B5E20
+    classDef bbStyle fill:#B2EBF2,stroke:#00838F,stroke-width:2px,color:#004D40
+    classDef dutStyle fill:#E1BEE7,stroke:#6A1B9A,stroke-width:2px,color:#4A148C
+
+    subgraph HOT_DOMAIN ["PRIMARY HOT DOMAIN (High Voltage)"]
+        S1["1. MAINS SUPPLY<br/>• 85V - 265V AC RMS<br/>• 2A Fuse, 10Ω NTC, MOV<br/>• 2-Stage EMI Filter"]:::acStyle
+        S2["2. RECTIFIER & BULK<br/>• GBU606 Bridge (600V, 6A)<br/>• 100µF / 450V Bulk Cap<br/>• +120V to +375V DC Bus"]:::rectStyle
+        S1 -->|"Filtered AC"| S2
+    end
+
+    subgraph COLD_DOMAIN ["SECONDARY COLD DOMAIN (Touch-Safe SELV)"]
+        S3["3. CONVERTER DC-DC<br/>• QR Flyback (TI UCC28740)<br/>• PQ26/20 Core (Lp = 220µH)<br/>• ⚡ 3000V RMS Safety Isolation<br/>• Sync Rectifier (BSC052N06NS)<br/>• +24.0V DC Intermediate Rail (72W)"]:::isoStyle
+        S4["4. FINAL STAGE<br/>• 4-Switch Buck-Boost (TI LM5176)<br/>• 4x 40V Low-Rds MOSFETs<br/>• Analog DAC Steering (10mV)<br/>• Fast < 5µs CC Hardware Clamp<br/>• 5.0V - 20.0V DC / 3.0A (60W)"]:::bbStyle
+        S3 -->|"+24.0V DC Rail"| S4
+    end
+
+    subgraph LOAD_DOMAIN ["APPLICATION"]
+        S5["5. TARGET DEVICE (DUT)<br/>• 4mm Gold Binding Posts<br/>• Clean DC: Ripple < 25mV pk-pk<br/>• Overload Protected"]:::dutStyle
+    end
+
+    S2 ==>|"⚡ 3000V Isolation Barrier"| S3
+    S4 -->|"Regulated Output"| S5
 ```
+
+---
+
+### Figure 2: Master Embedded Hardware Architecture Block Diagram
+The complete embedded hardware schematic-level architecture showing gate drivers, auxiliary supplies, analog feedback loops, and dual-domain power sensing:
+
+<p align="center">
+  <img src="smart_programmable_power_supply_system_block_diagram.png" alt="Figure 2: Master Embedded Hardware Architecture Block Diagram" width="100%"/>
+</p>
 
 ---
 

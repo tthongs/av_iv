@@ -4,6 +4,52 @@ Welcome to your central tracking workspace for embedded systems, hardware protoc
 
 ---
 
+## ⚡ Featured Project: Smart Programmable Power Supply (85–265V AC In, 5–20V / 3A DC Out)
+
+An intelligent, digitally controlled bench and industrial power supply module engineered for precision DC regulation ($5.0\,\text{V} \dots 20.0\,\text{V}$ DC @ up to $3.0\,\text{A}$, $60\,\text{W}$ max continuous) from universal AC mains ($85\,\text{V} \dots 265\,\text{V}$ AC RMS, $47\text{--}63\,\text{Hz}$).
+
+### Simplified 4-Stage Power Conversion Block Diagram
+$$\text{Mains Supply } (85\text{--}265\,\text{V AC}) \longrightarrow \text{Rectifier } (+120\text{--}375\,\text{V DC}) \longrightarrow \text{Converter DC-DC (Flyback } +24\,\text{V}) \longrightarrow \text{Final Stage (Buck-Boost } 5\text{--}20\,\text{V}) \longrightarrow \text{Device (DUT)}$$
+
+<p align="center">
+  <img src="smart_programmable_power_supply/diagram_simple_power_flow.png" alt="Simplified 4-Stage Power Flow Block Diagram" width="100%"/>
+</p>
+
+```mermaid
+flowchart LR
+    %% Domain Styles
+    classDef acStyle fill:#ECEFF1,stroke:#37474F,stroke-width:2px,color:#263238
+    classDef rectStyle fill:#FFF3E0,stroke:#E65100,stroke-width:2px,color:#BF360C
+    classDef isoStyle fill:#C8E6C9,stroke:#2E7D32,stroke-width:2px,color:#1B5E20
+    classDef bbStyle fill:#B2EBF2,stroke:#00838F,stroke-width:2px,color:#004D40
+    classDef dutStyle fill:#E1BEE7,stroke:#6A1B9A,stroke-width:2px,color:#4A148C
+
+    subgraph HOT_DOMAIN ["PRIMARY HOT DOMAIN (High Voltage)"]
+        S1["1. MAINS SUPPLY<br/>• 85V - 265V AC RMS<br/>• 2A Fuse, 10Ω NTC, MOV<br/>• 2-Stage EMI Filter"]:::acStyle
+        S2["2. RECTIFIER & BULK<br/>• GBU606 Bridge (600V, 6A)<br/>• 100µF / 450V Bulk Cap<br/>• +120V to +375V DC Bus"]:::rectStyle
+        S1 -->|"Filtered AC"| S2
+    end
+
+    subgraph COLD_DOMAIN ["SECONDARY COLD DOMAIN (Touch-Safe SELV)"]
+        S3["3. CONVERTER DC-DC<br/>• QR Flyback (TI UCC28740)<br/>• PQ26/20 Core (Lp = 220µH)<br/>• ⚡ 3000V RMS Safety Isolation<br/>• Sync Rectifier (BSC052N06NS)<br/>• +24.0V DC Intermediate Rail (72W)"]:::isoStyle
+        S4["4. FINAL STAGE<br/>• 4-Switch Buck-Boost (TI LM5176)<br/>• 4x 40V Low-Rds MOSFETs<br/>• Analog DAC Steering (10mV)<br/>• Fast < 5µs CC Hardware Clamp<br/>• 5.0V - 20.0V DC / 3.0A (60W)"]:::bbStyle
+        S3 -->|"+24.0V DC Rail"| S4
+    end
+
+    subgraph LOAD_DOMAIN ["APPLICATION"]
+        S5["5. TARGET DEVICE (DUT)<br/>• 4mm Gold Binding Posts<br/>• Clean DC: Ripple < 25mV pk-pk<br/>• Overload Protected"]:::dutStyle
+    end
+
+    S2 ==>|"⚡ 3000V Isolation Barrier"| S3
+    S4 -->|"Regulated Output"| S5
+```
+
+- 📄 **Hardware PRD**: [PRODUCT_REQUIREMENT_DOCUMENT_PRD.md](smart_programmable_power_supply/PRODUCT_REQUIREMENT_DOCUMENT_PRD.md)
+- 📥 **Word Deliverables**: [PRODUCT_REQUIREMENT_DOCUMENT_PRD.docx](smart_programmable_power_supply/PRODUCT_REQUIREMENT_DOCUMENT_PRD.docx) | [PRD.docx](smart_programmable_power_supply/PRD.docx)
+- 📂 **Full Hardware Architecture Dossiers**: [smart_programmable_power_supply/](smart_programmable_power_supply/)
+
+---
+
 ## Workspace Structure
 
 ```text
