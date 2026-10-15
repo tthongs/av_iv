@@ -11,8 +11,8 @@
 <polygon fill="#ffffff" stroke="none" points="-14.4,14.4 -14.4,-543.4 1333.66,-543.4 1333.66,14.4 -14.4,14.4"/>
 <g id="clust1" class="cluster">
 <title>cluster_pri_aux</title>
-<path fill="#fff3e0" stroke="#e65100" d="M20,-8C20,-8 698.46,-8 698.46,-8 704.46,-8 710.46,-14 710.46,-20 710.46,-20 710.46,-73 710.46,-73 710.46,-79 704.46,-85 698.46,-85 698.46,-85 20,-85 20,-85 14,-85 8,-79 8,-73 8,-73 8,-20 8,-20 8,-14 14,-8 20,-8"/>
-<text xml:space="preserve" text-anchor="middle" x="359.23" y="-68.65" font-family="DejaVu Sans, Arial, Helvetica, sans-serif" font-size="13.00">PRIMARY AUXILIARY BIAS (GND_PRI)</text>
+<path fill="#fff3e0" stroke="#e65100" d="M20,-8C20,-8 694.71,-8 694.71,-8 700.71,-8 706.71,-14 706.71,-20 706.71,-20 706.71,-73 706.71,-73 706.71,-79 700.71,-85 694.71,-85 694.71,-85 20,-85 20,-85 14,-85 8,-79 8,-73 8,-73 8,-20 8,-20 8,-14 14,-8 20,-8"/>
+<text xml:space="preserve" text-anchor="middle" x="357.36" y="-68.65" font-family="DejaVu Sans, Arial, Helvetica, sans-serif" font-size="13.00">PRIMARY AUXILIARY BIAS (GND_PRI)</text>
 </g>
 <g id="clust2" class="cluster">
 <title>cluster_sec_aux</title>
@@ -53,15 +53,15 @@
 <!-- ucc_vcc -->
 <g id="node3" class="node">
 <title>ucc_vcc</title>
-<path fill="#ffffff" stroke="#e65100" stroke-width="1.4" d="M690.46,-52C690.46,-52 557.68,-52 557.68,-52 551.68,-52 545.68,-46 545.68,-40 545.68,-40 545.68,-28 545.68,-28 545.68,-22 551.68,-16 557.68,-16 557.68,-16 690.46,-16 690.46,-16 696.46,-16 702.46,-22 702.46,-28 702.46,-28 702.46,-40 702.46,-40 702.46,-46 696.46,-52 690.46,-52"/>
-<text xml:space="preserve" text-anchor="middle" x="624.07" y="-36.7" font-family="DejaVu Sans, Arial, Helvetica, sans-serif" font-size="9.00">TI UCC28740 VDD Pin</text>
-<text xml:space="preserve" text-anchor="middle" x="624.07" y="-25.45" font-family="DejaVu Sans, Arial, Helvetica, sans-serif" font-size="9.00">Primary Flyback Controller Bias</text>
+<path fill="#ffffff" stroke="#e65100" stroke-width="1.4" d="M686.71,-52C686.71,-52 561.43,-52 561.43,-52 555.43,-52 549.43,-46 549.43,-40 549.43,-40 549.43,-28 549.43,-28 549.43,-22 555.43,-16 561.43,-16 561.43,-16 686.71,-16 686.71,-16 692.71,-16 698.71,-22 698.71,-28 698.71,-28 698.71,-40 698.71,-40 698.71,-46 692.71,-52 686.71,-52"/>
+<text xml:space="preserve" text-anchor="middle" x="624.07" y="-36.7" font-family="DejaVu Sans, Arial, Helvetica, sans-serif" font-size="9.00">UC3843 / UCC28C43 VCC Pin</text>
+<text xml:space="preserve" text-anchor="middle" x="624.07" y="-25.45" font-family="DejaVu Sans, Arial, Helvetica, sans-serif" font-size="9.00">Primary PWM Controller Bias</text>
 </g>
 <!-- pri_rect&#45;&gt;ucc_vcc -->
 <g id="edge2" class="edge">
 <title>pri_rect&#45;&gt;ucc_vcc</title>
-<path fill="none" stroke="#e65100" stroke-width="1.6" d="M452.6,-34C479.31,-34 508.77,-34 535.58,-34"/>
-<polygon fill="#e65100" stroke="#e65100" stroke-width="1.6" points="535.41,-36.63 542.91,-34 535.41,-31.38 535.41,-36.63"/>
+<path fill="none" stroke="#e65100" stroke-width="1.6" d="M452.6,-34C480.6,-34 511.62,-34 539.44,-34"/>
+<polygon fill="#e65100" stroke="#e65100" stroke-width="1.6" points="539.22,-36.63 546.72,-34 539.22,-31.38 539.22,-36.63"/>
 <text xml:space="preserve" text-anchor="middle" x="494.18" y="-36.15" font-family="DejaVu Sans, Arial, Helvetica, sans-serif" font-size="8.00"> +14V VCC</text>
 </g>
 <!-- bus_24v -->

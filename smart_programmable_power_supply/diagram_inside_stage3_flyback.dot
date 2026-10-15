@@ -74,24 +74,25 @@ digraph InsideStage3Flyback {
         pri_mosfet [
             label = <<table border="0" cellborder="0" cellspacing="2">
                 <tr><td><b>PRIMARY MOSFET (Q1)</b></td></tr>
-                <tr><td><font color="#1565C0">Infineon IPB80R290P7</font></td></tr>
+                <tr><td><font color="#1565C0">STP10NK80Z / IPB80R290P7</font></td></tr>
                 <hr/>
-                <tr><td align="left">• 800V Superjunction</td></tr>
-                <tr><td align="left">• R_DS(on) = 0.29Ω (D2PAK)</td></tr>
-                <tr><td align="left">• Quasi-resonant valley switch</td></tr>
+                <tr><td align="left">• 800V, N-Channel Power FET</td></tr>
+                <tr><td align="left">• R_DS(on) = 0.29Ω (D2PAK / TO-220)</td></tr>
+                <tr><td align="left">• Uniform 65kHz PWM Gate Drive</td></tr>
             </table>>,
             fillcolor = "#BBDEFB",
             color = "#1565C0"
         ];
 
-        qr_controller [
+        pwm_controller [
             label = <<table border="0" cellborder="0" cellspacing="2">
-                <tr><td><b>QR FLYBACK IC (U1)</b></td></tr>
-                <tr><td><font color="#2E7D32">TI UCC28740DR (SOIC-7)</font></td></tr>
+                <tr><td><b>UNIFORM-FREQ PWM IC (U1)</b></td></tr>
+                <tr><td><font color="#2E7D32">UC3843 / UCC28C43 (8-Pin)</font></td></tr>
                 <hr/>
-                <tr><td align="left">• Valley switching detector</td></tr>
-                <tr><td align="left">• Auxiliary winding ZCD</td></tr>
-                <tr><td align="left">• Optocoupler feedback pin</td></tr>
+                <tr><td align="left">• Uniform 65kHz Fixed Clock</td></tr>
+                <tr><td align="left">• RT = 10kΩ, CT = 2.2nF Timing</td></tr>
+                <tr><td align="left">• Cycle-by-cycle Current Limit</td></tr>
+                <tr><td align="left">• Direct Totem-Pole Gate Out</td></tr>
             </table>>,
             fillcolor = "#C8E6C9",
             color = "#2E7D32"
@@ -99,11 +100,11 @@ digraph InsideStage3Flyback {
 
         aux_winding [
             label = <<table border="0" cellborder="0" cellspacing="2">
-                <tr><td><b>AUX WINDING (6T)</b></td></tr>
-                <tr><td><font color="#6A1B9A">+14.0V Bias &amp; Demag</font></td></tr>
+                <tr><td><b>AUX WINDING (TX1_AUX)</b></td></tr>
+                <tr><td><font color="#6A1B9A">+14.0V Bias Supply (5T)</font></td></tr>
                 <hr/>
-                <tr><td align="left">• Powers UCC28740 VCC</td></tr>
-                <tr><td align="left">• ZCD zero-cross detection</td></tr>
+                <tr><td align="left">• UF4004 Diode + 47µF Cap</td></tr>
+                <tr><td align="left">• Powers UC3843 VCC pin</td></tr>
             </table>>,
             fillcolor = "#E1BEE7",
             color = "#6A1B9A"
@@ -130,14 +131,14 @@ digraph InsideStage3Flyback {
             color = "#1B5E20"
         ];
 
-        sync_rectifier [
+        schottky_rectifier [
             label = <<table border="0" cellborder="0" cellspacing="2">
-                <tr><td><b>SYNC RECTIFIER (Q_SR)</b></td></tr>
-                <tr><td><font color="#00695C">MP6908 + BSC052N06NS</font></td></tr>
+                <tr><td><b>SCHOTTKY RECTIFIER (D_SEC)</b></td></tr>
+                <tr><td><font color="#00695C">MBR10100 / MBR20100CT</font></td></tr>
                 <hr/>
-                <tr><td align="left">• 60V, 5.2mΩ SuperSO8</td></tr>
-                <tr><td align="left">• Eliminates diode 0.55V drop</td></tr>
-                <tr><td align="left">• Saves ~1.65W dissipation</td></tr>
+                <tr><td align="left">• 100V, 10A Schottky Diode</td></tr>
+                <tr><td align="left">• Simple passive rectification</td></tr>
+                <tr><td align="left">• Robust, no complex driver IC</td></tr>
             </table>>,
             fillcolor = "#B2DFDB",
             color = "#00695C"
@@ -145,11 +146,12 @@ digraph InsideStage3Flyback {
 
         sec_filter [
             label = <<table border="0" cellborder="0" cellspacing="2">
-                <tr><td><b>LC PI OUTPUT FILTER</b></td></tr>
-                <tr><td><font color="#1565C0">470µF Polymer + 2.2µH</font></td></tr>
+                <tr><td><b>OUTPUT LC FILTER</b></td></tr>
+                <tr><td><font color="#1565C0">470µF / 35V Low-ESR + 2.2µH</font></td></tr>
                 <hr/>
-                <tr><td align="left">• Ultra-low ESR bank</td></tr>
-                <tr><td align="left">• Attenuates 80kHz ripple</td></tr>
+                <tr><td align="left">• Smooths 65kHz ripple</td></tr>
+                <tr><td align="left">• Attenuates HF switching spikes</td></tr>
+                <tr><td align="left">• Bus ripple &lt; 50mV pk-pk</td></tr>
             </table>>,
             fillcolor = "#E3F2FD",
             color = "#1565C0"
@@ -158,10 +160,11 @@ digraph InsideStage3Flyback {
         tl431_opto [
             label = <<table border="0" cellborder="0" cellspacing="2">
                 <tr><td><b>ISOLATED FEEDBACK</b></td></tr>
-                <tr><td><font color="#4E342E">TL431 + Opto EL817</font></td></tr>
+                <tr><td><font color="#4E342E">TL431 + Opto PC817 / EL817</font></td></tr>
                 <hr/>
                 <tr><td align="left">• Precision 2.495V shunt</td></tr>
                 <tr><td align="left">• 5000V RMS Optocoupler</td></tr>
+                <tr><td align="left">• Pulls down UC3843 COMP pin</td></tr>
                 <tr><td align="left">• Regulates +24.0V ± 1.0%</td></tr>
             </table>>,
             fillcolor = "#D7CCC8",
@@ -184,13 +187,13 @@ digraph InsideStage3Flyback {
     hvdc_in -> pri_winding [label="HVDC Supply"];
     pri_winding -> rcd_snubber [label="Snubber Clamp", style=dashed, color="#B71C1C"];
     pri_winding -> pri_mosfet [label="Switch Drain"];
-    qr_controller -> pri_mosfet [label="Gate Drive PWM"];
-    aux_winding -> qr_controller [label="ZCD & VCC"];
+    pwm_controller -> pri_mosfet [label="65kHz PWM Gate"];
+    aux_winding -> pwm_controller [label="+14V VCC"];
 
     pri_winding -> sec_winding [label="⚡ 3000V Isolation Barrier", penwidth=3.0, color="#D32F2F", style=bold];
-    sec_winding -> sync_rectifier [label="HF AC Pulses"];
-    sync_rectifier -> sec_filter [label="Rectified DC"];
+    sec_winding -> schottky_rectifier [label="65kHz AC Pulses"];
+    schottky_rectifier -> sec_filter [label="Rectified DC"];
     sec_filter -> bus_24v [label="+24V Rail", color="#004D40", penwidth=2.4];
     bus_24v -> tl431_opto [label="Sense +24V"];
-    tl431_opto -> qr_controller [label="Isolated Feedback", style=dashed, color="#6A1B9A"];
+    tl431_opto -> pwm_controller [label="Isolated Feedback (COMP)", style=dashed, color="#6A1B9A"];
 }

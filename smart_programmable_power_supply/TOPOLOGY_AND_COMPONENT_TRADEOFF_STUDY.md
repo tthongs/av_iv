@@ -281,9 +281,9 @@ This guide is designed as an exhaustive, pedagogical engineering resource explai
 │ **Post-Regulator**         │ 4-Switch Synchronous BB     │ Delivers positive non-inverting rail; │
 │                            │ (TI LM5176)                 │ operates at 96.8% eff in pure buck.   │
 ├────────────────────────────┼─────────────────────────────┼───────────────────────────────────────┤
-│ **Primary Controller**     │ Quasi-Resonant (UCC28740)   │ Valley switching slashes Coss loss 75%│
+│ **Primary Controller**     │ Uniform-Freq PWM (UC3843)   │ Fixed 65kHz clock; predictable EMI    │
 ├────────────────────────────┼─────────────────────────────┼───────────────────────────────────────┤
-│ **Secondary Rectifier**    │ Sync MOSFET (BSC052N06NS)   │ Cuts thermal loss from 1.65W to 0.12W │
+│ **Secondary Rectifier**    │ Schottky Diode (MBR10100)   │ Eliminates sync timing misfire risks  │
 ├────────────────────────────┼─────────────────────────────┼───────────────────────────────────────┤
 │ **Voltage Programming**    │ 12-Bit DAC Current Injection│ Instant analog summing; 3.65mV step   │
 ├────────────────────────────┼─────────────────────────────┼───────────────────────────────────────┤

@@ -32,7 +32,7 @@ digraph AuxPower {
         color = "#E65100";
         naux [label="Transformer Aux Winding Naux (8T)\nFlyback Coupling during Off-time", fillcolor="#FFE0B2", color="#E65100"];
         pri_rect [label="Fast Diode (ES1J) + 22µF/35V Cap\nGenerates +14.0V Primary VCC", fillcolor="#FFFFFF", color="#E65100"];
-        ucc_vcc [label="TI UCC28740 VDD Pin\nPrimary Flyback Controller Bias", fillcolor="#FFFFFF", color="#E65100"];
+        ucc_vcc [label="UC3843 / UCC28C43 VCC Pin\nPrimary PWM Controller Bias", fillcolor="#FFFFFF", color="#E65100"];
 
         naux -> pri_rect -> ucc_vcc [label=" +14V VCC", color="#E65100"];
     }

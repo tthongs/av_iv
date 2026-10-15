@@ -75,17 +75,17 @@ digraph MasterArchitecture {
         tx_pri [label="Transformer Primary\nPQ26/20 Core (3C95)\nNp = 48T | Lp = 220µH", fillcolor="#FFE0B2", color="#E65100"];
         snubber [label="RCD Clamp Snubber\n50kΩ / 2.2nF / UF4007\nClamps Vds Ringing", fillcolor="#FFFFFF", color="#F57C00"];
         pri_mosfet [label="Primary Switch Q1\nIPB80R290P7 (800V, 0.29Ω)\nSuperjunction D2PAK", fillcolor="#FFFFFF", color="#E65100"];
-        pri_ctrl [label="QR Flyback Controller\nTI UCC28740\n• Valley Switching (ZCD)\n• Cycle-by-Cycle Peak CS", fillcolor="#FFFFFF", color="#E65100"];
+        pri_ctrl [label="Uniform-Freq PWM Controller\nUC3843 / UCC28C43\n• Uniform 65kHz Fixed Clock\n• Cycle-by-Cycle Peak CS", fillcolor="#FFFFFF", color="#E65100"];
         pri_rsense [label="Current Sense Shunt\nRsense = 0.2Ω / 2W", fillcolor="#FFFFFF", color="#F57C00"];
         aux_pri [label="Aux Bias Winding\nNaux = 8T (+14V VCC)", fillcolor="#FFE0B2", color="#E65100"];
 
         ac_rect -> tx_pri [label=" +V_BULK", color="#D84315", penwidth=2.2];
         tx_pri -> pri_mosfet [label=" Drain", color="#D84315", penwidth=2.2];
         pri_mosfet -> snubber [dir=both, style=dashed, color="#E65100"];
-        pri_ctrl -> pri_mosfet [label=" Gate", color="#BF360C"];
+        pri_ctrl -> pri_mosfet [label=" Gate (65kHz)", color="#BF360C"];
         pri_mosfet -> pri_rsense [label=" Source", color="#BF360C"];
         pri_rsense -> pri_ctrl [label=" CS", style=dashed, color="#BF360C"];
-        aux_pri -> pri_ctrl [label=" Aux Bias / ZCD", color="#E65100"];
+        aux_pri -> pri_ctrl [label=" Aux Bias (+14V)", color="#E65100"];
     }
 
     subgraph cluster_barrier {
@@ -102,13 +102,13 @@ digraph MasterArchitecture {
     }
 
     subgraph cluster_secondary_flyback {
-        label = "STAGE 1: SECONDARY SYNCHRONOUS RECTIFICATION (SELV SAFE)";
+        label = "STAGE 1: SECONDARY SCHOTTKY RECTIFICATION (SELV SAFE)";
         style = "filled,rounded";
         fillcolor = "#E8F5E9";
         color = "#2E7D32";
         penwidth = 1.6;
 
-        sr_stage [label="Synchronous Rectifier\n• MP6908 Smart Driver\n• BSC052N06NS (60V, 5.2mΩ)\nReplaces Lossy Schottky", fillcolor="#FFFFFF", color="#2E7D32"];
+        sr_stage [label="Schottky Barrier Rectifier\n• MBR10100 (100V, 10A)\n• Passive High-Speed Diodes\n• High Reliability & Low Complexity", fillcolor="#FFFFFF", color="#2E7D32"];
         bus_24v [label="+24.0V Intermediate Bus\n• Regulated 24V DC / 72W\n• Ripple: < 40mV pk-pk\n• 2x 470µF Poly + 4x 10µF MLCC", fillcolor="#A5D6A7", color="#1B5E20", penwidth=2.0];
         tl431_fb [label="Precision Shunt Reference\nTL431 + Compensation\nCloses 24V Reg Loop", fillcolor="#FFFFFF", color="#2E7D32"];
 
@@ -292,16 +292,16 @@ digraph Stage1Flyback {
         snubber_rcd [label="RCD Snubber Clamp\n50kΩ / 2.2nF / UF4007\nDamps Leakage Inductance Ring", fillcolor="#FFFFFF", color="#F57C00"];
         fet_q1 [label="Primary MOSFET Q1\nInfineon IPB80R290P7\n800V Superjunction, 0.29Ω", fillcolor="#FFFFFF", color="#E65100"];
         rsense_pri [label="Current Sense Shunt\nRsense = 0.2Ω / 2W", fillcolor="#FFFFFF", color="#F57C00"];
-        ctrl_ucc [label="QR Flyback Controller\nTI UCC28740\n• Valley Switching ZCD\n• Cycle Peak Current Mode", fillcolor="#FFFFFF", color="#E65100"];
+        ctrl_ucc [label="Uniform-Freq PWM Controller\nUC3843 / UCC28C43\n• Fixed 65kHz Clock (RT/CT)\n• Cycle Peak Current Mode", fillcolor="#FFFFFF", color="#E65100"];
         aux_wind [label="Aux Bias Winding\nNaux = 8T -> +14V VCC", fillcolor="#FFE0B2", color="#E65100"];
 
         cbulk -> pri_wind [label=" +V_BULK", color="#D84315", penwidth=2.2];
         pri_wind -> fet_q1 [label=" Drain", color="#D84315", penwidth=2.2];
         fet_q1 -> snubber_rcd [dir=both, style=dashed, color="#E65100"];
-        ctrl_ucc -> fet_q1 [label=" Gate", color="#BF360C"];
+        ctrl_ucc -> fet_q1 [label=" Gate (65kHz)", color="#BF360C"];
         fet_q1 -> rsense_pri [label=" Source", color="#BF360C"];
         rsense_pri -> ctrl_ucc [label=" CS", style=dashed, color="#BF360C"];
-        aux_wind -> ctrl_ucc [label=" VCC & ZCD", color="#E65100"];
+        aux_wind -> ctrl_ucc [label=" VCC (+14V)", color="#E65100"];
     }
 
     subgraph cluster_sec_barrier {
@@ -314,19 +314,17 @@ digraph Stage1Flyback {
     }
 
     subgraph cluster_sec_sr {
-        label = "SECONDARY SYNCHRONOUS RECTIFIER (GND_SEC)";
+        label = "SECONDARY SCHOTTKY RECTIFIER (GND_SEC)";
         style = "filled,rounded";
         fillcolor = "#E8F5E9";
         color = "#2E7D32";
-        sr_mosfet [label="SR MOSFET Q_SR\nInfineon BSC052N06NS\n60V, 5.2mΩ SuperSO8", fillcolor="#C8E6C9", color="#2E7D32"];
-        sr_driver [label="Smart SR Controller\nMonolithic Power MP6908\nFast Vds Zero-Crossing Sensing", fillcolor="#FFFFFF", color="#2E7D32"];
+        schottky_d [label="Schottky Rectifier D_SEC\nMBR10100 (100V, 10A)\nPassive Schottky Rectification", fillcolor="#C8E6C9", color="#2E7D32"];
         out_cap_24v [label="Intermediate Bus Filter\n2x 470µF Polymer + 4x 10µF MLCC\nUltra-low ESR Bank", fillcolor="#FFFFFF", color="#2E7D32"];
         bus_out [label="+24.0V Intermediate DC Rail\n72W Max Power | Ripple < 40mV pk-pk\nPowers Stage 2 Buck-Boost", fillcolor="#A5D6A7", color="#1B5E20", penwidth=2.0];
         tl431 [label="Precision Shunt Regulator\nTI TL431 (2.495V Reference)\nType-II Loop Compensation", fillcolor="#FFFFFF", color="#2E7D32"];
 
-        sec_wind -> sr_mosfet [label=" AC Pulse", color="#2E7D32", penwidth=2.0];
-        sr_driver -> sr_mosfet [label=" Gate", color="#2E7D32"];
-        sr_mosfet -> out_cap_24v -> bus_out [color="#2E7D32", penwidth=2.2];
+        sec_wind -> schottky_d [label=" AC Pulse", color="#2E7D32", penwidth=2.0];
+        schottky_d -> out_cap_24v -> bus_out [color="#2E7D32", penwidth=2.2];
         bus_out -> tl431 [label=" Bus Sense", color="#2E7D32"];
         tl431 -> opto_fb [label=" LED Drive", color="#C62828"];
         opto_fb -> ctrl_ucc [label=" FB Feedback", color="#C62828"];
@@ -632,7 +630,7 @@ digraph AuxPower {
         color = "#E65100";
         naux [label="Transformer Aux Winding Naux (8T)\nFlyback Coupling during Off-time", fillcolor="#FFE0B2", color="#E65100"];
         pri_rect [label="Fast Diode (ES1J) + 22µF/35V Cap\nGenerates +14.0V Primary VCC", fillcolor="#FFFFFF", color="#E65100"];
-        ucc_vcc [label="TI UCC28740 VDD Pin\nPrimary Flyback Controller Bias", fillcolor="#FFFFFF", color="#E65100"];
+        ucc_vcc [label="UC3843 / UCC28C43 VCC Pin\nPrimary PWM Controller Bias", fillcolor="#FFFFFF", color="#E65100"];
 
         naux -> pri_rect -> ucc_vcc [label=" +14V VCC", color="#E65100"];
     }

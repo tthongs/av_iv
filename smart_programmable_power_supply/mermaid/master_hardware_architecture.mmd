@@ -27,46 +27,46 @@ flowchart LR
     %% -------------------------------------------------------------
     %% SUBGRAPH 2: PRIMARY FLYBACK
     %% -------------------------------------------------------------
-    subgraph STAGE1_PRIMARY["Stage 1: Isolated Primary QR Flyback (GND_PRI)"]
-        TX_PRI["Transformer Primary Winding<br/>PQ26/20 Core (3C95 Ferrite)<br/>Np = 48T | Lp = 220µH"]:::priStyle
-        SNUBBER["RCD Clamp Snubber<br/>50kΩ / 2.2nF / UF4007<br/>Clamps Vds Ringing"]:::priStyle
-        Q1_FET["Primary MOSFET Q1<br/>Infineon IPB80R290P7<br/>800V Superjunction, 0.29Ω"]:::priStyle
-        UCC_CTRL["QR Flyback Controller<br/>TI UCC28740<br/>• Valley Switching (ZCD)<br/>• Cycle Peak Current Mode"]:::priStyle
-        R_SENSE["Current Sense Shunt<br/>R_sense = 0.2Ω / 2W"]:::priStyle
-        AUX_WIND["Aux Bias Winding<br/>Naux = 8T (+14V VCC)"]:::priStyle
+    subgraph STAGE1_PRIMARY["Stage 3: Uniform-Frequency Isolated Flyback (GND_PRI)"]
+        TX_PRI["Transformer Primary Winding<br/>PQ26/20 Core (3C95 Ferrite)<br/>Np = 36T | Lp = 220µH"]:::priStyle
+        SNUBBER["RCD Clamp Snubber<br/>US1M + 22kΩ 3W + 1nF 1kV<br/>Clamps Vds Ringing"]:::priStyle
+        Q1_FET["Primary MOSFET Q1<br/>STP10NK80Z / IPB80R290P7<br/>800V N-FET, 0.29Ω"]:::priStyle
+        UCC_CTRL["Uniform-Freq PWM Controller<br/>UC3843 / UCC28C43<br/>• Fixed 65kHz Clock (RT/CT)<br/>• Cycle-by-Cycle Peak CS"]:::priStyle
+        R_SENSE["Current Sense Shunt<br/>R_sense = 0.25Ω / 2W"]:::priStyle
+        AUX_WIND["Aux Bias Winding<br/>Naux = 5T (+14V VCC)"]:::priStyle
 
         RECT_BULK -->|+V_BULK| TX_PRI
         TX_PRI -->|Drain| Q1_FET
         Q1_FET -.->|Damping| SNUBBER
-        UCC_CTRL -->|Gate Drive| Q1_FET
+        UCC_CTRL -->|65kHz PWM Gate| Q1_FET
         Q1_FET -->|Source| R_SENSE
         R_SENSE -.->|CS Sense| UCC_CTRL
-        AUX_WIND -->|VCC & ZCD| UCC_CTRL
+        AUX_WIND -->|+14V VCC| UCC_CTRL
     end
 
     %% -------------------------------------------------------------
     %% SUBGRAPH 3: REINFORCED ISOLATION BARRIER
     %% -------------------------------------------------------------
     subgraph ISO_BARRIER["Reinforced Safety Isolation Barrier (IEC 62368-1)"]
-        ISO_TX["Galvanic Isolation Transformer<br/>PQ26/20 TIW Secondary (12T)<br/>Reinforced 3kV RMS Withstand"]:::isoStyle
+        ISO_TX["Galvanic Isolation Transformer<br/>PQ26/20 TIW Secondary (6T)<br/>Reinforced 3kV RMS Withstand"]:::isoStyle
         ISO_OPTO["PC817 Optocoupler<br/>5kV RMS Isolation<br/>Voltage Feedback"]:::isoStyle
         ISO_AMC["TI AMC1311 ΔΣ Modulator<br/>5kV RMS Isolation<br/>AC Voltage Bitstream"]:::isoStyle
         ISO_CT["Talema AC1005 (1000:1 CT)<br/>Galvanic Magnetic Isolation<br/>AC Current Sense"]:::isoStyle
     end
 
     %% -------------------------------------------------------------
-    %% SUBGRAPH 4: SECONDARY SR & 24V BUS
+    %% SUBGRAPH 4: SECONDARY SCHOTTKY & 24V BUS
     %% -------------------------------------------------------------
-    subgraph STAGE1_SECONDARY["Stage 1: Secondary Synchronous Rectification (SELV)"]
-        SR_STAGE["Synchronous Rectification<br/>• MP6908 Smart Controller<br/>• BSC052N06NS (60V, 5.2mΩ)<br/>Replaces Lossy Schottky"]:::secPwrStyle
-        BUS_24V["+24.0V Intermediate DC Bus<br/>• 72W Max Continuous Power<br/>• Low Ripple: < 40mV pk-pk<br/>• 2x 470µF Poly + 4x 10µF MLCC"]:::secPwrStyle
-        TL431_REG["Precision Reference<br/>TI TL431 (2.495V)<br/>Type-II Loop Compensation"]:::secPwrStyle
+    subgraph STAGE1_SECONDARY["Stage 3: Secondary Schottky Rectification (SELV)"]
+        SR_STAGE["Schottky Barrier Rectifier<br/>• MBR10100 (100V, 10A)<br/>• Passive Fast Rectification<br/>• High Reliability & Low Complexity"]:::secPwrStyle
+        BUS_24V["+24.0V Intermediate DC Bus<br/>• 72W Max Continuous Power<br/>• Low Ripple: < 50mV pk-pk<br/>• 470µF Low-ESR + 2.2µH LC"]:::secPwrStyle
+        TL431_REG["Precision Reference<br/>TI TL431 (2.495V)<br/>Closed-Loop Regulation"]:::secPwrStyle
 
         ISO_TX -->|Switched AC| SR_STAGE
         SR_STAGE -->|+24V DC| BUS_24V
         BUS_24V -->|Bus Sense| TL431_REG
         TL431_REG -->|LED Drive| ISO_OPTO
-        ISO_OPTO -->|FB Signal| UCC_CTRL
+        ISO_OPTO -->|COMP Control| UCC_CTRL
     end
 
     %% -------------------------------------------------------------

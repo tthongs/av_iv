@@ -21,7 +21,7 @@ The **Smart Programmable Power Supply (SPPS)** is a high-density, digitally cont
 │ Input Voltage Range (Vac)  │ 85 V – 265 V AC RMS         │ Universal Mains (Nom. 230V) │
 │ Input Frequency (f_line)   │ 47 Hz – 63 Hz               │ Global Grid Compatible      │
 │ Inrush Current Limiting    │ < 37.5 A Peak               │ Cold start via 10Ω NTC      │
-│ Primary Conversion Stage   │ Quasi-Resonant (QR) Flyback │ Valley switching (UCC28740) │
+│ Primary Conversion Stage   │ Uniform-Frequency Flyback   │ 65 kHz PWM (UC3843)         │
 │ Galvanic Safety Isolation  │ Reinforced (IEC 62368-1)    │ ≥ 6.4mm Creepage / 3kV Hipot│
 │ Intermediate DC Bus Rail   │ +24.0 V DC Fixed (±1.0%)    │ 72 W throughput, < 40mV pk  │
 │ Post-Regulator Topology    │ 4-Switch Synchronous BB     │ TI LM5176 (250 kHz PWM)     │
@@ -43,7 +43,7 @@ The **Smart Programmable Power Supply (SPPS)** is a high-density, digitally cont
 ## 2. Level-0: System Context Block Diagram
 
 At the highest functional boundary, the system operates across three distinct domains:
-1. **Primary High-Voltage AC Domain (Hot)**: Line protection, EMI suppression, and isolated QR Flyback conversion.
+1. **Primary High-Voltage AC Domain (Hot)**: Line protection, EMI suppression, and isolated Uniform-Frequency Flyback conversion.
 2. **Galvanic Safety Isolation Barrier**: Certified reinforced insulation separating lethal mains voltages from user terminals.
 3. **Secondary Low-Voltage DC & Control Domain (SELV Safe)**: Synchronous Buck-Boost post-regulation, closed-loop DAC voltage steering, autonomous hardware CC protection, dual-domain power metering, and host telemetry.
 
@@ -61,7 +61,7 @@ At the highest functional boundary, the system operates across three distinct do
   │ • AC Protection (Fuse/NTC/MOV)  │
   │ • 2-Stage EMI Filter (Class B)  │
   │ • Bridge Rectifier & C_BULK     │
-  │ • QR Valley Flyback (UCC28740)  │
+  │ • Uniform Flyback (UC3843 @ 65k)│
   │ • Primary 800V Superjunction FET│
   └────────────────┬────────────────┘
                    │
@@ -166,38 +166,38 @@ flowchart LR
     %% -------------------------------------------------------------
     %% SUBGRAPH 2: PRIMARY FLYBACK
     %% -------------------------------------------------------------
-    subgraph STAGE1_PRIMARY["Stage 1: Isolated Primary QR Flyback (GND_PRI)"]
-        TX_PRI["Transformer Primary Winding<br/>PQ26/20 Core (3C95 Ferrite)<br/>Np = 48T | Lp = 220µH"]:::priStyle
+    subgraph STAGE1_PRIMARY["Stage 3: Isolated Primary Uniform-Frequency Flyback (GND_PRI)"]
+        TX_PRI["Transformer Primary Winding<br/>PQ26/20 Core (3C95 Ferrite)<br/>Np = 36T | Lp = 220µH"]:::priStyle
         SNUBBER["RCD Clamp Snubber<br/>50kΩ / 2.2nF / UF4007<br/>Clamps Vds Ringing"]:::priStyle
         Q1_FET["Primary MOSFET Q1<br/>Infineon IPB80R290P7<br/>800V Superjunction, 0.29Ω"]:::priStyle
-        UCC_CTRL["QR Flyback Controller<br/>TI UCC28740<br/>• Valley Switching (ZCD)<br/>• Cycle Peak Current Mode"]:::priStyle
-        R_SENSE["Current Sense Shunt<br/>R_sense = 0.2Ω / 2W"]:::priStyle
-        AUX_WIND["Aux Bias Winding<br/>Naux = 8T (+14V VCC)"]:::priStyle
+        UC_CTRL["Uniform PWM Controller<br/>UC3843 / UCC28C43<br/>• Fixed 65 kHz Clock (RT/CT)<br/>• Cycle Peak Current Mode"]:::priStyle
+        R_SENSE["Current Sense Shunt<br/>R_sense = 0.25Ω / 2W"]:::priStyle
+        AUX_WIND["Aux Bias Winding<br/>Naux = 5T (+14V VCC)"]:::priStyle
 
         RECT_BULK -->|+V_BULK| TX_PRI
         TX_PRI -->|Drain| Q1_FET
         Q1_FET -.->|Damping| SNUBBER
-        UCC_CTRL -->|Gate Drive| Q1_FET
+        UC_CTRL -->|Gate Drive| Q1_FET
         Q1_FET -->|Source| R_SENSE
-        R_SENSE -.->|CS Sense| UCC_CTRL
-        AUX_WIND -->|VCC & ZCD| UCC_CTRL
+        R_SENSE -.->|CS Sense| UC_CTRL
+        AUX_WIND -->|VCC Bias| UC_CTRL
     end
 
     %% -------------------------------------------------------------
     %% SUBGRAPH 3: REINFORCED ISOLATION BARRIER
     %% -------------------------------------------------------------
     subgraph ISO_BARRIER["Reinforced Safety Isolation Barrier (IEC 62368-1)"]
-        ISO_TX["Galvanic Isolation Transformer<br/>PQ26/20 TIW Secondary (12T)<br/>Reinforced 3kV RMS Withstand"]:::isoStyle
+        ISO_TX["Galvanic Isolation Transformer<br/>PQ26/20 TIW Secondary (6T)<br/>Reinforced 3kV RMS Withstand"]:::isoStyle
         ISO_OPTO["PC817 Optocoupler<br/>5kV RMS Isolation<br/>Voltage Feedback"]:::isoStyle
         ISO_AMC["TI AMC1311 ΔΣ Modulator<br/>5kV RMS Isolation<br/>AC Voltage Bitstream"]:::isoStyle
         ISO_CT["Talema AC1005 (1000:1 CT)<br/>Galvanic Magnetic Isolation<br/>AC Current Sense"]:::isoStyle
     end
 
     %% -------------------------------------------------------------
-    %% SUBGRAPH 4: SECONDARY SR & 24V BUS
+    %% SUBGRAPH 4: SECONDARY RECTIFIER & 24V BUS
     %% -------------------------------------------------------------
-    subgraph STAGE1_SECONDARY["Stage 1: Secondary Synchronous Rectification (SELV)"]
-        SR_STAGE["Synchronous Rectification<br/>• MP6908 Smart Controller<br/>• BSC052N06NS (60V, 5.2mΩ)<br/>Replaces Lossy Schottky"]:::secPwrStyle
+    subgraph STAGE1_SECONDARY["Stage 3: Secondary Schottky Rectification (SELV)"]
+        SR_STAGE["Schottky Rectification<br/>• MBR10100 (100V, 10A)<br/>• Small TO-220 Heatsink<br/>Simple & Robust Operation"]:::secPwrStyle
         BUS_24V["+24.0V Intermediate DC Bus<br/>• 72W Max Continuous Power<br/>• Low Ripple: < 40mV pk-pk<br/>• 2x 470µF Poly + 4x 10µF MLCC"]:::secPwrStyle
         TL431_REG["Precision Reference<br/>TI TL431 (2.495V)<br/>Type-II Loop Compensation"]:::secPwrStyle
 
@@ -321,20 +321,21 @@ The isolated primary stage converts unpredictable universal grid AC ($85\,\text{
 *(Vector format: [`diagram_inside_stage3_flyback.svg`](diagram_inside_stage3_flyback.svg))*
 
 #### Technical Operational Principles:
-1. **Quasi-Resonant (QR) Valley Switching Physics**:
-   - Standard hard-switched flyback converters turn the primary switch ON at arbitrary points while the drain voltage sits at $V_{DS} = V_{bulk} + V_{reflect} \approx 475\,\text{V}$. This causes severe capacitive switching loss:
-     $$P_{coss} = \frac{1}{2} C_{oss} V_{DS}^2 f_{sw} \approx 1.5\,\text{W}$$
-   - The **TI UCC28740** controller monitors demagnetization of the PQ26/20 transformer core via the auxiliary winding. Once secondary conduction finishes, the primary inductance $L_p = 220\,\mu\text{H}$ resonates with the parasitic drain capacitance $C_{oss}$. The controller turns the switch ON at the exact minimum (the resonant "valley") of the drain ring ($V_{DS,valley} \approx 80\,\text{V}$). This cuts turn-on capacitive losses by up to $80\%$ and naturally spreads EMI harmonics.
-2. **Synchronous Rectification on Secondary**:
-   - A traditional Schottky diode (e.g. $V_F = 0.55\,\text{V}$) delivering $3.0\,\text{A}$ dissipates $P_{diode} = 0.55\,\text{V} \times 3.0\,\text{A} = 1.65\,\text{W}$.
-   - The secondary incorporates a smart synchronous rectifier (**MPS MP6908**) driving an ultra-low-$R_{DS(on)}$ N-channel MOSFET (**Infineon BSC052N06NS**, $60\,\text{V}, 5.2\,\text{m}\Omega$). Conduction loss drops to:
-     $$P_{SR} = I_{RMS}^2 \times R_{DS(on)} = (4.5\,\text{A})^2 \times 0.0052\,\Omega = \mathbf{0.105\,\text{W}}$$
-   - This delivers a direct efficiency gain of over $2.1\%$, keeping the secondary heatsink-free!
+1. **Uniform-Frequency Current-Mode PWM Operation**:
+   - The primary stage utilizes a standard current-mode PWM controller (**UC3843 / UCC28C43**) operating at a fixed, uniform switching frequency of **$65\,\text{kHz} \pm 5\%$**, accurately governed by an external $R_T/C_T$ timing network ($R_T = 10\,\text{k}\Omega, C_T = 2.2\,\text{nF}$ on Pin 4):
+     $$f_{\text{sw}} \approx \frac{1.72}{R_T \times C_T} = \frac{1.72}{10\,000 \times 2.2 \times 10^{-9}} \approx 78\,\text{kHz} \longrightarrow 65\,\text{kHz} \text{ (with internal discharge)}$$
+   - Fixed-frequency operation produces predictable, non-jittering switching harmonics, making EMI input filtering and bench testing straightforward.
+   - Cycle-by-cycle peak primary current sensing across a low-inductance sense resistor ($R_{\text{sense}} = 0.25\,\Omega$) provides immediate peak current limiting ($I_{\text{pk,max}} = 1.0\,\text{V} / 0.25\,\Omega = 4.0\,\text{A}$), protecting the 800V MOSFET against core saturation.
+2. **Robust Secondary Schottky Rectification**:
+   - Rather than complex active synchronous rectification with gate drivers susceptible to false triggering or negative current shoot-through during light-load transitions, the secondary uses a high-reliability **MBR10100** Schottky barrier diode ($100\,\text{V}, 10\,\text{A}$, TO-220).
+   - Forward drop at nominal $3.0\,\text{A}$ is $V_F \approx 0.60\,\text{V}$, resulting in a manageable dissipation of:
+     $$P_{\text{diode}} = V_F \times I_{\text{sec,avg}} = 0.60\,\text{V} \times 3.0\,\text{A} = 1.80\,\text{W}$$
+   - Mounted to a compact board-level stamped heatsink ($13.4^\circ\text{C/W}$), junction temperature rises by only $\Delta T_J \approx 24^\circ\text{C}$, ensuring rock-solid thermal reliability and absolute simplicity.
 3. **Transformer Magnetic Specifications**:
-   - **Core**: PQ26/20, 3C95 high-saturation ferrite material.
-   - **Inductance**: $L_p = 220\,\mu\text{H} \pm 7\%$, air gap $l_g = 0.52\,\text{mm}$.
-   - **Turns**: Primary $N_p = 48\,\text{T}$, Secondary $N_s = 12\,\text{T}$ (Triple Insulated Wire TEX-E), Auxiliary $N_{aux} = 8\,\text{T}$.
-   - **Isolation**: Reinforced barrier conforming to IEC 62368-1 ($\ge 3000\,\text{V}_{\text{RMS}}$ withstand, $\ge 6.4\,\text{mm}$ creepage).
+   - **Core**: PQ26/20, 3C95 high-saturation ferrite material ($A_e = 122\,\text{mm}^2$).
+   - **Primary Inductance**: $L_p = 220\,\mu\text{H} \pm 7\%$, air gap $l_g = 0.52\,\text{mm}$.
+   - **Turns Ratio**: Primary $N_p = 36\,\text{T}$, Secondary $N_s = 6\,\text{T}$ (Furukawa TEX-E Triple-Insulated Wire), Auxiliary $N_{\text{aux}} = 5\,\text{T}$. Peak flux density is kept conservative ($B_{\text{max}} = 0.148\,\text{T} \ll B_{\text{sat}} = 0.38\,\text{T}$).
+   - **Isolation**: Reinforced barrier conforming strictly to IEC 62368-1 ($\ge 3000\,\text{V}_{\text{RMS}}$ Hipot withstand, $\ge 6.4\,\text{mm}$ creepage with PCB isolation slot).
 
 ---
 
@@ -477,7 +478,7 @@ A frequent point of failure in power supply design is inadequate bias supply seq
 *(Vector format: [`block_diagram_aux_power_distribution.svg`](file:///home/tthhongs/build_tthongs/tasks_aa_ii/vvdn/smart_programmable_power_supply/block_diagram_aux_power_distribution.svg))*
 
 #### 1. Auxiliary Power Rails:
-1. **Primary $+14.0\,\text{V}$ VCC**: Derived from the transformer auxiliary winding $N_{aux} = 8\,\text{T}$ via an ES1J ultra-fast diode and $22\,\mu\text{F} / 35\,\text{V}$ capacitor. Powers the UCC28740 controller VDD pin.
+1. **Primary $+14.0\,\text{V}$ VCC**: Derived from the transformer auxiliary winding $N_{\text{aux}} = 5\,\text{T}$ via an ES1J ultra-fast diode and $22\,\mu\text{F} / 35\,\text{V}$ capacitor. Powers the UC3843 / UCC28C43 controller VDD pin.
 2. **Secondary $+5.0\,\text{V}$ Aux Rail**: Stepped down from the $+24.0\,\text{V}$ bus by a high-efficiency synchronous buck regulator (**TI TPS54202**, $2.0\,\text{A}$ rating, $92\%$ efficiency). Powers the LM5176 gate drivers and OLED display backlight.
 3. **Secondary $+3.3\,\text{V}$ Logic Rail**: Stepped down from $+5.0\,\text{V}$ by an ultra-low-noise, high-PSRR LDO (**TI TPS7A25**, $500\,\text{mA}$). Powers the STM32G474 digital core, INA226, and MicroSD card.
 4. **Precision $+3.000\,\text{V}$ Reference Rail**: Stepped down from $+3.3\,\text{V}$ by a precision bandgap reference (**TI REF3030**, $0.2\%$ tolerance, $15\,\text{ppm/}^\circ\text{C}$ drift). Feeds MCU `VDDA` and `VREF+` pins to guarantee rock-solid ADC/DAC accuracy.
@@ -544,11 +545,11 @@ This table establishes the comprehensive pinout and interface contract uniting a
 | `AC_L`, `AC_N` | IEC C14 Receptacle | Input Protection | AC Power | $85-265\,\text{V}_{\text{RMS}}$ | $50/60\,\text{Hz}$ | Universal mains high-voltage conductors. |
 | `EARTH_PE` | IEC C14 Earth Pin | Chassis & Y-Caps | Safety Earth | $0\,\text{V}$ Earth | DC / RF Ground | Protective Earth chassis return. |
 | `+V_BULK` | Bridge Rectifier | Flyback Primary | High-Voltage DC | $+120-375\,\text{V}$ DC | Line Ripple ($100\text{Hz}$) | Rectified DC bus on `GND_PRI`. |
-| `PRI_GATE` | UCC28740 Controller | Q1 (IPB80R290P7) | Gate Drive | $0-12\,\text{V}$ Pulsed | $65-100\,\text{kHz}$ QR | Valley-switched primary gate drive. |
-| `PRI_CS` | Current Resistor $R_{sense}$ | UCC28740 Controller | Analog Sense | $0-0.7\,\text{V}$ Peak | $65-100\,\text{kHz}$ | Cycle-by-cycle primary peak current sense. |
-| `PRI_ZCD` | Transformer Aux Winding| UCC28740 Controller | Analog Sense | $-5\,\text{V} \dots +15\,\text{V}$ | $65-100\,\text{kHz}$ | Auxiliary zero-crossing valley detector. |
+| `PRI_GATE` | UC3843 Controller | Q1 (IPB80R290P7) | Gate Drive | $0-12\,\text{V}$ Pulsed | $65\,\text{kHz}$ Uniform | Uniform 65 kHz primary gate drive. |
+| `PRI_CS` | Current Resistor $R_{sense}$ | UC3843 Controller | Analog Sense | $0-1.0\,\text{V}$ Peak | $65\,\text{kHz}$ | Cycle-by-cycle primary peak current sense. |
+| `PRI_RTCT` | RT/CT Timing Network | UC3843 Pin 4 | Oscillator Ramp | $1.2-2.8\,\text{V}$ Sawtooth | $65\,\text{kHz}$ Uniform | Uniform clock frequency timing network. |
 | `OPTO_FB` | TL431 Shunt Reference | PC817 Optocoupler | Current Loop | $0-5\,\text{mA}$ Loop | DC to $10\,\text{kHz}$ | **Crosses 3kV Isolation Barrier**. |
-| `+24V_BUS` | Synchronous Rectifier | LM5176 / Aux Buck | Power Rail | $+24.0\,\text{V} \pm 1\%$ | DC ($<40\text{mV}$ rip) | Regulated intermediate DC bus on `GND_SEC`. |
+| `+24V_BUS` | MBR10100 Schottky Rectifier | LM5176 / Aux Buck | Power Rail | $+24.0\,\text{V} \pm 1\%$ | DC ($<40\text{mV}$ rip) | Regulated intermediate DC bus on `GND_SEC`. |
 | `PWM_A..D` | LM5176 Controller | 4-Switch H-Bridge | Gate Drive | $0-5\,\text{V}$ High-Curr | $250\,\text{kHz}$ Fixed | High/low side gate drives for Buck-Boost FETs. |
 | `V_FB` | DAC Summing Node | LM5176 Controller | Analog Feedback | $1.200\,\text{V}$ Fixed | DC to $50\,\text{kHz}$ | Closed-loop voltage feedback summing node. |
 | `DAC1_VSET`| STM32G474 DAC1 | Summing Resistor $R_{DAC}$ | Analog Control | $0.00-3.30\,\text{V}$ | DC Stepped | Commanded voltage programming ($3.65\text{mV/LSB}$). |

@@ -82,13 +82,14 @@ digraph SimplePowerFlow {
         stage3_flyback [
             label = <<table border="0" cellborder="0" cellspacing="3" cellpadding="2">
                 <tr><td><font point-size="12"><b>3. ISOLATED DC-DC CONVERTER</b></font></td></tr>
-                <tr><td><font color="#1B5E20"><b>Stage 1: QR Flyback (72W)</b></font></td></tr>
+                <tr><td><font color="#1B5E20"><b>Stage 3: Uniform-Freq Flyback (72W)</b></font></td></tr>
                 <hr/>
-                <tr><td align="left">• Controller: <b>TI UCC28740</b> (Valley Sw.)</td></tr>
+                <tr><td align="left">• Controller: <b>UC3843 / UCC28C43</b> (65kHz)</td></tr>
+                <tr><td align="left">• Timing: <b>RT/CT Fixed Clock Oscillator</b></td></tr>
                 <tr><td align="left">• Magnetics: <b>PQ26/20 Core</b> (Lp=220µH)</td></tr>
                 <tr><td align="left">• <b>Isolation: 3000V RMS Reinforced</b></td></tr>
                 <tr><td align="left">&nbsp;&nbsp;(Furukawa TEX-E Triple Wire)</td></tr>
-                <tr><td align="left">• Rectifier: <b>Sync FET</b> (BSC052N06NS)</td></tr>
+                <tr><td align="left">• Rectifier: <b>Schottky Diode</b> (MBR10100)</td></tr>
                 <tr><td align="left">• Output: <b>+24.0V DC Stable Bus</b></td></tr>
             </table>>,
             fillcolor = "#C8E6C9",

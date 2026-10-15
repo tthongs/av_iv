@@ -31,7 +31,7 @@ flowchart LR
     end
 
     subgraph COLD_DOMAIN ["SECONDARY COLD DOMAIN (Touch-Safe SELV)"]
-        S3["3. CONVERTER DC-DC<br/>• QR Flyback (TI UCC28740)<br/>• PQ26/20 Core (Lp = 220µH)<br/>• ⚡ 3000V RMS Safety Isolation<br/>• Sync Rectifier (BSC052N06NS)<br/>• +24.0V DC Intermediate Rail (72W)"]:::isoStyle
+        S3["3. CONVERTER DC-DC<br/>• Uniform Flyback (UC3843 @ 65kHz)<br/>• PQ26/20 Core (Lp = 220µH)<br/>• ⚡ 3000V RMS Safety Isolation<br/>• MBR10100 Schottky Rectifier<br/>• +24.0V DC Intermediate Rail (72W)"]:::isoStyle
         S4["4. FINAL STAGE<br/>• 4-Switch Buck-Boost (TI LM5176)<br/>• 4x 40V Low-Rds MOSFETs<br/>• Analog DAC Steering (10mV)<br/>• Built-in CSP/CSN Current Limit<br/>• 5.0V - 20.0V DC / 3.0A (60W)"]:::bbStyle
         S3 -->|"+24.0V DC Rail"| S4
     end
@@ -50,7 +50,7 @@ flowchart LR
 | :---: | :--- | :--- |
 | **Stage 1: Mains Supply** | <img src="smart_programmable_power_supply/diagram_inside_stage1_mains.png" width="450"/> | 85V–265V AC In, 2A Fuse, 10Ω NTC, 14D471K MOV, 2-Stage CM Chokes (15mH, 4.7mH), X2/Y1 filter. |
 | **Stage 2: Rectifier & Bulk** | <img src="smart_programmable_power_supply/diagram_inside_stage2_rectifier.png" width="450"/> | GBU606 bridge (600V, 6A), 100µF/450V bulk cap (>10ms holdup), 100nF/630V HF cap, 3x 330kΩ bleeder. |
-| **Stage 3: Converter DC-DC** | <img src="smart_programmable_power_supply/diagram_inside_stage3_flyback.png" width="450"/> | TI UCC28740 QR Flyback, 800V CoolMOS, PQ26/20 core, 3000V RMS barrier, Sync Rectifier (BSC052N06NS) -> +24V DC (72W). |
+| **Stage 3: Converter DC-DC** | <img src="smart_programmable_power_supply/diagram_inside_stage3_flyback.png" width="450"/> | UC3843 / UCC28C43 Uniform 65 kHz Flyback, 800V CoolMOS, PQ26/20 core, 3000V RMS barrier, MBR10100 Schottky -> +24V DC (72W). |
 | **Stage 4: Final Stage** | <img src="smart_programmable_power_supply/diagram_inside_stage4_final_stage.png" width="450"/> | TI LM5176 4-switch Buck-Boost, 10µH inductor, 10mV DAC steering (5V–20V), built-in CSP/CSN current limit, 4mm binding posts. |
 
 - 📄 **Hardware PRD (High-Level Requirements)**: [PRODUCT_REQUIREMENT_DOCUMENT_PRD.md](smart_programmable_power_supply/PRODUCT_REQUIREMENT_DOCUMENT_PRD.md)

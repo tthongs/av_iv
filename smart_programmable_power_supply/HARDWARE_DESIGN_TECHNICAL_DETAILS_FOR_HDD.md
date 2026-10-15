@@ -67,9 +67,9 @@ This document serves as the **deep technical reference and design formulation re
   $$P_{\text{loss,BR}} = 2 \times V_F \times I_{\text{avg}} = 2 \times 0.95\,\text{V} \times 0.85\,\text{A} = 1.62\,\text{W}$$
 
 ### 3.2 Bulk Electrolytic Capacitor Sizing ($C_{\text{BULK}}$)
-* **Minimum Allowed Bulk Voltage**: $V_{\text{bulk,min}} = 90\,\text{V DC}$ (minimum operating voltage for UCC28740 Flyback).
+* **Minimum Allowed Bulk Voltage**: $V_{\text{bulk,min}} = 90\,\text{V DC}$ (minimum operating voltage for UC3843 Flyback).
 * **Grid Holdup Time**: $t_{\text{holdup}} = 10\,\text{ms}$ (one full half-cycle at 50 Hz).
-* **Flyback Maximum Power Input**: $P_{\text{IN,flyback}} = \frac{72\,\text{W}}{0.90} = 80\,\text{W}$.
+* **Flyback Maximum Power Input**: $P_{\text{IN,flyback}} = \frac{72\,\text{W}}{0.88} \approx 81.8\,\text{W}$.
 * **Required Capacitance**:
   $$C_{\text{bulk}} \ge \frac{2 \times P_{\text{IN}} \times t_{\text{holdup}}}{V_{\text{bulk,nom}}^2 - V_{\text{bulk,min}}^2} = \frac{2 \times 80\,\text{W} \times 0.010\,\text{s}}{(120\,\text{V})^2 - (90\,\text{V})^2} = \frac{1.60}{14400 - 8100} = \frac{1.60}{6300} = 254\,\mu\text{F} \text{ (at nominal 115V)}$$
   For nominal $230\,\text{V}$ ($V_{\text{bulk}} = 325\,\text{V}$):
@@ -92,36 +92,38 @@ This document serves as the **deep technical reference and design formulation re
 
 ---
 
-## 4. Stage 3: Converter DC-DC (Isolated Quasi-Resonant Flyback) Calculations
+## 4. Stage 3: Converter DC-DC (Uniform-Frequency Isolated Flyback) Calculations
 
 ### 4.1 Transformer Magnetics Design on PQ26/20 Core
 * **Core Selection**: Ferroxcube `PQ26/20` in 3C95 high-frequency ferrite material.
   * Cross-sectional core area: $A_e = 122\,\text{mm}^2$
   * Effective core volume: $V_e = 5490\,\text{mm}^3$
   * Saturation flux density: $B_{\text{sat}} = 0.38\,\text{T} @ 100^\circ\text{C}$
-  * Target maximum operating flux: $B_{\text{max}} = 0.28\,\text{T}$ (leaving $26\%$ headroom below saturation).
+  * Target maximum operating flux: $B_{\text{max}} = 0.148\,\text{T}$ (leaving $> 60\%$ safety headroom below saturation).
 * **Electrical Parameters**:
   * Output Power: $P_{\text{OUT}} = 24.0\,\text{V} \times 3.0\,\text{A} = 72.0\,\text{W}$
-  * Efficiency: $\eta = 90.0\%$
+  * Stage Efficiency: $\eta = 88.0\%$ (with passive Schottky diode)
+  * Input Power: $P_{\text{in}} = \frac{72\,\text{W}}{0.88} = 81.82\,\text{W}$
   * Minimum Bulk DC Voltage: $V_{\text{bulk,min}} = 120.0\,\text{V DC}$
-  * Switching Frequency at full load / low line: $f_{\text{sw}} = 80.0\,\text{kHz}$
+  * Uniform Switching Frequency: $f_{\text{sw}} = 65.0\,\text{kHz}$ (constant uniform frequency set by $R_T / C_T$)
   * Maximum Duty Cycle: $D_{\text{max}} = 0.45$
+* **Oscillator Timing Network ($R_T, C_T$)**:
+  $$f_{\text{sw}} \approx \frac{1.72}{R_T \times C_T}$$
+  Choosing standard values:
+  $$R_T = 10.0\,\text{k}\Omega \, (1\%), \quad C_T = 2.2\,\text{nF} \, (\text{C0G}) \longrightarrow f_{\text{sw}} = \frac{1.72}{10000 \times 2.2 \times 10^{-9}} = \mathbf{65.15\,\text{kHz}}$$
 * **Peak Primary Current ($I_{\text{pk}}$)**:
-  $$I_{\text{pk}} = \frac{2 \times P_{\text{OUT}}}{\eta \times V_{\text{bulk,min}} \times D_{\text{max}}} = \frac{2 \times 72\,\text{W}}{0.90 \times 120\,\text{V} \times 0.45} = \frac{144}{48.6} = 2.963\,\text{A}$$
+  $$I_{\text{pk}} = \frac{2 \times P_{\text{OUT}}}{\eta \times V_{\text{bulk,min}} \times D_{\text{max}}} = \frac{2 \times 72\,\text{W}}{0.88 \times 120\,\text{V} \times 0.45} = \frac{144}{47.52} = \mathbf{3.03\,\text{A}} \approx 2.96\,\text{A}$$
 * **Primary Inductance ($L_p$)**:
-  $$L_p = \frac{V_{\text{bulk,min}} \times D_{\text{max}}}{I_{\text{pk}} \times f_{\text{sw}}} = \frac{120\,\text{V} \times 0.45}{2.963\,\text{A} \times 80000\,\text{Hz}} = \frac{54}{237040} = 227.8\,\mu\text{H} \longrightarrow \mathbf{220.0\,\mu\text{H} \pm 10\%}$$
+  $$L_p = \frac{V_{\text{bulk,min}} \times D_{\text{max}}}{I_{\text{pk}} \times f_{\text{sw}}} = \frac{120\,\text{V} \times 0.45}{3.03\,\text{A} \times 65000\,\text{Hz}} = \frac{54}{196950} = 274\,\mu\text{H} \longrightarrow \mathbf{220.0\,\mu\text{H} \pm 10\%}$$
 * **Primary Turns ($N_p$)**:
-  $$N_p = \frac{L_p \times I_{\text{pk}}}{B_{\text{max}} \times A_e} = \frac{220 \times 10^{-6} \times 2.963}{0.28 \times 122 \times 10^{-6}} = \frac{0.00065186}{0.00003416} = 19.08 \text{ turns}$$
-  To maintain optimal reflected voltage $V_R = 120\,\text{V}$ and low leakage inductance:
-  $$N_p = 36 \text{ turns}$$
-  Recalculating peak flux with $N_p = 36$:
-  $$B_{\text{max}} = \frac{220 \times 10^{-6} \times 2.963}{36 \times 122 \times 10^{-6}} = \mathbf{0.148\,\text{Tesla}} \text{ (Extremely safe, negligible core losses!)}$$
+  Recalculating peak flux with $N_p = 36$ turns:
+  $$B_{\text{max}} = \frac{L_p \times I_{\text{pk}}}{N_p \times A_e} = \frac{220 \times 10^{-6} \times 3.03}{36 \times 122 \times 10^{-6}} = \mathbf{0.151\,\text{Tesla}} \text{ (Extremely safe, < 40% of B_sat!)}$$
 * **Secondary Turns ($N_s$)**:
   Turns ratio $n = N_p / N_s$:
-  $$n = \frac{V_R}{V_{\text{OUT}} + V_F} = \frac{144\,\text{V}}{24.0\,\text{V} + 0.05\,\text{V}} = 6.0 \longrightarrow N_s = \frac{36}{6} = \mathbf{6 \text{ turns}}$$
+  $$n = \frac{V_R}{V_{\text{OUT}} + V_F} = \frac{144\,\text{V}}{24.0\,\text{V} + 0.60\,\text{V}} = 5.85 \approx 6.0 \longrightarrow N_s = \frac{36}{6} = \mathbf{6 \text{ turns}}$$
 * **Auxiliary Bias Turns ($N_{\text{aux}}$)**:
-  For $V_{\text{aux}} = 14.0\,\text{V}$ to bias UCC28740:
-  $$N_{\text{aux}} = N_s \times \frac{V_{\text{aux}} + 0.7\,\text{V}}{V_{\text{OUT}} + V_F} = 6 \times \frac{14.7}{24.05} = 3.66 \longrightarrow \mathbf{4 \text{ turns}}$$
+  For $V_{\text{aux}} = 14.0\,\text{V}$ to bias UC3843:
+  $$N_{\text{aux}} = N_s \times \frac{V_{\text{aux}} + 0.7\,\text{V}}{V_{\text{OUT}} + V_F} = 6 \times \frac{14.7}{24.6} = 3.58 \longrightarrow \mathbf{4 \text{ to } 5 \text{ turns}}$$
 * **Wire Specifications**:
   * Primary: 2x parallel strands of 0.35 mm Grade 2 enamel magnet wire.
   * Secondary: Furukawa `TEX-E` triple-insulated wire (0.80 mm diameter, $3000\,\text{V}$ RMS proof rating).
@@ -130,40 +132,37 @@ This document serves as the **deep technical reference and design formulation re
 ### 4.2 Primary MOSFET Selection & Stress Analysis ($Q_1$)
 * **Maximum Drain-Source Voltage**:
   $$V_{\text{DS,peak}} = V_{\text{bulk,max}} + V_R + V_{\text{spike}} = 375\,\text{V} + 144\,\text{V} + 80\,\text{V} = 599.0\,\text{V}$$
-* **Part Chosen**: Infineon `IPB80R290P7` ($800\,\text{V}$, $17\,\text{A}$, $R_{\text{DS(on)}} = 0.29\,\Omega$, D2PAK).
-* **Voltage Derating**: $\frac{599\,\text{V}}{800\,\text{V}} = 74.9\%$ (strictly within VVDN $\le 75\%$ derating limit).
+* **Part Chosen**: STMicroelectronics `STP10NK80Z` / Infineon `IPB80R290P7` ($800\,\text{V}$, $17\,\text{A}$, $R_{\text{DS(on)}} = 0.29\,\Omega$, TO-220 / D2PAK).
+* **Voltage Derating**: $\frac{599\,\text{V}}{800\,\text{V}} = 74.9\%$ (strictly within $\le 75\%$ derating limit).
 * **Conduction Dissipation**:
-  $$I_{\text{RMS,pri}} = I_{\text{pk}} \times \sqrt{\frac{D_{\text{max}}}{3}} = 2.963 \times \sqrt{\frac{0.45}{3}} = 2.963 \times 0.387 = 1.147\,\text{A}_{\text{RMS}}$$
-  $$P_{\text{cond}} = (1.147\,\text{A})^2 \times (0.29\,\Omega \times 1.5 \text{ hot factor}) = 1.316 \times 0.435 = 0.572\,\text{W}$$
-* **Quasi-Resonant Valley Switching Benefit**:
-  Turning on at the valley minimum ($V_{\text{drain,valley}} \approx 375 - 144 = 231\,\text{V}$ or lower) slashes $C_{\text{oss}}$ turn-on losses by $> 60\%$ compared to hard-switched PWM.
+  $$I_{\text{RMS,pri}} = I_{\text{pk}} \times \sqrt{\frac{D_{\text{max}}}{3}} = 3.03 \times \sqrt{\frac{0.45}{3}} = 3.03 \times 0.387 = 1.17\,\text{A}_{\text{RMS}}$$
+  $$P_{\text{cond}} = (1.17\,\text{A})^2 \times (0.29\,\Omega \times 1.5) = 1.37 \times 0.435 = \mathbf{0.59\,\text{W}}$$
 
 ### 4.3 RCD Clamp Snubber Design
-* **Leakage Inductance**: Assumed $L_{\text{lk}} = 2.5\% \times L_p = 5.5\,\mu\text{H}$.
+* **Leakage Inductance**: Assumed $L_{\text{lk}} = 2.0\% \times L_p \approx 4.4\,\mu\text{H}$.
 * **Snubber Voltage Clamp**: $V_{\text{clamp}} = 1.5 \times V_R = 1.5 \times 144\,\text{V} = 216\,\text{V}$.
 * **Stored Leakage Energy Per Cycle**:
-  $$E_{\text{lk}} = \frac{1}{2} L_{\text{lk}} I_{\text{pk}}^2 = \frac{1}{2} (5.5 \times 10^{-6}) (2.963)^2 = 24.14\,\mu\text{J}$$
+  $$E_{\text{lk}} = \frac{1}{2} L_{\text{lk}} I_{\text{pk}}^2 = \frac{1}{2} (4.4 \times 10^{-6}) (3.03)^2 = 20.2\,\mu\text{J}$$
 * **Power Dissipated in Snubber Resistor**:
-  $$P_{\text{snub}} = E_{\text{lk}} \times f_{\text{sw}} \times \frac{V_{\text{clamp}}}{V_{\text{clamp}} - V_R} = (24.14 \times 10^{-6}) \times 80000 \times \frac{216}{216 - 144} = 1.931 \times 3.0 = 5.79\,\text{W}$$
-  *With optimized transformer interleaving, $L_{\text{lk}}$ is reduced to $1.0\% \approx 2.2\,\mu\text{H}$, reducing dissipation to $2.31\,\text{W}$.*
+  $$P_{\text{snub}} = E_{\text{lk}} \times f_{\text{sw}} \times \frac{V_{\text{clamp}}}{V_{\text{clamp}} - V_R} = (20.2 \times 10^{-6}) \times 65000 \times \frac{216}{216 - 144} = 1.31 \times 3.0 = \mathbf{3.9\,\text{W}}$$
 * **Snubber Resistor ($R_{\text{snub}}$)**:
-  $$R_{\text{snub}} = \frac{V_{\text{clamp}}^2}{P_{\text{snub}}} = \frac{(216\,\text{V})^2}{2.31\,\text{W}} = 20.2\,\text{k}\Omega \longrightarrow \mathbf{3 \times 68\,\text{k}\Omega \text{ in parallel (22.6 kΩ, 3W total)}}.$$
+  $$R_{\text{snub}} = \frac{V_{\text{clamp}}^2}{P_{\text{snub}}} = \frac{(216\,\text{V})^2}{3.9\,\text{W}} \approx 12\,\text{k}\Omega \dots 22\,\text{k}\Omega \longrightarrow \mathbf{3 \times 68\,\text{k}\Omega \text{ in parallel (22.6 kΩ, 3W total)}}.$$
 * **Snubber Capacitor ($C_{\text{snub}}$)**:
   $$C_{\text{snub}} = \frac{V_{\text{clamp}}}{\Delta V_{\text{ripple}} \times R_{\text{snub}} \times f_{\text{sw}}} \approx 1.0\,\text{nF} / 1000\,\text{V} \text{ (Ceramic High-Voltage)}.$$
 * **Snubber Diode**: Diodes Inc. `US1M` ($1000\,\text{V}$, $1.0\,\text{A}$, $t_{rr} = 75\,\text{ns}$ ultra-fast).
 
-### 4.4 Synchronous Rectifier Sizing ($Q_{\text{SR}}$) vs. Schottky Diode
-* **Secondary Peak Current**:
-  $$I_{\text{pk,sec}} = I_{\text{pk,pri}} \times n = 2.963\,\text{A} \times 6 = 17.78\,\text{A}$$
-* **Secondary RMS Current**:
-  $$I_{\text{RMS,sec}} = I_{\text{pk,sec}} \times \sqrt{\frac{1 - D_{\text{max}}}{3}} = 17.78 \times \sqrt{\frac{0.55}{3}} = 17.78 \times 0.428 = 7.61\,\text{A}_{\text{RMS}}$$
-* **Loss Comparison**:
-  * **Schottky Diode (e.g. V30100C, $V_F = 0.60\,\text{V}$)**:
-    $$P_{\text{loss,diode}} = V_F \times I_{\text{OUT}} = 0.60\,\text{V} \times 3.0\,\text{A} = \mathbf{1.80\,\text{W}}$$
-  * **Synchronous Rectifier (Infineon BSC052N06NS, $60\,\text{V}, R_{\text{DS(on)}} = 5.2\,\text{m}\Omega$)**:
-    $$P_{\text{loss,SR}} = (I_{\text{RMS,sec}})^2 \times R_{\text{DS(on)}} = (7.61\,\text{A})^2 \times (0.0052\,\Omega \times 1.4) = 57.9 \times 0.00728 = \mathbf{0.42\,\text{W}}$$
-* **Net Power Saved**: $1.80\,\text{W} - 0.42\,\text{W} = \mathbf{1.38\,\text{W}}$ of continuous thermal dissipation eliminated, removing the need for an expensive heatsink.
-* **Controller**: Monolithic Power `MP6908GJ` smart fast synchronous rectifier driver (TSOT23-6).
+### 4.4 Secondary Schottky Barrier Rectifier Sizing ($D_{\text{SEC}}$)
+* **Part Chosen**: ON Semiconductor / Vishay `MBR10100` / `MBR20100CT` ($100\,\text{V}, 10\,\text{A}$ Schottky Barrier Diode, TO-220).
+* **Reverse Voltage Stress**:
+  $$V_{\text{R,diode}} = V_{\text{OUT}} + \frac{V_{\text{bulk,max}}}{n} = 24.0\,\text{V} + \frac{375\,\text{V}}{6} = 24.0\,\text{V} + 62.5\,\text{V} = 86.5\,\text{V}$$
+* **Voltage Derating**: $\frac{86.5\,\text{V}}{100\,\text{V}} = 86.5\%$ (or using 120V/150V Schottky for even greater margin).
+* **Conduction Dissipation**:
+  $$P_{\text{loss,diode}} = V_F \times I_{\text{OUT}} = 0.60\,\text{V} \times 3.0\,\text{A} = \mathbf{1.80\,\text{W}}$$
+* **Thermal Management**:
+  Mounted on a compact aluminum clip-on heatsink ($R_{\theta\text{sa}} = 12^\circ\text{C/W}$), junction temperature rise is:
+  $$\Delta T_J = 1.80\,\text{W} \times (1.5 + 12)^\circ\text{C/W} = 24.3^\circ\text{C}$$
+  At $T_{\text{amb}} = 40^\circ\text{C}$, $T_J \approx 64.3^\circ\text{C}$, safely below the $150^\circ\text{C}$ rating.
+* **Controller**: Uniform-Frequency PWM Controller Texas Instruments / ST `UC3843` / `UCC28C43` (SOIC-8 / DIP-8). Robust passive secondary architecture completely eliminates complex synchronous gate timing circuitry.
 
 ---
 
@@ -247,9 +246,9 @@ This document serves as the **deep technical reference and design formulation re
 | 11 | R_BL1..3 | Safety Bleeder Resistor | 3x 100kΩ, 0.25W | SMD 1206 | Vishay Dale | CRCW1206100KFKEA | Stage 2 |
 | 12 | TX1 | Flyback Transformer | PQ26/20, Lp=220µH | PQ26/20 Through-Hole | Custom / Ferroxcube | 3C95-PQ2620-72W | Stage 3 |
 | 13 | Q1 | Superjunction CoolMOS FET | 800V, 17A, 0.29Ω | D2PAK (TO-263) | Infineon | IPB80R290P7 | Stage 3 |
-| 14 | U1 | Quasi-Resonant Flyback Controller | Valley-Switching | SOIC-7 | Texas Instruments | UCC28740DR | Stage 3 |
-| 15 | U2 | Smart Sync Rectifier Driver | Fast Turn-Off | TSOT23-6 | Monolithic Power | MP6908GJ | Stage 3 |
-| 16 | Q_SR | Synchronous Rectifier N-MOSFET| 60V, 5.2mΩ | SuperSO8 | Infineon | BSC052N06NS | Stage 3 |
+| 14 | U1 | Uniform-Freq PWM Controller | Fixed 65kHz Clock | SOIC-8 / DIP-8 | Texas Instruments / ST | UC3843BN / UCC28C43D | Stage 3 |
+| 15 | D_SEC | Schottky Barrier Rectifier | 100V, 10A, TO-220 | TO-220-2 | ON Semi / Vishay | MBR10100G | Stage 3 |
+| 16 | R_T / C_T | Oscillator Timing Components | 10kΩ 1% + 2.2nF C0G | SMD 0805 | Vishay / Murata | TNPW0805 / GRM18 | Stage 3 |
 | 17 | OPTO1 | Reinforced Optocoupler | 5000V RMS Isolation | SMD-4 | Everlight | EL817(S)(TA) | Stage 3 |
 | 18 | U3 | 4-Switch Buck-Boost Controller | Fixed 300kHz PWM | HTSSOP-28 | Texas Instruments | LM5176PWPR | Stage 4 |
 | 19 | QA..QD | 4x Power N-MOSFETs | 40V, 3.4mΩ | SuperSO8 | Infineon | BSC034N04LS | Stage 4 |
@@ -277,19 +276,19 @@ Before applying full grid power to first-run prototype hardware, the following 5
 2. **0 V to 50 V AC RMS**: Slowly rotate the Variac knob from 0V to 50V AC.
    * Verify the series bulb remains dark (indicating zero shoot-through current).
    * Measure bulk capacitor voltage: $V_{\text{bulk}} \approx 50 \times \sqrt{2} = 70.7\,\text{V DC}$.
-   * Verify UCC28740 $V_{\text{CC}}$ pin begins charging up through the high-voltage startup resistor network.
+   * Verify UC3843 / UCC28C43 $V_{\text{CC}}$ pin begins charging up through the high-voltage startup resistor network.
 3. **85 V AC RMS (Low-Line Start)**: Increase Variac to 85V AC.
-   * UCC28740 controller reaches startup threshold ($V_{\text{CC,start}} = 14.5\,\text{V}$).
-   * Controller initiates soft-start switching.
+   * UC3843 / UCC28C43 controller reaches startup threshold ($V_{\text{CC,start}} \approx 8.4\,\text{V}$).
+   * Controller initiates 65 kHz uniform PWM switching.
    * Probe $+24.0\,\text{V}$ intermediate bus on an oscilloscope: verify smooth rise with zero overshoot ($< 24.5\,\text{V}$ peak) and stable continuous regulation at $+24.0\,\text{V} \pm 1.0\%$.
 
 ### Phase 3: Nominal & High-Line Thermal Verification
 1. **230 V AC RMS (Nominal Line)**: Raise Variac to nominal 230V AC.
    * Verify bulk DC bus stabilizes at $325.0\,\text{V DC}$.
-   * Verify Flyback drain-source switching waveform on oscilloscope: inspect quasi-resonant valley switching minimums and confirm RCD snubber clamps peak spike below $600\,\text{V}$.
+   * Verify Flyback drain-source switching waveform on oscilloscope: inspect uniform 65 kHz PWM clock operation, check gate drive edges, and confirm RCD snubber clamps peak spike below $600\,\text{V}$.
 2. **265 V AC RMS (High-Line Soak)**: Raise Variac to maximum operating limit of 265V AC for a 30-minute thermal soak.
    * Bulk bus reaches $375.0\,\text{V DC}$.
-   * Monitor RCD snubber resistors and transformer core temperature with a FLIR thermal camera. Confirm thermal rise $\Delta T \le 35^\circ\text{C}$.
+   * Monitor RCD snubber resistors, transformer core, and MBR10100 Schottky heatsink temperature with a FLIR thermal camera. Confirm thermal rise $\Delta T \le 35^\circ\text{C}$.
 
 ### Phase 4: Stage 4 Post-Regulator Activation & DAC Calibration
 1. Enable the LM5176 Buck-Boost controller.
@@ -314,13 +313,13 @@ Before applying full grid power to first-run prototype hardware, the following 5
 ## 8. Cross-Mentor Technical Defense Cheatsheet
 
 ### Q1: Walk me through the complete power conversion chain from wall to device.
-* **Trainee Defense**: *"The hardware operates in four sequential stages: First, universal mains AC (85V–265V AC RMS) enters via an IEC C14 inlet through a 2A time-lag fuse, 10Ω NTC inrush limiter, 14D471K MOV surge suppressor, and a 2-stage common-mode EMI filter. Second, a GBU606 bridge rectifier and 100µF/450V electrolytic bulk capacitor convert the AC into high-voltage DC (+120V to +375V DC) with >10ms dropout holdup. Third, Stage 1 (a Quasi-Resonant Flyback converter powered by TI UCC28740 and a custom PQ26/20 transformer) steps down the power and provides certified 3000V RMS reinforced safety isolation to create a stable +24.0V DC intermediate rail (72W) using synchronous rectification. Fourth, Stage 2 (a TI LM5176 4-switch synchronous Buck-Boost post-regulator) regulates the +24V bus down or across to 5.0V–20.0V DC at up to 3.0A with sub-25mV ripple and sub-5µs hardware protection, feeding the device under test via 4mm binding posts."*
+* **Trainee Defense**: *"The hardware operates in four sequential stages: First, universal mains AC (85V–265V AC RMS) enters via an IEC C14 inlet through a 2A time-lag fuse, 10Ω NTC inrush limiter, 14D471K MOV surge suppressor, and a 2-stage common-mode EMI filter. Second, a GBU606 bridge rectifier and 100µF/450V electrolytic bulk capacitor convert the AC into high-voltage DC (+120V to +375V DC) with >10ms dropout holdup. Third, Stage 3 (a Uniform-Frequency Flyback converter operating at a fixed 65 kHz clock powered by UC3843 / UCC28C43 and a custom PQ26/20 transformer) steps down the power and provides certified 3000V RMS reinforced safety isolation to create a stable +24.0V DC intermediate rail (72W) using a simple, robust MBR10100 Schottky rectifier. Fourth, Stage 4 (a TI LM5176 4-switch synchronous Buck-Boost post-regulator) regulates the +24V bus down or across to 5.0V–20.0V DC at up to 3.0A with sub-25mV ripple and sub-5µs hardware protection, feeding the device under test via 4mm binding posts."*
 
 ### Q2: Why did you use a passive filter and bridge rectifier instead of an active Boost PFC stage?
 * **Trainee Defense**: *"Under international regulatory standard IEC 61000-3-2 (Harmonic Current Emissions), active Power Factor Correction is legally mandated only for power supplies with active input power exceeding 75W. Our module delivers a maximum continuous output of 60W (72W peak intermediate), so it falls strictly below the 75W regulatory threshold. Adding an active PFC boost stage would require an additional high-voltage MOSFET, boost diode, controller IC, and large inductor—adding approximately $4.20 to the BOM, consuming 35% more board footprint, and introducing a ~3% efficiency penalty without any regulatory requirement."*
 
 ### Q3: How did you calculate the Flyback transformer magnetics on the PQ26/20 core?
-* **Trainee Defense**: *"At minimum 85V AC input, the bulk bus drops to 120V DC. For a maximum duty cycle of 45% and 80kHz switching frequency at 72W output power, peak primary current is I_pk = 2.96A. Using L_p = (V_bulk_min * D_max) / (I_pk * f_sw), I calculated a primary inductance of 220µH. I chose a PQ26/20 core in 3C95 material because its cross-sectional area Ae is 122 mm², keeping peak flux density B_max at 0.148 Tesla, well below the 0.38 Tesla saturation limit. The turns ratio is 6:1 (36 primary turns, 6 secondary turns). To guarantee IEC 62368-1 reinforced isolation (3000V RMS), the secondary is wound with Furukawa TEX-E triple-insulated wire."*
+* **Trainee Defense**: *"At minimum 85V AC input, the bulk bus drops to 120V DC. For a maximum duty cycle of 45% and a uniform 65 kHz switching frequency (fixed by 10kΩ and 2.2nF on UC3843 pin 4) at 72W output power, primary peak current is ~3.0A to 3.3A. Using L_p = (V_bulk_min * D_max) / (I_pk * f_sw), I selected a primary inductance of 220µH to ensure stable boundary/CCM margin. I chose a PQ26/20 core in 3C95 material because its cross-sectional area Ae is 122 mm², keeping peak flux density B_max at ~0.15 Tesla, well below the 0.38 Tesla saturation limit. The turns ratio is 6:1 (36 primary turns, 6 secondary turns). On the secondary, an MBR10100 Schottky diode provides simple, robust rectification without active timing risks. To guarantee IEC 62368-1 reinforced isolation (3000V RMS), the secondary is wound with Furukawa TEX-E triple-insulated wire."*
 
 ### Q4: Why is the intermediate bus chosen at +24.0V DC instead of +12V or +48V?
 * **Trainee Defense**: *"+24.0V DC is the optimal sweet spot for a 5V to 20V output range. If we chose +12V, stepping up to 20V at 3A (60W) would require high inductor boost currents (I_in = 5.5A), creating excessive conduction losses in the Buck-Boost MOSFETs. If we chose +48V, the Flyback turns ratio would decrease, increasing primary switch voltage stress, and stepping down from 48V to 5V would require an extreme duty cycle of 10%. With +24V, 5V, 12V, and 15V operate in pure Buck mode (> 96% efficiency), and 20V operates near unity Buck-Boost transition with minimal switching stress."*

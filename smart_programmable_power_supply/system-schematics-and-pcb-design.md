@@ -22,24 +22,24 @@ Below is the master system interconnection schematic uniting the universal AC fr
                                          │                                             GND_PRI
   EARTH (PE) ────────────────────────────┴────────────────────────────────────────────────┴─── EARTH (PE)
 
-  [ STAGE 1: ISOLATED QR FLYBACK CONVERTER ]
+  [ STAGE 3: ISOLATED UNIFORM-FREQUENCY FLYBACK CONVERTER ]
   +V_BULK ───[ Primary Winding (PQ26/20: 220uH) ]───┬─── Drain (IPB80R290P7: 800V Superjunction)
                                                     │    │
                                             [ RCD Snubber ]
                                             (50kΩ / 2.2nF)
                                                     │
-                                                   Gate ─── Driven by UCC28740 Controller
+                                                   Gate ─── Driven by UC3843 Controller (65 kHz PWM)
                                                     │
-                                                 Source ───[ R_sense: 0.2Ω ]─── GND_PRI
+                                                 Source ───[ R_sense: 0.25Ω ]─── GND_PRI
 
   ==================================================================================================================================================
                               REINFORCED SAFETY ISOLATION BARRIER (>= 6.4mm Creepage / 3000V RMS Hipot / Y1 Safety Cap)
   ==================================================================================================================================================
 
-  Secondary Winding (12T) ───[ MP6908 + BSC052N06NS Synchronous Rectifier ]───┬───> +24V Intermediate DC Bus (72W)
+  Secondary Winding (6T) ───[ MBR10100 Schottky Diode (100V, 10A) ]───────────┬───> +24V Intermediate DC Bus (72W)
                                                                               │
                                                                            ┌──┴──┐
-                                                                           │TL431│ ───> [ PC817 Optocoupler ] ───> (Feedback to UCC28740)
+                                                                           │TL431│ ───> [ PC817 Optocoupler ] ───> (Feedback to UC3843)
                                                                            └──┬──┘
                                                                               │
                                                                            GND_SEC
@@ -159,9 +159,9 @@ The PCB is architected as a high-density **4-layer board ($1.6\,\text{mm}$ FR-4,
 │ 6    │ 1   │ C_BULK1                   │ Electrolytic 100uF/450V │ Radial 18x25 │ Nichicon LGW2W101MELZ25                │
 │ 7    │ 1   │ TX1                       │ Transformer PQ26/20 220uH│ PQ26/20      │ Custom VVDN / Ferroxcube 3C95          │
 │ 8    │ 1   │ Q1                        │ Superjunction FET 800V  │ D2PAK / TO263│ Infineon IPB80R290P7                   │
-│ 9    │ 1   │ U1 (Primary Controller)   │ QR Flyback Controller   │ SOIC-8       │ Texas Instruments UCC28740DR           │
-│ 10   │ 1   │ U2 (Synchronous Rectifier)│ Smart SR Controller     │ SOIC-8       │ Monolithic Power MP6908GJ              │
-│ 11   │ 1   │ Q_SR                      │ Secondary MOSFET 60V    │ SuperSO8     │ Infineon BSC052N06NS                   │
+│ 9    │ 1   │ U1 (Primary Controller)   │ Uniform PWM Controller  │ SOIC-8 / DIP-8│ Texas Instruments UC3843BN / UCC28C43 │
+│ 10   │ 1   │ D_sec (Secondary Diode)   │ Schottky Rectifier 100V │ TO-220AC     │ ON Semiconductor MBR10100G             │
+│ 11   │ 1   │ R_T / C_T (Timing Network)│ 10kΩ 1% / 2.2nF C0G 50V │ 0805 SMD     │ Panasonic ERA-6AEB103V / Murata C0G    │
 │ 12   │ 1   │ OPTO1                     │ Optocoupler 5000V RMS   │ DIP-4 / SMD  │ Everlight EL817(S)(TA)                 │
 │ 13   │ 1   │ U3 (Buck-Boost Controller)│ 4-Switch Sync BB IC     │ HTSSOP-28    │ Texas Instruments LM5176PWPR           │
 │ 14   │ 4   │ Q_A, Q_B, Q_C, Q_D        │ Power MOSFET 40V 3.4mΩ  │ SuperSO8     │ Infineon BSC034N04LS                   │
@@ -193,13 +193,13 @@ Follow this rigorous multi-step procedure when assembling and verifying the firs
 │      │                      │   Leakage current must be $< 1.0\,\text{mA}$.        │
 ├──────┼──────────────────────┼─────────────────────────────────────────────────────┤
 │ **2**│ Low-Voltage Primary  │ Apply current-limited $+30\,\text{V}$ DC from bench  │
-│      │ Functional Check     │ supply to $C_{bulk}$. Check UCC28740 startup pulses  │
+│      │ Functional Check     │ supply to $C_{bulk}$. Check UC3843 startup pulses    │
 │      │                      │ on gate using oscilloscope. Verify VCC charges.      │
 ├──────┼──────────────────────┼─────────────────────────────────────────────────────┤
 │ **3**│ AC Mains Variac Ramp │ Connect through an Isolation Transformer + Variac.   │
 │      │                      │ Slowly ramp AC voltage from $0\,\text{V} \rightarrow 85\,\text{V} \dots 230\,\text{V}$.│
 │      │                      │ Verify $+24.0\,\text{V}$ intermediate bus stabilizes │
-│      │                      │ with $< 50\,\text{mV}$ ripple. Check QR valley ring. │
+│      │                      │ with $< 50\,\text{mV}$ ripple. Check uniform 65 kHz. │
 ├──────┼──────────────────────┼─────────────────────────────────────────────────────┤
 │ **4**│ Buck-Boost & DAC Test│ Flash initial MCU firmware via ST-LINK. Command DAC  │
 │      │                      │ to output voltages: $5.0\,\text{V}, 12.0\,\text{V}, 20.0\,\text{V}$.│

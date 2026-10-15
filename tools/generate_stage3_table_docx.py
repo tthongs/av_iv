@@ -142,7 +142,7 @@ def main():
     title_p = doc.add_paragraph()
     title_p.paragraph_format.space_before = Pt(0)
     title_p.paragraph_format.space_after = Pt(4)
-    run_title = title_p.add_run("Stage 3: Converter DC-DC (Isolated Flyback) Subsystem")
+    run_title = title_p.add_run("Stage 3: Converter DC-DC (Uniform-Frequency Isolated Flyback) Subsystem")
     run_title.font.name = "Arial"
     run_title.font.size = Pt(14)
     run_title.font.bold = True
@@ -183,88 +183,88 @@ def main():
             "Low-impedance high-voltage input rail feeding transformer primary winding and snubber network."
         ),
         (
-            "Quasi-Resonant Controller",
+            "Uniform-Freq PWM Controller",
             "U1",
-            "Texas Instruments UCC28740DR (SOIC-7)",
-            "Valley-switching detector, aux ZCD, optical FB pin, cycle-by-cycle CS",
-            "Modulates switching frequency (up to 80 kHz) to turn on primary MOSFET at drain voltage resonance minimums, slashing turn-on capacitive losses by > 60%."
+            "Texas Instruments UC3843 / UCC28C43 (SOIC-8 / DIP-8)",
+            "Uniform 65 kHz clock, RT/CT oscillator, cycle-by-cycle CS, direct totem-pole gate out",
+            "Generates constant-frequency PWM switching pulses at a uniform 65 kHz rate, providing predictable EMI harmonics and deterministic current-mode control."
+        ),
+        (
+            "Oscillator Timing Network",
+            "R_T\nC_T",
+            "Precision Thin-Film Resistor +\nC0G/NP0 Ceramic Capacitor",
+            "R_T = 10.0 kΩ (1%),\nC_T = 2.2 nF (50V C0G)",
+            "Sets constant oscillator clock frequency: f_sw approx 1.72 / (R_T x C_T) = 65 kHz uniform clock without frequency jitter."
         ),
         (
             "Primary Power Switch",
             "Q1",
-            "Infineon IPB80R290P7 (CoolMOS P7, D2PAK)",
+            "STMicroelectronics STP10NK80Z / Infineon IPB80R290P7",
             "800 V, 17 A, R_DS(on) = 0.29 Ω, V_DS,peak = 599 V",
-            "Low-loss primary switching element. Derated to 74.9% of breakdown voltage rating (strictly < 75% limit). Conduction loss <= 0.57 W."
+            "Main switching element modulated by 65 kHz PWM gate drive. Voltage stress derated to 74.9% of 800V rating (< 75% limit)."
         ),
         (
             "Primary Current Sensing",
             "R_CS",
-            "Precision Sense Resistor Network",
-            "Low-inductance metal foil, 0.25 Ω, 1%, 1 W",
-            "Senses primary switch peak current (I_pk = 2.96 A) on UCC28740 CS pin for cycle-by-cycle overcurrent protection (OCP)."
+            "Current Sense Shunt Resistor Network",
+            "Low-inductance metal strip, 0.25 Ω, 1%, 2 W",
+            "Monitors primary switch peak current (I_pk = 2.96 A) on UC3843 ISENSE pin (Pin 3) with 1.0 V internal comparator threshold for cycle-by-cycle OCP."
         ),
         (
             "RCD Snubber Clamp",
             "D_snub\nR_snub\nC_snub",
             "Diodes Inc. US1M +\n3x 68 kΩ in parallel (22.6 kΩ, 3W) +\n1.0 nF / 1 kV Ceramic",
             "Diode: 1000 V, 1 A, t_rr = 75 ns;\nCap: 1 nF / 1000 V ceramic;\nClamp: ~216 V clamp level",
-            "Absorbs transformer primary leakage inductance energy (L_lk approx 2.2 uH); clamps peak drain-source voltage spike safely below 650 V peak."
+            "Damps high-voltage inductive kick caused by transformer leakage inductance (L_lk approx 2.2 uH); clamps peak drain voltage spike safely below 650 V peak."
         ),
         (
             "Flyback Power Transformer",
             "TX1",
-            "Ferroxcube PQ26/20 (3C95 Ferrite Core) / Custom",
+            "Ferroxcube PQ26/20 (3C95 Ferrite) / EE25 Core",
             "L_p = 220 uH +/- 10%, B_max = 0.148 T (B_sat = 0.38 T), N_p = 36 T",
-            "Primary energy storage inductor (72 W throughput, I_pk = 2.96 A, low core loss, air gap l_g = 0.52 mm)."
+            "Stores energy during switch on-time and delivers 72 W continuous power to secondary during off-time (Np:Ns = 6:1 turns ratio)."
         ),
         (
-            "Auxiliary Bias & Demag Winding",
+            "Auxiliary Bias Winding",
             "TX1_AUX",
-            "N_aux = 4 T (0.25 mm wire) +\nUltra-fast diode & 10 uF MLCC",
+            "N_aux = 5 T (0.25 mm wire) +\nFast Diode (UF4004) & 47 µF Cap",
             "Output: +14.0 V DC bias rail",
-            "Self-powers UCC28740 VCC pin after initial high-voltage startup and provides Zero Crossing Detection (ZCD) for core demagnetization timing."
+            "Sustains UC3843 VCC pin (Pin 7) above UVLO threshold (8.4 V start / 7.6 V min) after initial high-voltage bleed startup."
         ),
         (
             "Galvanic Safety Isolation Barrier",
             "TX1_ISO",
             "Furukawa TEX-E Triple-Insulated Wire (TIW)",
             "N_s = 6 T (N_p:N_s = 6:1), Reinforced insulation, >= 6.4 mm creepage",
-            "Conforms to IEC 62368-1 safety standards. Provides certified >= 3000 V RMS dielectric withstand between primary hot and secondary touch-safe SELV domains."
+            "Complies with IEC 62368-1 standard. Provides certified >= 3000 V RMS dielectric withstand between primary hot domain and secondary touch-safe SELV domain."
         ),
         (
-            "Smart Synchronous Rectifier Driver",
-            "U2",
-            "Monolithic Power Systems MP6908GJ (TSOT23-6)",
-            "Fast turn-off (35 ns gate fall), V_DS drain-sense detection",
-            "Autonomous gate driver for secondary sync switch; eliminates external sync timing coils and prevents shoot-through during DCM/QR resonant ringing."
-        ),
-        (
-            "Synchronous Rectifier Switch",
-            "Q_SR",
-            "Infineon BSC052N06NS (OptiMOS 5, SuperSO8)",
-            "60 V, R_DS(on) = 5.2 mΩ, I_RMS,sec = 7.61 A",
-            "Replaces lossy Schottky diode (V_F = 0.6 V); cuts secondary rectification dissipation from 1.80 W to 0.42 W (saving 1.38 W continuous heat, heatsink-free)."
+            "Secondary Schottky Barrier Rectifier",
+            "D_SEC",
+            "ON Semi / Vishay MBR10100 / MBR20100CT",
+            "100 V, 10 A Schottky Barrier Diode, V_F = 0.60 V, TO-220 with heatsink",
+            "Performs high-speed passive rectification of secondary flyback pulses. Highly reliable and robust passive design, eliminating active gate driver IC complexity."
         ),
         (
             "Secondary LC Output Filter",
             "C_sec\nL_sec",
-            "Panasonic OS-CON 470 uF / 35 V Polymer +\n2.2 uH Inductor + 22 uF MLCC",
-            "Ultra-low ESR (< 15 mΩ), Delta V_ripple < 50 mV pk-pk",
-            "Suppresses high-frequency 80 kHz switching pulses and secondary flyback current spikes to form clean intermediate DC rail."
+            "470 µF / 35 V Low-ESR Electrolytic +\n2.2 µH Inductor + 22 µF MLCC",
+            "Low-ESR filtering, Delta V_ripple < 50 mV pk-pk",
+            "Attenuates 65 kHz fundamental switching ripple and high-frequency commutation spikes to produce a quiet intermediate DC rail."
         ),
         (
             "Isolated Closed-Loop Feedback",
             "OPTO1\nU3",
-            "Everlight EL817(S)(TA) Optocoupler +\nTI TL431AIDBZR Shunt Regulator",
+            "Everlight PC817 / EL817 Optocoupler +\nTI TL431 Shunt Regulator",
             "5000 V RMS optical isolation, 2.495 V internal bandgap, 0.5%",
-            "Secondary-side precision voltage divider senses the +24.0 V rail and transfers feedback error signal across isolation barrier to UCC28740 FB node."
+            "Precision resistor divider samples +24.0 V rail, driving optocoupler LED to pull down UC3843 COMP pin (Pin 1), regulating rail to +/- 1.0%."
         ),
         (
             "Intermediate Rail Output",
             "+24V_BUS",
             "Intermediate DC Power Distribution Bus",
             "+24.0 V DC +/- 1.0%, 72.0 W continuous (3.0 A), 84 W peak",
-            "Delivers stable intermediate regulated power to Stage 4 (Synchronous Buck-Boost Post-Regulator) and secondary auxiliary housekeeping LDOs."
+            "Delivers stable intermediate regulated DC power to Stage 4 (Synchronous Buck-Boost Post-Regulator) and secondary auxiliary housekeeping LDOs."
         )
     ]
 

@@ -284,7 +284,7 @@ def generate_prd_docx():
         ("AC", "Alternating Current (Grid Mains Input, 85 V – 265 V AC RMS)"),
         ("DC", "Direct Current (Regulated Output, 5.0 V – 20.0 V DC)"),
         ("SELV", "Safety Extra-Low Voltage (< 60 V DC limit per IEC 62368-1)"),
-        ("QR", "Quasi-Resonant Valley Switching (Primary Flyback Mode)"),
+        ("PWM", "Pulse Width Modulation (Uniform-Frequency Flyback Mode)"),
         ("PFC", "Power Factor Correction"),
         ("CC", "Constant Current Mode (Autonomous Hardware Current Limit)"),
         ("CV", "Constant Voltage Mode (Precision Closed-Loop Voltage Regulation)"),
@@ -299,7 +299,6 @@ def generate_prd_docx():
         ("I2C", "Inter-Integrated Circuit Serial Communication Bus"),
         ("SPI", "Serial Peripheral Interface Bus"),
         ("UART", "Universal Asynchronous Receiver-Transmitter"),
-        ("PWM", "Pulse Width Modulation"),
         ("EMI", "Electromagnetic Interference"),
         ("EMC", "Electromagnetic Compatibility"),
         ("NTC", "Negative Temperature Coefficient Thermistor (Inrush Limiter)"),
@@ -335,8 +334,8 @@ def generate_prd_docx():
         ("REF-004", "IEC 61000-3-2: Electromagnetic compatibility (EMC) – Limits for harmonic current emissions (< 75 W Class A exemption)"),
         ("REF-005", "IEC 61000-4-5: Electromagnetic compatibility (EMC) – Surge immunity test (Level 3: 2 kV Line-Earth, 1 kV Line-Line)"),
         ("REF-006", "Texas Instruments LM5176: High-Performance 4-Switch Synchronous Buck-Boost Controller Datasheet (SNVSAR4)"),
-        ("REF-007", "Texas Instruments UCC28740: Constant-Voltage Constant-Current Isolated Flyback Controller Datasheet (SLUSBL2)"),
-        ("REF-008", "VVDN Hardware Design Document (HDD): Smart Programmable Power Supply Circuit Design, Derivations & Schematics")
+        ("REF-007", "Texas Instruments / ST UC3843 / UCC28C43: Current-Mode PWM Controller Datasheet"),
+        ("REF-008", "Hardware Design Document (HDD): Smart Programmable Power Supply Circuit Design, Derivations & Schematics")
     ]
     set_cell_background(t5.rows[0].cells[0], "BFBFBF")
     set_cell_background(t5.rows[0].cells[1], "BFBFBF")
@@ -353,11 +352,11 @@ def generate_prd_docx():
     use_cases = [
         ("1", "Universal AC mains soft startup and inrush current suppression (< 25 A peak)"),
         ("2", "AC full-wave rectification and high-voltage DC bulk energy holdup (> 10 ms)"),
-        ("3", "Galvanically isolated Quasi-Resonant Flyback conversion (+24.0 V DC, 72 W)"),
+        ("3", "Galvanically isolated Uniform-Frequency PWM Flyback conversion (+24.0 V DC, 72 W)"),
         ("4", "Synchronous 4-switch Buck-Boost step-down/step-up post-regulation (5 V – 20 V DC)"),
         ("5", "High-precision 10 mV digital voltage steering via 12-bit DAC summing network"),
         ("6", "LM5176 built-in cycle-by-cycle overcurrent protection via CSP/CSN pins"),
-        ("7", "Primary Flyback cycle-by-cycle current limit via UCC28740 CS resistor"),
+        ("7", "Primary Flyback cycle-by-cycle peak current limit via UC3843 ISENSE resistor"),
         ("8", "Controller internal thermal shutdown and board temperature monitoring"),
         ("9", "Primary AC input power measurement via isolated delta-sigma amplifier and CT"),
         ("10", "Secondary DC load voltage, current, and power monitoring via 16-bit I2C monitor"),
@@ -521,15 +520,15 @@ def generate_prd_docx():
             ("6", "Bridge Rectifier Glass Passivated 600V 6A GBU", "1", "Diodes Inc.", "GBU606"),
             ("7", "Primary Bulk Electrolytic Cap 100µF 450V 105°C", "1", "Nichicon", "LGW2W101MELZ25")
         ]),
-        ("Subsystem 2: Quasi-Resonant Flyback Power Stage & Galvanic Isolation (Electrical)", [
+        ("Subsystem 2: Uniform-Frequency Flyback Power Stage & Galvanic Isolation (Electrical)", [
             ("8", "Flyback Transformer PQ26/20 220µH 72W (TEX-E Wire)", "1", "Custom / Ferroxcube", "3C95-PQ2620-72W"),
-            ("9", "Superjunction Power MOSFET 800V 0.29Ω D2PAK", "1", "Infineon", "IPB80R290P7"),
-            ("10", "Quasi-Resonant Flyback Controller IC SOIC-7", "1", "Texas Instruments", "UCC28740DR"),
-            ("11", "Smart Synchronous Rectifier Driver TSOT23-6", "1", "Monolithic Power", "MP6908GJ"),
-            ("12", "Synchronous N-MOSFET 60V 5.2mΩ SuperSO8", "1", "Infineon", "BSC052N06NS"),
-            ("13", "Phototransistor Optocoupler 5000V RMS Isolation SMD-4", "1", "Everlight", "EL817(S)(TA)"),
+            ("9", "Power N-MOSFET 800V 0.29Ω TO-220 / D2PAK", "1", "ST / Infineon", "STP10NK80Z / IPB80R290P7"),
+            ("10", "Uniform-Frequency Current-Mode PWM Controller (8-Pin)", "1", "Texas Instruments / ST", "UC3843BN / UCC28C43D"),
+            ("11", "Schottky Barrier Diode 100V 10A TO-220", "1", "ON Semi / Vishay", "MBR10100G"),
+            ("12", "Oscillator Timing Network (10kΩ 1% + 2.2nF C0G)", "2", "Vishay / Murata", "TNPW0805 / GRM18"),
+            ("13", "Phototransistor Optocoupler 5000V RMS Isolation DIP-4 / SMD-4", "1", "Everlight", "EL817(S)(TA) / PC817"),
             ("14", "RCD Snubber Ultra-Fast Diode 1000V 1A SMA", "1", "Diodes Inc.", "US1M-13-F"),
-            ("15", "Auxiliary Bias Electrolytic Cap 22µF 50V Low-ESR", "1", "Panasonic", "EEU-FC1H220")
+            ("15", "Auxiliary Bias Electrolytic Cap 47µF 50V Low-ESR", "1", "Panasonic", "EEU-FC1H470")
         ])
     ]
 
@@ -663,7 +662,7 @@ def generate_prd_docx():
             p.text = (
                 "Traditional bench power supplies rely on bulky 50 Hz iron-core transformers, inefficient linear regulators, and manual dials, "
                 "which lead to high thermal dissipation, large footprint, and lack of automated telemetry. This product eliminates those limitations "
-                "by integrating a universal mains Quasi-Resonant (QR) Flyback converter, an ultra-efficient 4-switch synchronous Buck-Boost "
+                "by integrating a universal mains Uniform-Frequency PWM Flyback converter, an efficient 4-switch synchronous Buck-Boost "
                 "post-regulator, real-time dual-domain power telemetry, and autonomous analog hardware protection into a single compact board."
             )
         elif "All the details in this section would be from customer perspective" in txt:
@@ -674,7 +673,7 @@ def generate_prd_docx():
                 "The Smart Programmable Power Supply is a 4-stage AC-to-DC conversion and regulation system in which the power stage "
                 "and mixed-signal microcontroller work together to deliver precise, clean, and safe DC power. The module connects directly "
                 "to universal grid AC mains (85V–265V AC RMS) through an input protection and EMI filter stage, rectifies it to a high-voltage bulk DC rail "
-                "(+120V to +375V DC), isolates and steps it down via a Quasi-Resonant Flyback stage to an intermediate +24.0V DC bus (72W), "
+                "(+120V to +375V DC), isolates and steps it down via a Uniform-Frequency Flyback stage to an intermediate +24.0V DC bus (72W), "
                 "and regulates it through a synchronous 4-switch Buck-Boost stage to provide the commanded 5.0V to 20.0V DC output at up to 3.0A.\n\n"
                 "The onboard microcontroller (STM32G474) acts as the system brain by reading dual-domain electrical telemetry (primary AC input power "
                 "and secondary DC load power), computing real-time conversion efficiency, updating the 1.3-inch OLED dashboard, and driving the "
@@ -685,21 +684,21 @@ def generate_prd_docx():
                 "The primary power supply functionality includes:\n"
                 "• Universal AC Grid Operation: Accepts 85V to 265V AC RMS (47–63 Hz) without manual line selector switches.\n"
                 "• Reinforced Galvanic Isolation: Certified 3000V AC RMS (1 min) isolation meeting IEC 62368-1 SELV.\n"
-                "• Intermediate Regulated Rail: Quasi-Resonant Flyback converter generates a stable +24.0V DC bus (72W) with > 90% peak efficiency.\n"
+                "• Intermediate Regulated Rail: Uniform-Frequency Flyback converter generates a stable +24.0V DC bus (72W) with > 88% peak efficiency.\n"
                 "• Wide Programmable DC Output: 4-switch synchronous Buck-Boost post-regulator delivers 5.0V to 20.0V DC at up to 3.0A continuous (60W continuous power).\n"
                 "• High-Resolution DAC Voltage Steering: 12-bit DAC network achieves 10mV monotonic setpoint resolution.\n"
                 "• Built-in Cycle-by-Cycle Hardware Current Limiting: LM5176 monitors output current through a dedicated 10mΩ shunt across its CSP/CSN pins, natively limiting peak inductor current on every switching cycle without external analog complexity.\n"
                 "• Built-in Controller Protections: Integrated input fuse (2A), NTC inrush limiter (10Ω), MOV transient clamp (300V), LM5176 internal thermal shutdown (165°C), and Under-Voltage Lockout (UVLO).\n"
                 "• Real-Time Dual-Domain Telemetry: Measures AC input power and DC load power, computing live efficiency (η) at 10 Hz.\n"
                 "• Interactive Local Dashboard: 1.3\" OLED display shows live V, I, P, and efficiency meters; dual rotary encoders allow intuitive tuning; front-panel LEDs indicate CV, Current Limit, and Fault states.\n"
-                "• Low Standby Power: Consumes < 150 mW in idle state when output is disabled."
+                "• Low Standby Power: Consumes < 250 mW in idle state when output is disabled."
             )
         elif "Also, if the product comprises of developing multiple systems" in txt:
             p.text = ""
         elif "A diagram showing various systems of the product" in txt:
             p.text = ""
         elif "< Small description of different systems within the product" in txt:
-            p.text = "The product is designed as a unified Embedded Hardware Power Supply Module (System 1). Primary hardware stages include AC Mains Protection & EMI Filter, GBU606 Bridge Rectifier & Bulk Capacitor (+120V to +375V DC), Stage 1 Isolated Quasi-Resonant Flyback Converter (+24V DC, 72W), Stage 2 Synchronous 4-Switch Buck-Boost Post-Regulator (5V–20V / 3A DC), and Analog DAC Steering & Built-in Hardware Protections."
+            p.text = "The product is designed as a unified Embedded Hardware Power Supply Module (System 1). Primary hardware stages include AC Mains Protection & EMI Filter, GBU606 Bridge Rectifier & Bulk Capacitor (+120V to +375V DC), Stage 1 Isolated Uniform-Frequency Flyback Converter (+24V DC, 72W), Stage 2 Synchronous 4-Switch Buck-Boost Post-Regulator (5V–20V / 3A DC), and Analog DAC Steering & Built-in Hardware Protections."
         # Use Cases
         elif "<Summarize the major functions the product must perform" in txt:
             p.text = (
@@ -770,7 +769,7 @@ def generate_prd_docx():
             p.text = (
                 "The following dependencies are included in the design and development of the SPPS module:\n"
                 "• Custom transformer engineering samples on Ferroxcube PQ26/20 ferrite cores with triple-insulated Furukawa TEX-E wire required prior to Phase 3 schematic freeze.\n"
-                "• Component sourcing and lead times for TI LM5176, UCC28740, INA226, AMC1311, and ST STM32G474.\n"
+                "• Component sourcing and lead times for TI LM5176, TI/ST UC3843 / UCC28C43, TI INA226, TI AMC1311, and ST STM32G474.\n"
                 "• Laboratory equipment availability: Chroma AC source, DC electronic load, 3000V RMS Hi-Pot tester, and thermal camera.\n"
                 "• Mechanical front-panel drawings for binding post spacing (19.05mm), IEC C14 inlet cutout, and OLED mounting.\n"
                 "• Firmware device drivers for SSD1306 OLED display, INA226 power monitor, and STM32 internal 12-bit DAC."
@@ -923,10 +922,11 @@ def generate_prd_docx():
         ("FR-02", "Intermediate DC Bus Voltage", "+24.0 V DC ± 1.0% [MUST]", "Across all line/load variations", "Precision DMM"),
         ("FR-03", "Continuous Primary Power", "72.0 W Continuous [MUST]", "85V–265V AC In, 24V / 3A Out", "Electronic Load 72W Soak"),
         ("FR-04", "Peak Power Capability", "84.0 W for 500 ms [SHOULD]", "During dynamic load surges", "Transient Load Step"),
-        ("FR-05", "Primary Stage Efficiency", "> 90.0% @ 230V AC Full Load [MUST]", "Pout = 72W, Tamb = 25°C", "Precision Power Analyzer"),
+        ("FR-05", "Primary Stage Efficiency", "> 88.0% @ 230V AC Full Load [MUST]", "Pout = 72W, Tamb = 25°C", "Precision Power Analyzer"),
         ("FR-06", "Safety Galvanic Isolation", "3,000 V AC RMS (1 min) [MUST]", "Primary to Secondary barrier", "Certified Hi-Pot Tester"),
-        ("FR-07", "Cold-Start Inrush Current", "< 25.0 A Peak [MUST]", "Vin = 265V AC, cold start 25°C", "Current Probe & Scope"),
-        ("FR-08", "No-Load Standby Power", "< 150 mW Standby [SHOULD]", "Vin = 230V AC, Output Off", "Power Meter Integrator")
+        ("FR-07", "Uniform Switching Frequency", "65.0 kHz ± 5% Constant [MUST]", "Set by RT=10k, CT=2.2nF", "Scope / Frequency Counter"),
+        ("FR-08", "Cold-Start Inrush Current", "< 25.0 A Peak [MUST]", "Vin = 265V AC, cold start 25°C", "Current Probe & Scope"),
+        ("FR-09", "No-Load Standby Power", "< 250 mW Standby [SHOULD]", "Vin = 230V AC, Output Off", "Power Meter Integrator")
     ]
 
     req_buckboost = [
@@ -974,11 +974,11 @@ def generate_prd_docx():
     if p_sys1 is not None:
         p_sys1.text = (
             "System 1 represents the physical Hardware Power Supply Module, comprising the universal AC input, EMI filter, "
-            "isolated Quasi-Resonant Flyback stage, 4-switch synchronous Buck-Boost post-regulator, built-in controller hardware protection, "
+            "isolated Uniform-Frequency Flyback stage, 4-switch synchronous Buck-Boost post-regulator, built-in controller hardware protection, "
             "and microcontroller sensing core. The detailed engineering specifications are defined in the tables below:"
         )
         cursor = p_sys1._p
-        cap1 = doc.add_paragraph("Table 4.1: AC-DC Isolated Flyback Power Stage Engineering Requirements")
+        cap1 = doc.add_paragraph("Table 4.1: AC-DC Isolated Uniform-Frequency Flyback Power Stage Engineering Requirements")
         cap1.style = "Caption"
         cursor.addnext(cap1._p)
         cursor = cap1._p
@@ -1036,9 +1036,9 @@ def generate_prd_docx():
 
     fig5_steps = [
         ("1", "High-Voltage DC Input", "Receives +120V to +375V DC bulk bus into primary switching cell."),
-        ("2", "Quasi-Resonant Switching", "TI UCC28740 valley-switching controller modulates 800V CoolMOS at resonant minimums to slash Coss loss."),
+        ("2", "Uniform-Frequency PWM", "UC3843 / UCC28C43 controller operates at constant 65kHz uniform clock set by RT/CT with predictable EMI harmonics."),
         ("3", "3000V RMS Safety Barrier", "PQ26/20 transformer (Lp=220µH) with Furukawa TEX-E wire provides reinforced galvanic isolation."),
-        ("4", "Synchronous Rectification", "MP6908 smart driver and BSC052N06NS 60V/5.2mΩ FET replace Schottky diode, saving 1.65W heat dissipation."),
+        ("4", "Schottky Barrier Rectification", "MBR10100 100V/10A Schottky diode provides simple, robust passive rectification with high reliability."),
         ("5", "+24.0V DC Intermediate Rail", "Low-ESR LC filter delivers stable +24.0V DC (72W) with optocoupled feedback regulation.")
     ]
 
@@ -1075,7 +1075,7 @@ def generate_prd_docx():
             found_sys2 = True
         if found_sys2:
             if p.style.name == "Heading 4" and "Mobile UI Screens/Wireframes" in txt:
-                p.text = "Inside Stage 3: Converter DC-DC (Isolated Quasi-Resonant Flyback) Subsystem"
+                p.text = "Inside Stage 3: Converter DC-DC (Uniform-Frequency Isolated Flyback) Subsystem"
             elif ("<Refer above section>" in txt or "Figure 5" in txt) and p.style.name == "Caption":
                 diag5_path = "smart_programmable_power_supply/diagram_inside_stage3_flyback.png"
                 if os.path.exists(diag5_path):
@@ -1083,8 +1083,8 @@ def generate_prd_docx():
                     p_pic5.alignment = WD_ALIGN_PARAGRAPH.CENTER
                     r5 = p_pic5.add_run()
                     r5.add_picture(diag5_path, width=Inches(6.47))
-                p.text = "Figure 5: Inside Stage 3 - Converter DC-DC (Isolated Flyback) Subsystem Architecture"
-                tbl_fig5 = create_workflow_table(doc, "STAGE 3: ISOLATED FLYBACK DC-DC CONVERTER SEQUENCE", fig5_steps, header_color="1C4532")
+                p.text = "Figure 5: Inside Stage 3 - Converter DC-DC (Uniform-Frequency Isolated Flyback) Subsystem Architecture"
+                tbl_fig5 = create_workflow_table(doc, "STAGE 3: UNIFORM-FREQUENCY FLYBACK DC-DC CONVERTER SEQUENCE", fig5_steps, header_color="1C4532")
                 p._p.addnext(tbl_fig5._tbl)
                 break
 
@@ -1195,13 +1195,13 @@ def generate_prd_docx():
 
     qa_list = [
         ("Q1: Walk me through the complete power conversion chain from the wall to the device.",
-         "The power conversion hardware operates in four clean, sequential stages: First, universal mains AC (85V–265V AC RMS) enters through an IEC C14 inlet with a 2A time-lag ceramic fuse, 10Ω NTC inrush thermistor, MOV surge clamp, and a 2-stage common-mode EMI filter. Second, a GBU606 bridge rectifier and 100µF/450V bulk electrolytic capacitor convert AC into an unregulated high-voltage DC bus (+120V to +375V DC). Third, Stage 1 (a Quasi-Resonant Flyback converter with TI UCC28740 and a custom PQ26/20 transformer) provides certified 3000V RMS reinforced safety isolation and steps down power to a stable +24.0V DC intermediate bus (72W) using synchronous rectification (BSC052N06NS). Fourth, Stage 2 (a TI LM5176 4-switch synchronous Buck-Boost post-regulator) regulates the +24V bus down or across to the target 5.0V–20.0V DC at up to 3.0A with sub-25mV ripple, delivering clean DC to the device under test via heavy-duty 4mm binding posts."),
+         "The power conversion hardware operates in four clean, sequential stages: First, universal mains AC (85V–265V AC RMS) enters through an IEC C14 inlet with a 2A time-lag ceramic fuse, 10Ω NTC inrush thermistor, MOV surge clamp, and a 2-stage common-mode EMI filter. Second, a GBU606 bridge rectifier and 100µF/450V bulk electrolytic capacitor convert AC into an unregulated high-voltage DC bus (+120V to +375V DC). Third, Stage 3 (a Uniform-Frequency Flyback converter with UC3843 / UCC28C43 and a custom PQ26/20 transformer) provides certified 3000V RMS reinforced safety isolation and steps down power to a stable +24.0V DC intermediate bus (72W) using an MBR10100 Schottky barrier diode. Fourth, Stage 4 (a TI LM5176 4-switch synchronous Buck-Boost post-regulator) regulates the +24V bus down or across to the target 5.0V–20.0V DC at up to 3.0A with sub-25mV ripple, delivering clean DC to the device under test via heavy-duty 4mm binding posts."),
 
         ("Q2: Why did you use a passive filter and bridge rectifier instead of an active Boost PFC stage?",
          "Under international standard IEC 61000-3-2, active Power Factor Correction (PFC) is legally mandated only for equipment with active input power exceeding 75W. Our module delivers a maximum continuous output of 60W (72W peak intermediate), so it falls strictly below the 75W threshold. Adding an active PFC boost stage would require an additional high-voltage MOSFET, boost diode, controller IC, and large inductor—adding approximately $4.20 to the BOM, consuming 35% more PCB area, and introducing a ~3% efficiency penalty without any regulatory requirement."),
 
         ("Q3: How did you calculate the Flyback transformer magnetics on the PQ26/20 core?",
-         "At minimum 85V AC input, the rectified bulk bus is 120V DC. For a maximum duty cycle of 45% and 80kHz switching frequency at 72W output power, peak primary current is I_pk = 2.96A. Using L_p = (V_bulk_min * D_max) / (I_pk * f_sw), I calculated a primary inductance of 220µH. I chose a Ferroxcube PQ26/20 core in 3C95 material because its cross-sectional area Ae is 122 mm², keeping peak flux density B_max at 0.28 Tesla (well below the 0.38 Tesla saturation limit). The turns ratio is 6:1 (36 primary turns, 6 secondary turns). To guarantee IEC 62368-1 reinforced isolation (3000V RMS), the secondary is wound with Furukawa TEX-E triple-insulated wire."),
+         "At minimum 85V AC input, the rectified bulk bus is 120V DC. For a maximum duty cycle of 45% and uniform 65kHz switching frequency (set by RT=10kΩ, CT=2.2nF) at 72W output power, peak primary current is I_pk = 2.96A. Using L_p = (V_bulk_min * D_max) / (I_pk * f_sw), I calculated a primary inductance of 220µH. I chose a Ferroxcube PQ26/20 core in 3C95 material because its cross-sectional area Ae is 122 mm², keeping peak flux density B_max at 0.148 Tesla (well below the 0.38 Tesla saturation limit). The turns ratio is 6:1 (36 primary turns, 6 secondary turns). To guarantee IEC 62368-1 reinforced isolation (3000V RMS), the secondary is wound with Furukawa TEX-E triple-insulated wire. The uniform frequency ensures fixed, predictable EMI harmonics at 65kHz and its integer multiples."),
 
         ("Q4: Why is the intermediate bus chosen at +24.0V DC instead of +12V or +48V?",
          "+24.0V DC is the optimal design choice for a 5V to 20V output range. If we chose +12V, stepping up to 20V at 3A (60W) would require high inductor boost currents (I_in = 5.5A), creating excessive I²R conduction losses in the Buck-Boost MOSFETs. If we chose +48V, the Flyback turns ratio would decrease, increasing primary switch voltage stress, and stepping down to 5V would require an extreme duty cycle of 10%. With +24V, 5V, 12V, and 15V operate in pure Buck mode (>96% efficiency), and 20V operates near unity Buck-Boost transition with minimal switching stress."),

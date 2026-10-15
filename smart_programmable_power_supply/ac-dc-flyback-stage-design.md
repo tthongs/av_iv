@@ -96,35 +96,33 @@ The bulk capacitor must maintain the DC bus voltage above $V_{bulk(min)} = 90\,\
 
 ---
 
-## 4. Quasi-Resonant (QR) Valley-Switching Flyback Controller Architecture
+## 4. Uniform-Frequency Current-Mode PWM Flyback Controller Architecture
 
-The primary controller employs the **TI UCC28740** (or **ON Semi NCP1342**) operating in **Quasi-Resonant (QR) Valley Switching Mode**:
+The primary controller employs the industry-standard **UC3843** (or modern CMOS **UCC28C43**) operating in **Uniform-Frequency Peak Current-Mode PWM Control**:
 
 ```text
-               Quasi-Resonant Valley Switching Waveform (Drain-to-Source)
-  Vds ^
-      │   V_bulk + V_reflected + V_spike
-      │        ┌─.
-      │       /   \
-      │      /     \
-      │     /       \
-V_bulk┼────'         '─────────────────.
-      │                                 \      Resonant Ringing (Lp with Coss)
-      │                                  \      / \
-      │                                   '────'   \     / \
-      │                                    Valley 1 '───'   \
-      │                                    (0.5 * Lp * I^2 = 0)
-   0V ┴───────────────────────────────────────────────────────┴───> Time
-                                              ▲
-                                              └─ Primary MOSFET turns ON HERE!
-                                                 Vds is at absolute MINIMUM!
-                                                 Capacitive turn-on loss slashed by 75%!
+               Uniform-Frequency 65 kHz PWM Clock Waveform (Gate & Drain)
+  V_gate ^
+      12V├───┐         ┌───┐         ┌───┐         ┌───┐
+         │   │         │   │         │   │         │   │
+       0V┴───┴─────────┴───┴─────────┴───┴─────────┴───┴───────────────> Time
+         <---- T = 15.38 µs (Fixed Uniform 65 kHz Clock: RT=10kΩ, CT=2.2nF) ---->
+
+  Vds    ^
+         │   V_bulk + V_reflected + V_spike
+         │        ┌─.
+         │       /   \
+         │      /     \
+  V_bulk ┼────'         '───────────────────.
+         │                                   \      Resonant Ringing (DCM Boundary)
+         │                                    '────'   \     / \
+      0V ┴───────────────────────────────────────────────────────┴───> Time
 ```
 
-### Why Quasi-Resonant (QR) Operation?
-1. **Valley Switching**: In a standard hard-switched Flyback, the primary FET turns on while $V_{DS} = V_{bulk} + V_R \approx 475\,\text{V}$, dissipating capacitive stored energy $P_{coss} = \frac{1}{2} C_{oss} V_{DS}^2 f_{sw} \approx 1.5\,\text{W}$.
-2. In QR mode, the controller monitors the transformer auxiliary winding via a zero-crossing detection (ZCD) pin. It turns the primary switch ON precisely at the resonant minimum (the "valley") of the drain ring, cutting capacitive turn-on losses by up to $80\%$.
-3. **Variable Frequency EMI Spreading**: Because switching frequency modulates naturally with load and line voltage, EMI energy is distributed across a wider bandwidth, drastically easing compliance with CISPR 32 Class B limits without bulky chokes.
+### Why Uniform-Frequency PWM Operation?
+1. **Predictable EMI Spectral Profile**: A fixed 65 kHz clock concentrates switching fundamental and harmonics at deterministic frequencies (65 kHz, 130 kHz, 195 kHz), allowing the 2-stage input common-mode and differential EMI filter to be calculated and tuned with absolute precision.
+2. **Simple, Highly Robust Bring-Up**: Current-mode PWM ICs like UC3843 require no complex zero-crossing detection (ZCD) or valley-skipping logic. A standard $R_T/C_T$ timing network ($10\,\text{k}\Omega / 2.2\,\text{nF}$) guarantees a reliable, rock-solid 65 kHz clock on initial power-up.
+3. **Inherent Cycle-by-Cycle Peak Current Protection**: Current flowing through the primary switch generates a voltage across $R_{\text{sense}} = 0.25\,\Omega$. If current exceeds the internal $1.0\,\text{V}$ threshold, the gate is instantly terminated for the remainder of the clock cycle, preventing transformer magnetic saturation.
 
 ---
 
@@ -227,38 +225,41 @@ The flyback transformer is the heart of the primary stage. It acts not merely as
 
 ---
 
-## 7. Secondary Synchronous Rectification (SR) Stage
+## 7. Secondary Schottky Rectification Stage
 
-Traditional Schottky diodes ($V_F \approx 0.55\,\text{V}$) dissipate significant power in high-current low-voltage supplies. At $3.0\,\text{A}$, a Schottky dissipates $P_{diode} = 3.0\,\text{A} \times 0.55\,\text{V} = 1.65\,\text{W}$, requiring a large heatsink.
+To maximize circuit robustness and ensure straightforward hardware bring-up without zero-crossing timing faults or reverse shoot-through, the secondary incorporates a high-efficiency **MBR10100** Schottky barrier rectifier ($100\,\text{V}, 10\,\text{A}$, TO-220):
 
 ```text
-                  Secondary Synchronous Rectifier (SR) Architecture
-  Secondary Winding ───┬────────────────────────────────────────────────────────┬───> +24V Intermediate Bus
-  (12 Turns)           │                                                        │
-                       │   ┌───────────────────────────┐                      ┌─┴─┐ C_OUT1
-                       │   │ MP6908 / UCC24612         │                      │   │ 470uF / 35V
-                       │   │ Fast SR Controller        │                      └─┬─┘ Low-ESR Electro
-                       │   │                           │                        │
-                       │   │ VDD     DRAIN (Drain-Sense)                        ├───[ Ferrite Bead ]───┬───> +24V Clean
-                       │   │                           │                        │   (60Ω @ 100MHz)     │
-                       └───┤ VSS     GATE              │                      ┌─┴─┐                  ┌─┴─┐
-                           └───────────┬───────────────┘                      │   │ C_OUT2           │   │ C_OUT3
-                                       │                                      └─┬─┘ 47uF / 35V       └─┬─┘ 100nF
-                                   Gate│                                        │   Ceramic MLCC       │   Ceramic
-                                     ┌─┴─┐                                   GND_SEC                GND_SEC
-                                     │   │ Q_SR: N-Channel MOSFET
-                                     │   │ (BSC052N06NS: 60V, 5.2mΩ)
-                                     └─┬─┘
-                                       │ Source
-  Secondary Return ────────────────────┴────────────────────────────────────────┴─── GND_SEC
+                  Secondary Schottky Rectifier Architecture
+  Secondary Winding ───┬───[|>| MBR10100 Schottky Diode ]───────────────┬───> +24V Intermediate Bus
+  (6 Turns)            │   (100V, 10A, Heatsinked TO-220)               │
+                       │                                              ┌─┴─┐ C_OUT1
+                       │   ┌───[ R_snub (22Ω) ]───[ C_snub (1nF) ]──┐ │   │ 2x 470uF / 35V
+                       │   │   Secondary RC Snubber Dampens         │ └─┬─┘ Low-ESR Poly Electro
+                       └───┴─── Diode Turn-Off Voltage Ringing ─────┘   │
+                                                                        ├───[ Ferrite Bead ]───┬───> +24V Clean
+                                                                        │   (60Ω @ 100MHz)     │
+                                                                      ┌─┴─┐                  ┌─┴─┐
+                                                                      │   │ C_OUT2           │   │ C_OUT3
+                                                                      └─┬─┘ 4x 10uF / 35V    └─┬─┘ 100nF
+                                                                        │   Ceramic MLCC       │   Ceramic
+                                                                     GND_SEC                GND_SEC
+  Secondary Return ─────────────────────────────────────────────────────┴──────────────────────┴─── GND_SEC
 ```
 
-### 7.1 Synchronous Rectifier Engineering Benefits:
-- **Secondary MOSFET**: **Infineon BSC052N06NS** ($60\,\text{V}$ breakdown, $R_{DS(on)} = 5.2\,\text{m}\Omega$, SuperSO8 package).
-- Conduction Power Dissipation:
-  $$P_{SR} = I_{rms(sec)}^2 \times R_{DS(on)} = (4.8\,\text{A})^2 \times 0.0052\,\Omega = \mathbf{0.120\,\text{W}!}$$
-- **Efficiency Gain**: Slashes secondary rectification loss from $1.65\,\text{W}$ down to $0.12\,\text{W}$—a **$92.7\%$ reduction in secondary thermal loss**, eliminating the need for a secondary heatsink!
-- **Fast Turn-Off**: The **MP6908** controller monitors $V_{DS}$ across the MOSFET with a high-speed comparator ($30\,\text{ns}$ turn-off delay). As current ramps toward zero at the end of the flyback cycle, the driver pulls the gate low to prevent reverse current from discharging the output capacitor back into the transformer.
+### 7.1 Schottky Rectifier Engineering Specifications:
+- **Rectifier Device**: **ON Semiconductor / Diodes Inc. MBR10100G** ($100\,\text{V}$ reverse breakdown, $10.0\,\text{A}$ average forward current, TO-220AC).
+- **Forward Voltage & Power Dissipation**:
+  At maximum continuous $3.0\,\text{A}$ load, forward drop is $V_F \approx 0.60\,\text{V}$:
+  $$P_{\text{diode}} = V_F \times I_{\text{sec,avg}} = 0.60\,\text{V} \times 3.0\,\text{A} = \mathbf{1.80\,\text{W}}$$
+- **Thermal Management**:
+  Mounted onto a small stamped aluminum clip-on heatsink (Aavid 574702B00000G, thermal resistance $R_{\theta,\text{hs}} = 13.4^\circ\text{C/W}$):
+  $$\Delta T_J = P_{\text{diode}} \times (R_{\theta,\text{JC}} + R_{\theta,\text{hs}}) = 1.80\,\text{W} \times (2.0 + 13.4)^\circ\text{C/W} = 1.80 \times 15.4 \approx \mathbf{27.7^\circ\text{C}}$$
+  At $30^\circ\text{C}$ ambient, junction temperature is safely $T_J \approx 58^\circ\text{C}$, far below the $150^\circ\text{C}$ maximum rating!
+- **Engineering Reliability Advantages**:
+  1. Passive, autonomous commutation with zero risk of driver misfire or shoot-through.
+  2. Eliminates active SR controller IC, gate drive traces, and drain-sense noise pickup.
+  3. Simple, highly reliable, and easily verified on any laboratory bench with a standard oscilloscope.
 
 ---
 

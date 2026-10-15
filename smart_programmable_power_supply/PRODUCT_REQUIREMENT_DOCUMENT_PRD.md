@@ -107,7 +107,7 @@ The technical acronyms and terms utilized in this document are defined in Table 
 | **AC** | Alternating Current (Grid Mains Input, 85 V – 265 V AC RMS) |
 | **DC** | Direct Current (Regulated Output, 5.0 V – 20.0 V DC) |
 | **SELV** | Safety Extra-Low Voltage (< 60 V DC limit per IEC 62368-1) |
-| **QR** | Quasi-Resonant Valley Switching (Primary Flyback Mode) |
+| **PWM** | Pulse Width Modulation (Uniform-Frequency Current-Mode Control) |
 | **PFC** | Power Factor Correction |
 | **CC** | Constant Current Mode (Regulated Current Limit) |
 | **CV** | Constant Voltage Mode (Precision Closed-Loop Voltage Regulation) |
@@ -141,7 +141,7 @@ The industry standards, specifications, and reference documents applicable to th
 | **REF-004** | **IEC 61000-3-2** | Electromagnetic compatibility (EMC) – Limits for harmonic current emissions (< 75 W Class A exemption) |
 | **REF-005** | **IEC 61000-4-5** | Electromagnetic compatibility (EMC) – Surge immunity test (Level 3: 2 kV Line-Earth, 1 kV Line-Line) |
 | **REF-006** | **Texas Instruments LM5176** | High-Performance 4-Switch Synchronous Buck-Boost Controller Datasheet (SNVSAR4) |
-| **REF-007** | **Texas Instruments UCC28740** | Constant-Voltage Constant-Current Isolated Flyback Controller Datasheet (SLUSBL2) |
+| **REF-007** | **Texas Instruments UC3843 / UCC28C43** | Current-Mode PWM Controller Datasheet (SLUS223) |
 | **REF-008** | **VVDN Hardware Design Document** | Companion HDD: Smart Programmable Power Supply Circuit Design, Derivations & Schematics |
 
 ---
@@ -151,7 +151,7 @@ The industry standards, specifications, and reference documents applicable to th
 ### 2.1 Product - Business Perspective
 The **Smart Programmable Voltage Supply Module** is an intelligent, high-density benchtop and automated test equipment (ATE) power supply. It delivers a tightly regulated, programmable DC voltage output from **5.0 V to 20.0 V** at currents up to **3.0 A** (maximum continuous power rating of **60 W**) from universal grid AC mains input (**85 V to 265 V AC RMS**, 47 Hz to 63 Hz).
 
-Traditional benchtop power supplies rely on bulky, heavy 50 Hz iron-core transformers and dissipative linear regulators, leading to high thermal losses, large enclosures, and lack of digital telemetry. This product eliminates those drawbacks by combining universal AC Quasi-Resonant (QR) Flyback isolation, an ultra-efficient 4-switch synchronous Buck-Boost post-regulator, real-time dual-domain power telemetry, and standard built-in controller hardware protection into a single, compact, high-efficiency PCBA module.
+Traditional benchtop power supplies rely on bulky, heavy 50 Hz iron-core transformers and dissipative linear regulators, leading to high thermal losses, large enclosures, and lack of digital telemetry. This product eliminates those drawbacks by combining universal AC Uniform-Frequency Flyback isolation (65 kHz PWM), an ultra-efficient 4-switch synchronous Buck-Boost post-regulator, real-time dual-domain power telemetry, and standard built-in controller hardware protection into a single, compact, high-efficiency PCBA module.
 
 ### 2.2 Product – Technical Perspective
 The Smart Programmable Power Supply operates through a sequential 4-stage AC-to-DC conversion and regulation chain. The high-voltage primary stage connects directly to raw AC mains, suppresses transients and conducted emissions, rectifies the input into a high-voltage DC bus (+120 V to +375 V DC), and steps it down across a reinforced 3000V RMS galvanic isolation barrier into a regulated +24.0V DC intermediate rail (72W). The secondary stage utilizes a 4-switch synchronous Buck-Boost post-regulator to deliver the user-commanded 5.0V to 20.0V DC output at up to 3.0A.
@@ -163,7 +163,7 @@ In simple terms, the power conversion stages provide efficient, touch-safe energ
 The primary power supply functionality includes:
 * **Universal AC Grid Operation**: Accepts 85 V to 265 V AC RMS (47 Hz to 63 Hz) without manual line selector switches.
 * **Reinforced Galvanic Isolation**: Certified 3000 V AC RMS (1 minute) isolation barrier complying with IEC 62368-1, ensuring output terminals remain touch-safe (SELV < 60 V DC).
-* **Intermediate Regulated Rail**: Quasi-Resonant Flyback converter generates a stable +24.0 V DC bus rated for 72 W continuous with > 90% peak efficiency.
+* **Intermediate Regulated Rail**: Uniform-Frequency Flyback converter generates a stable +24.0 V DC bus rated for 72 W continuous with ~88% peak efficiency using a robust MBR10100 Schottky rectifier.
 * **Wide Programmable DC Output**: 4-switch synchronous Buck-Boost post-regulator steps voltage up or down to provide 5.0 V to 20.0 V DC at up to 3.0 A continuous (60 W continuous output power).
 * **High-Resolution DAC Voltage Steering**: 12-bit DAC network injects steering current into the regulator feedback node, achieving 10 mV monotonic setpoint resolution.
 * **Built-in Cycle-by-Cycle Hardware Current Limiting**: LM5176 monitors output current through a dedicated $10\,\text{m}\Omega$ shunt across its CSP/CSN pins, natively limiting peak inductor current on every switching cycle without external analog complexity.
@@ -191,7 +191,7 @@ flowchart LR
     end
 
     subgraph COLD_DOMAIN ["SECONDARY COLD DOMAIN (Touch-Safe SELV)"]
-        S3["3. CONVERTER DC-DC<br/>• QR Flyback (TI UCC28740)<br/>• PQ26/20 Core (Lp = 220µH)<br/>• ⚡ 3000V RMS Safety Isolation<br/>• Sync Rectifier (BSC052N06NS)<br/>• +24.0V DC Intermediate Rail (72W)"]:::isoStyle
+        S3["3. CONVERTER DC-DC<br/>• Uniform Flyback (UC3843 @ 65kHz)<br/>• PQ26/20 Core (Lp = 220µH)<br/>• ⚡ 3000V RMS Safety Isolation<br/>• MBR10100 Schottky Rectifier<br/>• +24.0V DC Intermediate Rail (72W)"]:::isoStyle
         S4["4. FINAL STAGE<br/>• 4-Switch Buck-Boost (TI LM5176)<br/>• 4x 40V Low-Rds MOSFETs<br/>• Analog DAC Steering (10mV)<br/>• Built-in CSP/CSN Current Limit<br/>• 5.0V - 20.0V DC / 3.0A (60W)"]:::bbStyle
         S3 -->|"+24.0V DC Rail"| S4
     end
@@ -239,11 +239,11 @@ The Smart Programmable Power Supply module operates across simple, standard oper
 | :---: | :--- |
 | **1** | Universal AC mains soft startup and inrush current suppression (< 25 A peak) |
 | **2** | AC full-wave rectification and high-voltage DC bulk energy holdup (> 10 ms) |
-| **3** | Galvanically isolated Quasi-Resonant Flyback conversion (+24.0 V DC, 72 W) |
+| **3** | Galvanically isolated Uniform-Frequency PWM Flyback conversion (+24.0 V DC, 72 W) |
 | **4** | Synchronous 4-switch Buck-Boost step-down/step-up post-regulation (5 V – 20 V DC) |
 | **5** | High-precision 10 mV digital voltage steering via 12-bit DAC summing network |
 | **6** | LM5176 built-in cycle-by-cycle overcurrent protection via CSP/CSN pins |
-| **7** | Primary Flyback cycle-by-cycle current limit via UCC28740 CS resistor |
+| **7** | Primary Flyback cycle-by-cycle peak current limit via UC3843 ISENSE resistor |
 | **8** | Controller internal thermal shutdown and board temperature monitoring |
 | **9** | Primary AC input power measurement via isolated delta-sigma amplifier and CT |
 | **10** | Secondary DC load voltage, current, and power monitoring via 16-bit I2C monitor |
@@ -321,17 +321,18 @@ The engineering disciplines and development domains involved in the SPPS module 
 ### 4.1 System Requirements
 The engineering requirements and verification criteria for the Smart Programmable Voltage Supply Module are organized into five structured requirement tables:
 
-#### Table 4.1: AC-DC Isolated Flyback Power Stage Engineering Requirements
+#### Table 4.1: AC-DC Isolated Uniform-Frequency Flyback Power Stage Engineering Requirements
 | Req ID | Parameter / Feature | Specification / Target | Condition | Verification Method |
 | :---: | :--- | :--- | :--- | :--- |
 | **FR-01** | AC Input Voltage Range | 85 V – 265 V AC RMS **[MUST]** | Nominal 230 V AC, 47–63 Hz | AC Source Voltage Sweep |
 | **FR-02** | Intermediate DC Bus Voltage | +24.0 V DC ± 1.0% **[MUST]** | Across all line/load variations | Precision Digital Multimeter |
 | **FR-03** | Continuous Primary Power | 72.0 W Continuous **[MUST]** | 85V–265V AC In, 24V / 3A Out | Electronic Load 72W Soak |
 | **FR-04** | Peak Power Capability | 84.0 W for 500 ms **[SHOULD]** | Dynamic load step surges | Transient Load Step |
-| **FR-05** | Primary Stage Efficiency | > 90.0% @ 230V AC Full Load **[MUST]** | $P_{\text{out}} = 72\,\text{W}, T_{\text{amb}} = 25^\circ\text{C}$ | Precision Power Analyzer |
+| **FR-05** | Primary Stage Efficiency | > 88.0% @ 230V AC Full Load **[MUST]** | $P_{\text{out}} = 72\,\text{W}, T_{\text{amb}} = 25^\circ\text{C}$ (Passive Schottky) | Precision Power Analyzer |
 | **FR-06** | Safety Galvanic Isolation | 3,000 V AC RMS (1 min) **[MUST]** | Primary to Secondary barrier | Certified Hi-Pot Tester |
-| **FR-07** | Cold-Start Inrush Current | < 25.0 A Peak **[MUST]** | $V_{\text{in}} = 265\,\text{V}$ AC, cold start 25°C | Current Probe & Oscilloscope |
-| **FR-08** | No-Load Standby Power | < 150 mW Standby **[SHOULD]** | $V_{\text{in}} = 230\,\text{V}$ AC, Output Off | Power Meter Integration |
+| **FR-07** | Uniform Switching Frequency | 65.0 kHz ± 5% Constant **[MUST]** | Set by $R_T=10\,\text{k}\Omega, C_T=2.2\,\text{nF}$ | Oscilloscope / Frequency Counter |
+| **FR-08** | Cold-Start Inrush Current | < 25.0 A Peak **[MUST]** | $V_{\text{in}} = 265\,\text{V}$ AC, cold start 25°C | Current Probe & Oscilloscope |
+| **FR-09** | No-Load Standby Power | < 250 mW Standby **[SHOULD]** | $V_{\text{in}} = 230\,\text{V}$ AC, Output Off | Power Meter Integration |
 
 ---
 
@@ -402,7 +403,7 @@ The engineering requirements and verification criteria for the Smart Programmabl
 
 The following engineering dependencies and hardware boundary conditions govern the execution of the SPPS module development:
 * **Custom Magnetics Tooling**: Transformer engineering samples wound on Ferroxcube PQ26/20 ferrite cores with triple-insulated Furukawa TEX-E secondary wire must be validated prior to Phase 3 schematic freeze.
-* **Semiconductor Availability**: Supply chain allocation and sample lead times for key ICs (TI LM5176, TI UCC28740, TI INA226, TI AMC1311, ST STM32G474RET6, and Infineon BSC034N04LS MOSFETs) must be tracked to meet prototype build dates.
+* **Semiconductor Availability**: Supply chain allocation and sample lead times for key ICs (TI LM5176, TI/ST UC3843 / UCC28C43, TI INA226, TI AMC1311, ST STM32G474RET6, and Infineon BSC034N04LS MOSFETs) must be tracked to meet prototype build dates.
 * **Laboratory Test Equipment**: Hardware bring-up and DVT validation require access to a calibrated Chroma 61604 Programmable AC Source, Chroma 63102A DC Electronic Load, Keysight 34465A 6.5-digit DMM, 4-channel oscilloscope with high-voltage differential probes and current probes, and a certified 3000V RMS Hi-Pot tester.
 * **Enclosure & Front-Panel Alignment**: Final mechanical drawings for the front-panel bezel, 4mm binding post cutouts, IEC C14 inlet cutout, and OLED mounting brackets must be frozen during Phase 4 PCB layout.
 * **Firmware Device Drivers**: Driver source code for the SSD1306 OLED display controller, STM32 internal 12-bit DAC, and INA226 register configuration must be available prior to Phase 5 integrated DVT.
@@ -493,15 +494,15 @@ flowchart TD
         AC_IN --> PROT --> EMI --> RECT --> BULK
     end
 
-    subgraph STAGE3 ["STAGE 3: ISOLATED DC-DC CONVERTER"]
-        FLY_CTL["TI UCC28740 Controller<br/>Quasi-Resonant Valley Switching<br/>Cycle-by-Cycle Primary OCP"]:::priStyle
-        FLY_FET["Infineon IPB80R290P7<br/>800V CoolMOS Switch"]:::priStyle
+    subgraph STAGE3 ["STAGE 3: UNIFORM-FREQUENCY ISOLATED FLYBACK"]
+        FLY_CTL["UC3843 / UCC28C43 Controller<br/>Uniform 65kHz Fixed Clock PWM<br/>Cycle-by-Cycle Peak CS"]:::priStyle
+        FLY_FET["STP10NK80Z / IPB80R290P7<br/>800V Power N-FET"]:::priStyle
         TRANS["PQ26/20 Transformer<br/>⚡ 3000V RMS Reinforced Isolation<br/>Lp = 220µH, TEX-E Secondary"]:::secStyle
-        SYNC_RECT["MP6908 Smart Driver &<br/>BSC052N06NS Sync FET (60V, 5.2mΩ)"]:::secStyle
+        SCHOTTKY_RECT["MBR10100 Schottky Diode<br/>100V, 10A Passive Rectifier"]:::secStyle
         BUS_24V["Intermediate DC Rail<br/>+24.0V DC ± 1.0% (72W Continuous)"]:::secStyle
 
-        BULK --> FLY_FET --> TRANS --> SYNC_RECT --> BUS_24V
-        FLY_CTL -.->|"Gate PWM"| FLY_FET
+        BULK --> FLY_FET --> TRANS --> SCHOTTKY_RECT --> BUS_24V
+        FLY_CTL -.->|"65kHz Gate PWM"| FLY_FET
     end
 
     subgraph STAGE4 ["STAGE 4: SYNCHRONOUS BUCK-BOOST POST-REGULATOR"]
@@ -553,12 +554,12 @@ flowchart TD
 * **High-Frequency Decoupling**: 100nF / 630V ceramic capacitor placed directly across the primary switching loop bypasses 80kHz MOSFET turn-off ringing.
 * **Passive Safety Discharge**: 3x 330kΩ resistor bleeder string safely drains bulk voltage to touch-safe SELV levels ($< 50\,\text{V}$) within 60 seconds of AC disconnection per IEC 62368-1.
 
-#### Stage 3: Isolated Quasi-Resonant Flyback DC-DC Converter Subsystem
-* **Quasi-Resonant Switching**: TI UCC28740 valley-switching controller modulates an Infineon IPB80R290P7 (800V CoolMOS) at resonant valley minimums, minimizing switching losses.
-* **Cycle-by-Cycle Primary OCP**: UCC28740 senses primary switch current through a low-inductance sense resistor on its CS pin, capping maximum peak current on every cycle.
-* **Safety Isolation Barrier**: Custom transformer wound on Ferroxcube PQ26/20 ferrite core ($L_p = 220\,\mu\text{H}$) with Furukawa TEX-E triple-insulated secondary wire guarantees certified 3000V RMS reinforced safety isolation.
-* **Synchronous Rectification**: MPS MP6908 smart driver and Infineon BSC052N06NS (60V, 5.2mΩ FET) replace lossy Schottky diodes, saving $> 1.3\,\text{W}$ of thermal dissipation.
-* **Intermediate Rail Delivery**: Delivers a stable +24.0V DC intermediate rail rated for 72W continuous power with $< 50\,\text{mV}$ pk-pk ripple and $> 90\%$ stage efficiency.
+#### Stage 3: Converter DC-DC (Uniform-Frequency Isolated Flyback Subsystem)
+* **Uniform-Frequency PWM Operation**: Standard current-mode PWM controller (UC3843 / UCC28C43) operates at a constant, uniform 65 kHz clock set by a precision $R_T / C_T$ timing network ($10\,\text{k}\Omega, 2.2\,\text{nF}$), driving an 800V N-MOSFET (STP10NK80Z / IPB80R290P7) with predictable, deterministic EMI harmonics.
+* **Cycle-by-Cycle Peak Current Limiting**: Senses primary switch current through a $0.25\,\Omega$ low-inductance sense resistor on its ISENSE pin (Pin 3), instantaneously truncating the PWM pulse if current exceeds the internal 1.0V comparator threshold ($I_{\text{pk}} \le 2.96\,\text{A}$).
+* **Safety Isolation Barrier**: Custom/standard transformer wound on Ferroxcube PQ26/20 ferrite core ($L_p = 220\,\mu\text{H}$) with Furukawa TEX-E triple-insulated secondary wire guarantees certified 3000V RMS reinforced safety isolation per IEC 62368-1.
+* **Secondary Schottky Rectification**: High-speed MBR10100 (100V, 10A) Schottky barrier diode with a compact heatsink delivers robust, trouble-free passive rectification without requiring active synchronous gate drive controllers.
+* **Intermediate Rail Delivery & Feedback**: Delivers a stable +24.0V DC intermediate rail rated for 72W continuous power with $< 50\,\text{mV}$ pk-pk ripple and $> 88\%$ stage efficiency. Regulation is maintained to $\pm 1.0\%$ across all line and load variations via a TL431 programmable shunt reference and PC817/EL817 optocoupler feedback network controlling the UC3843 COMP pin.
 
 #### Stage 4: 4-Switch Synchronous Buck-Boost Post-Regulator Subsystem
 * **H-Bridge Architecture**: TI LM5176 controller modulates four 40V N-MOSFETs (Infineon BSC034N04LS, 3.4mΩ) in an H-bridge configuration around a 10µH flat-wire power inductor (Wurth 7443321000, 8.5A).
@@ -568,7 +569,7 @@ flowchart TD
 
 > [!NOTE]
 > *This is the proposed hardware architecture baseline and may undergo fine-tuning during detailed schematic bring-up.*
-> *Component selection must strictly comply with VVDN component stress derating guidelines (voltage derating $\ge 75\%$, current derating $\ge 80\%$, temperature derating $\ge 80\%$).*
+> *Component selection strictly complies with component stress derating guidelines (voltage derating $\ge 75\%$, current derating $\ge 80\%$, temperature derating $\ge 80\%$).*
 
 ---
 
@@ -587,11 +588,11 @@ Organized across the 4 power conversion stages:
 | **6** | Stage 2: Rectifier | Bridge Rectifier Glass Passivated 600V 6A GBU | 1 | Diodes Inc. | GBU606 |
 | **7** | Stage 2: Bulk Filter | Primary Bulk Electrolytic Cap 100µF 450V 105°C | 1 | Nichicon | LGW2W101MELZ25 |
 | **8** | Stage 3: Flyback Stage| Transformer PQ26/20 220µH 72W (TEX-E Wire)| 1 | Custom / Ferroxcube | 3C95-PQ2620-72W |
-| **9** | Stage 3: Flyback Stage| Superjunction Power MOSFET 800V 0.29Ω D2PAK| 1 | Infineon | IPB80R290P7 |
-| **10** | Stage 3: Flyback Stage| Quasi-Resonant Flyback Controller IC SOIC-7| 1 | Texas Instruments | UCC28740DR |
-| **11** | Stage 3: Flyback Stage| Smart Synchronous Rectifier Driver TSOT23-6 | 1 | Monolithic Power | MP6908GJ |
-| **12** | Stage 3: Flyback Stage| Synchronous N-MOSFET 60V 5.2mΩ SuperSO8 | 1 | Infineon | BSC052N06NS |
-| **13** | Stage 3: Isolation | Phototransistor Optocoupler 5000V RMS SMD-4 | 1 | Everlight | EL817(S)(TA) |
+| **9** | Stage 3: Flyback Stage| Power N-MOSFET 800V 0.29Ω TO-220 / D2PAK | 1 | ST / Infineon | STP10NK80Z / IPB80R290P7 |
+| **10** | Stage 3: Flyback Stage| Uniform-Freq Current-Mode PWM Controller (8-Pin)| 1 | Texas Instruments / ST | UC3843BN / UCC28C43D |
+| **11** | Stage 3: Flyback Stage| Schottky Barrier Diode 100V 10A TO-220 | 1 | ON Semi / Vishay | MBR10100G |
+| **12** | Stage 3: Flyback Stage| Oscillator Timing Network (10kΩ 1% + 2.2nF C0G)| 2 | Vishay / Murata | TNPW0805 / GRM18 |
+| **13** | Stage 3: Isolation | Phototransistor Optocoupler 5000V RMS DIP-4 / SMD-4 | 1 | Everlight | EL817(S)(TA) / PC817 |
 | **14** | Stage 4: Post-Regulator| 4-Switch Synchronous Buck-Boost Controller | 1 | Texas Instruments | LM5176PWPR (HTSSOP-28) |
 | **15** | Stage 4: Post-Regulator| Power N-MOSFET 40V 3.4mΩ SuperSO8 | 4 | Infineon | BSC034N04LS |
 | **16** | Stage 4: Post-Regulator| Flat-Wire Power Inductor 10µH 8.5A (12.5mm) | 1 | Wurth Elektronik | 7443321000 |
@@ -650,7 +651,7 @@ This appendix provides structured technical defense rationales for the Power Ele
 The power conversion hardware operates in four clean, sequential stages:
 1. **Mains AC Input**: Accepts universal 85V–265V AC RMS mains through an IEC C14 inlet with a 2A time-lag ceramic fuse, 10Ω NTC inrush thermistor, 14mm 300V MOV, and a two-stage common-mode EMI filter (15mH and 4.7mH).
 2. **Bridge Rectification & Bulk Filter**: A GBU606 bridge rectifies the AC sine wave into unipolar pulses, and a 100µF/450V electrolytic cap smooths it into a +120V to +375V DC bulk rail, providing $> 10\,\text{ms}$ holdup energy.
-3. **Quasi-Resonant Flyback Stage**: A TI UCC28740 controller modulates an 800V CoolMOS at valley minimums, transferring energy across a custom PQ26/20 transformer ($L_p = 220\,\mu\text{H}$) with 3000V RMS reinforced safety isolation. A secondary synchronous rectifier (MP6908 + 60V/5.2mΩ FET) delivers an intermediate +24.0V DC rail at 72W with > 90% efficiency.
+3. **Uniform-Frequency Flyback Stage**: A UC3843 / UCC28C43 controller operates at a constant, uniform 65 kHz switching frequency, transferring energy across a custom PQ26/20 transformer ($L_p = 220\,\mu\text{H}$) with 3000V RMS reinforced safety isolation. A secondary Schottky barrier diode (MBR10100, 100V/10A) delivers an intermediate +24.0V DC rail at 72W with > 88% efficiency.
 4. **4-Switch Buck-Boost Post-Regulator**: A TI LM5176 controller modulates four 40V MOSFETs in an H-bridge around a 10µH flat-wire inductor. It steps the 24V rail down or across to deliver 5.0V–20.0V DC at up to 3.0A (60W continuous) with $< 25\,\text{mV}$ ripple, delivering clean DC to the device under test via heavy-duty 4mm binding posts.
 
 ---
@@ -671,17 +672,20 @@ At minimum 85V AC input, the rectified DC bulk voltage is:
 
 $$V_{\text{bulk,min}} = 85 \times \sqrt{2} - 2 \times 1.0\,\text{V} \approx 118\,\text{V DC}$$
 
-Designing for a maximum duty cycle $D_{\text{max}} = 0.45$ and minimum switching frequency $f_{\text{sw}} = 80\,\text{kHz}$ at 72 W output:
+Designing for a maximum duty cycle $D_{\text{max}} = 0.45$ and uniform switching frequency $f_{\text{sw}} = 65\,\text{kHz}$ at 72 W output:
 1. **Primary Inductance ($L_p$)**:
-   $$L_p = \frac{(V_{\text{bulk,min}} \times D_{\text{max}})^2}{2 \times P_{\text{in}} \times f_{\text{sw}}} = \frac{(118 \times 0.45)^2}{2 \times 80\,\text{W} \times 80{,}000\,\text{Hz}} \approx 220\,\mu\text{H}$$
+   $$L_p = \frac{(V_{\text{bulk,min}} \times D_{\text{max}})^2}{2 \times P_{\text{in}} \times f_{\text{sw}}} = \frac{(118 \times 0.45)^2}{2 \times 81.8\,\text{W} \times 65{,}000\,\text{Hz}} \approx 220\,\mu\text{H}$$
 
 2. **Primary Peak Current ($I_{\text{pk}}$)**:
-   $$I_{\text{pk}} = \frac{V_{\text{bulk,min}} \times D_{\text{max}}}{L_p \times f_{\text{sw}}} = \frac{118 \times 0.45}{220 \times 10^{-6} \times 80{,}000} \approx 3.01\,\text{A}$$
+   $$I_{\text{pk}} = \frac{V_{\text{bulk,min}} \times D_{\text{max}}}{L_p \times f_{\text{sw}}} = \frac{118 \times 0.45}{220 \times 10^{-6} \times 65{,}000} \approx 2.96\,\text{A}$$
 
 3. **Core Selection & Flux Density**:
-   The PQ26/20 ferrite core provides an effective cross-sectional area $A_e = 119\,\text{mm}^2$. With $N_p = 36\,\text{turns}$, the maximum operating magnetic flux density is:
-   $$B_{\text{max}} = \frac{L_p \times I_{\text{pk}}}{N_p \times A_e} = \frac{220 \times 10^{-6} \times 3.01}{36 \times 119 \times 10^{-6}} \approx 0.154\,\text{Tesla} = 154\,\text{mT}$$
-   $154\,\text{mT}$ is safely below the core saturation limit of $320\,\text{mT}$ for 3C95 ferrite at $100^\circ\text{C}$, providing a > 50% saturation margin.
+   The PQ26/20 ferrite core provides an effective cross-sectional area $A_e = 122\,\text{mm}^2$. With $N_p = 36\,\text{turns}$, the maximum operating magnetic flux density is:
+   $$B_{\text{max}} = \frac{L_p \times I_{\text{pk}}}{N_p \times A_e} = \frac{220 \times 10^{-6} \times 2.96}{36 \times 122 \times 10^{-6}} \approx 0.148\,\text{Tesla} = 148\,\text{mT}$$
+   $148\,\text{mT}$ is safely below the core saturation limit of $380\,\text{mT}$ for 3C95 ferrite at $100^\circ\text{C}$, providing an exceptional > 60% saturation margin.
+
+4. **Uniform-Frequency Advantages**:
+   Using a fixed 65 kHz oscillator clock ($R_T=10\,\text{k}\Omega, C_T=2.2\,\text{nF}$) ensures that all switching harmonics occur at known, fixed frequencies ($65\,\text{kHz}, 130\,\text{kHz}, 195\,\text{kHz}$), dramatically simplifying EMI filter suppression and eliminating unpredictable acoustic noise or subharmonic jitter.
 
 ---
 
@@ -751,5 +755,5 @@ To protect the prototype hardware against assembly errors or short circuits:
 1. **Cold Resistance Checks**: Before applying AC mains power, measure resistance across bulk capacitor terminals (confirming no bridge or FET shorts) and primary-to-secondary isolation impedance (> 100 MΩ with insulation tester).
 2. **Current-Limited DC Auxiliary Check**: Inject external +12V DC into the secondary auxiliary rail to verify that the STM32 MCU boots, the OLED dashboard illuminates, and the DAC generates valid reference voltages.
 3. **Supervised AC Ramp with Variac**: Connect the AC mains input through a 1:1 safety isolation transformer, a Variac, and a 100W incandescent series ballast bulb. Slowly increase AC input voltage from 0V to 85V AC while observing bulk bus voltage on an oscilloscope.
-4. **Intermediate Bus Stabilization**: Confirm that the UCC28740 Flyback starts switching at $V_{\text{bulk}} \approx 80\,\text{V DC}$ and stabilizes the intermediate bus at exactly $+24.0\,\text{V DC} \pm 1.0\%$.
+4. **Intermediate Bus Stabilization**: Confirm that the UC3843 Flyback starts switching at $V_{\text{bulk}} \approx 80\,\text{V}$ to $100\,\text{V DC}$ and stabilizes the intermediate bus at exactly $+24.0\,\text{V DC} \pm 1.0\%$.
 5. **Post-Regulator Progressive Load**: Enable the LM5176 Buck-Boost controller with no load, verify DAC setpoints from 5V to 20V with a precision DMM, and gradually increase electronic load current in 0.5A steps up to 3.0A while monitoring inductor thermal signatures with a FLIR thermal camera.
