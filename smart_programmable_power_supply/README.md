@@ -69,7 +69,7 @@ flowchart LR
 
     subgraph COLD_DOMAIN ["SECONDARY COLD DOMAIN (Touch-Safe SELV)"]
         S3["3. CONVERTER DC-DC<br/>• QR Flyback (TI UCC28740)<br/>• PQ26/20 Core (Lp = 220µH)<br/>• ⚡ 3000V RMS Safety Isolation<br/>• Sync Rectifier (BSC052N06NS)<br/>• +24.0V DC Intermediate Rail (72W)"]:::isoStyle
-        S4["4. FINAL STAGE<br/>• 4-Switch Buck-Boost (TI LM5176)<br/>• 4x 40V Low-Rds MOSFETs<br/>• Analog DAC Steering (10mV)<br/>• Fast < 5µs CC Hardware Clamp<br/>• 5.0V - 20.0V DC / 3.0A (60W)"]:::bbStyle
+        S4["4. FINAL STAGE<br/>• 4-Switch Buck-Boost (TI LM5176)<br/>• 4x 40V Low-Rds MOSFETs<br/>• Analog DAC Steering (10mV)<br/>• Built-in CSP/CSN Current Limit<br/>• 5.0V - 20.0V DC / 3.0A (60W)"]:::bbStyle
         S3 -->|"+24.0V DC Rail"| S4
     end
 
@@ -113,7 +113,7 @@ TI UCC28740 QR valley-switching controller, 800V CoolMOS IPB80R290P7, and custom
 </p>
 
 #### Stage 4: Final Stage (Synchronous 4-Switch Buck-Boost Post-Regulator Subsystem)
-TI LM5176 modulating four 40V MOSFETs (BSC034N04LS) through a 10µH flat-wire power inductor. Features 10mV DAC voltage steering (5V–20V DC), sub-25mV ripple, and < 5µs autonomous hardware CC clamping feeding 4mm gold binding posts.
+TI LM5176 modulating four 40V MOSFETs (BSC034N04LS) through a 10µH flat-wire power inductor. Features 10mV DAC voltage steering (5V–20V DC), sub-25mV ripple, and built-in cycle-by-cycle CSP/CSN current limiting feeding 4mm gold binding posts.
 <p align="center">
   <img src="diagram_inside_stage4_final_stage.png" alt="Inside Stage 4: 4-Switch Buck-Boost Post-Regulator Subsystem" width="100%"/>
 </p>

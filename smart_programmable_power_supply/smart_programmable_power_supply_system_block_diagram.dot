@@ -120,21 +120,17 @@ digraph MasterArchitecture {
     }
 
     subgraph cluster_control_protection {
-        label = "MIXED-SIGNAL CLOSED-LOOP CONTROL & HARDWARE PROTECTION";
+        label = "CLOSED-LOOP REGULATION & BUILT-IN HARDWARE PROTECTION";
         style = "filled,rounded";
         fillcolor = "#F3E5F5";
         color = "#6A1B9A";
         penwidth = 1.6;
 
-        dac_summing [label="DAC Voltage Steering Network\nR_top = 49.9kΩ, R_bot = 3.65kΩ\nR_DAC = 11.0kΩ (0.1% Precision)\nInjects offset current into FB node\nLinear Resolution: 3.65mV / LSB", fillcolor="#FFFFFF", color="#6A1B9A"];
-        ina240 [label="Fast Current Sense Amp\nTI INA240A2 (Gain = 50 V/V)\n400 kHz BW, 2µs Response", fillcolor="#FFFFFF", color="#6A1B9A"];
-        cc_clamp [label="Hardware Fast CC Clamp\nTI TLV3501 (4.5ns Comparator)\nPulls COMP pin down via BAT54\nTrip Latency < 5µs (Zero CPU lag)", fillcolor="#E1BEE7", color="#4A148C", penwidth=1.8];
+        dac_summing [label="DAC Voltage Steering Network\nR_top = 49.9kΩ, R_bot = 3.65kΩ\nR_DAC = 11.0kΩ (0.1% Precision)\nInjects steering current into FB node\n10mV Step Resolution", fillcolor="#FFFFFF", color="#6A1B9A"];
 
         dc_terminals -> dac_summing [label=" VOUT Sense", color="#6A1B9A"];
         dac_summing -> bb_ctrl [label=" V_FB (1.20V Ref)", color="#6A1B9A"];
-        dc_shunt -> ina240 [label=" Kelvin Sense", color="#6A1B9A"];
-        ina240 -> cc_clamp [label=" V_ISENSE", color="#6A1B9A"];
-        cc_clamp -> bb_ctrl [label=" Throttles COMP Pin\n(< 5µs CC Clamp)", color="#B71C1C", penwidth=1.8];
+        dc_shunt -> bb_ctrl [label=" CSP / CSN Pins\n(Cycle-by-Cycle OCP)", color="#B71C1C", penwidth=2.0];
     }
 
     subgraph cluster_telemetry {
@@ -163,15 +159,15 @@ digraph MasterArchitecture {
         color = "#0277BD";
         penwidth = 1.8;
 
-        mcu [label="STM32G474RET6 Microcontroller\n• 32-bit ARM Cortex-M4F @ 170 MHz\n• Hardware Sinc3 Decimation Filter\n• Hardware CORDIC / Math Accel\n• Dual 12-Bit Fast DACs & ADCs\n• FreeRTOS Real-Time Kernel", fillcolor="#B3E5FC", color="#01579B", penwidth=2.0];
+        mcu [label="STM32G474RET6 Microcontroller\n• 32-bit ARM Cortex-M4F @ 170 MHz\n• Hardware Sinc3 Decimation Filter\n• Hardware CORDIC / Math Accel\n• 12-Bit Fast DAC & ADCs\n• Bare-Metal Telemetry Firmware", fillcolor="#B3E5FC", color="#01579B", penwidth=2.0];
         eff_calc [label="Real-Time Efficiency Engine (10Hz)\nComputes: η = (P_DC / P_AC) × 100%\n• Instantaneous v(t)·i(t) Integration\n• Active Power Pac, True RMS Vac, Iac, PF\n• True Vdc, Idc, Pdc\n• 8-tap EMA Smoothing Filter", fillcolor="#FFFFFF", color="#0277BD"];
 
         iso_amc -> mcu [label=" Bitstream (Sinc3)", color="#1565C0", penwidth=1.6];
         ct_burden -> mcu [label=" I_AC Signal", color="#1565C0"];
         ina226 -> mcu [label=" I2C (400kHz)", color="#0277BD", penwidth=1.6];
         mcu -> eff_calc [dir=both, label=" Math Engine", color="#0277BD"];
-        mcu -> dac_summing [label=" 12-Bit DAC1 (V_SET)\n0.0V - 3.3V Control", color="#6A1B9A", penwidth=1.8];
-        mcu -> cc_clamp [label=" 12-Bit DAC2 (I_SET)\nCurrent Limit Ref", color="#6A1B9A", penwidth=1.8];
+        mcu -> dac_summing [label=" 12-Bit DAC (V_SET)\n0.0V - 3.3V Control", color="#6A1B9A", penwidth=1.8];
+        mcu -> bb_ctrl [label=" GPIO ENABLE Line\n(Supervisory Disable)", color="#00838F", penwidth=1.8];
     }
 
     subgraph cluster_hmi_storage {

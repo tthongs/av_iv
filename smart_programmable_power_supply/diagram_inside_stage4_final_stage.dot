@@ -116,28 +116,15 @@ digraph InsideStage4FinalStage {
 
         shunt_sense [
             label = <<table border="0" cellborder="0" cellspacing="2">
-                <tr><td><b>CURRENT SHUNT &amp; AMP</b></td></tr>
-                <tr><td><font color="#B71C1C">10mΩ Shunt + INA240A2</font></td></tr>
+                <tr><td><b>CURRENT SHUNT RESISTOR</b></td></tr>
+                <tr><td><font color="#B71C1C">10mΩ Metal Shunt (CSP/CSN)</font></td></tr>
                 <hr/>
                 <tr><td align="left">• 10mΩ 3W 0.1% Metal Shunt</td></tr>
-                <tr><td align="left">• INA240 Gain = 50V/V</td></tr>
-                <tr><td align="left">• Enhanced PWM rejection</td></tr>
+                <tr><td align="left">• Kelvin sense to LM5176 pins</td></tr>
+                <tr><td align="left">• Cycle-by-cycle peak limit</td></tr>
             </table>>,
             fillcolor = "#FFCDD2",
             color = "#B71C1C"
-        ];
-
-        cc_comparator [
-            label = <<table border="0" cellborder="0" cellspacing="2">
-                <tr><td><b>FAST HW CC CLAMP</b></td></tr>
-                <tr><td><font color="#B71C1C">TI TLV3501 (4.5ns Comp)</font></td></tr>
-                <hr/>
-                <tr><td align="left">• Direct pull-down on COMP</td></tr>
-                <tr><td align="left">• Overrides PWM in <b>&lt; 5.0µs</b></td></tr>
-                <tr><td align="left">• Zero software latency clamp</td></tr>
-            </table>>,
-            fillcolor = "#FFEBEE",
-            color = "#C62828"
         ];
 
         binding_posts [
@@ -166,6 +153,5 @@ digraph InsideStage4FinalStage {
     output_filter -> dac_steering [label="V_OUT Sense", style=dotted];
     dac_steering -> bb_controller [label="FB Node Steering", color="#6A1B9A"];
 
-    shunt_sense -> cc_comparator [label="I_OUT Sense Signal"];
-    cc_comparator -> bb_controller [label="&lt; 5µs COMP Pull-Down", color="#C62828", penwidth=2.2, style=bold];
+    shunt_sense -> bb_controller [label="CSP/CSN Current Sense", color="#C62828", penwidth=2.0];
 }

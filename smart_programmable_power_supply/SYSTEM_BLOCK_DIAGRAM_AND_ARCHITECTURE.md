@@ -312,13 +312,13 @@ To provide complete design clarity during your mentor technical review, this sec
 
 ---
 
-### 4.1 Subsystem 1: Stage 1 Isolated AC-DC Quasi-Resonant Flyback Stage
+### 4.1 Subsystem 1: Stage 3 Isolated AC-DC Quasi-Resonant Flyback Stage
 
 The isolated primary stage converts unpredictable universal grid AC ($85\,\text{V} \dots 265\,\text{V}$ AC RMS) into a rock-solid $+24.0\,\text{V}$ DC intermediate rail capable of delivering $72\,\text{W}$ maximum stage throughput with $> 91\%$ conversion efficiency.
 
-![Stage 1 AC-DC Flyback Block Diagram](block_diagram_stage1_flyback.png)
+![Stage 3 AC-DC Flyback Block Diagram](diagram_inside_stage3_flyback.png)
 
-*(Vector format: [`block_diagram_stage1_flyback.svg`](file:///home/tthhongs/build_tthongs/tasks_aa_ii/vvdn/smart_programmable_power_supply/block_diagram_stage1_flyback.svg))*
+*(Vector format: [`diagram_inside_stage3_flyback.svg`](diagram_inside_stage3_flyback.svg))*
 
 #### Technical Operational Principles:
 1. **Quasi-Resonant (QR) Valley Switching Physics**:
@@ -338,13 +338,13 @@ The isolated primary stage converts unpredictable universal grid AC ($85\,\text{
 
 ---
 
-### 4.2 Subsystem 2: Stage 2 Synchronous 4-Switch Buck-Boost Post-Regulator
+### 4.2 Subsystem 2: Stage 4 Synchronous 4-Switch Buck-Boost Post-Regulator
 
 The post-regulator steps the $+24.0\,\text{V}$ bus up or down into a continuously programmable DC output spanning from **$5.0\,\text{V}$ to $20.0\,\text{V}$** at continuous load currents up to **$3.0\,\text{A}$** ($60\,\text{W}$).
 
-![Stage 2 Buck-Boost Block Diagram](block_diagram_stage2_buckboost.png)
+![Stage 4 Buck-Boost Block Diagram](diagram_inside_stage4_final_stage.png)
 
-*(Vector format: [`block_diagram_stage2_buckboost.svg`](file:///home/tthhongs/build_tthongs/tasks_aa_ii/vvdn/smart_programmable_power_supply/block_diagram_stage2_buckboost.svg))*
+*(Vector format: [`diagram_inside_stage4_final_stage.svg`](diagram_inside_stage4_final_stage.svg))*
 
 #### Multi-Mode Operating States:
 The 4-switch H-bridge consists of a Buck half-bridge ($Q_A, Q_B$) at node `SW1` and a Boost half-bridge ($Q_C, Q_D$) at node `SW2`, wrapped around a single $10.0\,\mu\text{H}$ flat-wire power inductor (**Wurth 7443321000**):
@@ -376,18 +376,14 @@ To achieve lab-grade bench supply ripple ($\Delta V_{OUT} < 25\,\text{mV}_{\text
 
 ---
 
-### 4.3 Subsystem 3: Mixed-Signal Closed-Loop Control & Hardware CC Protection
+### 4.3 Subsystem 3: Closed-Loop Regulation & Built-in Hardware Protections
 
-A key design highlight of this module is its **hybrid analog-digital architecture**:
-1. High-speed stability and cycle-by-cycle protection are executed entirely in **analog hardware** (sub-5µs response, impossible for firmware to achieve).
-2. Setpoint calibration, mathematical linearity, and supervisory logic are commanded digitally by the **32-bit ARM Cortex-M4F microcontroller**.
-
-![Mixed-Signal Control & Protection Block Diagram](block_diagram_control_feedback.png)
-
-*(Vector format: [`block_diagram_control_feedback.svg`](file:///home/tthhongs/build_tthongs/tasks_aa_ii/vvdn/smart_programmable_power_supply/block_diagram_control_feedback.svg))*
+The module achieves tight DC regulation and reliable circuit protection through built-in controller hardware:
+1. High-speed closed-loop voltage regulation and cycle-by-cycle current limiting are executed autonomously by the **TI LM5176 controller**.
+2. Setpoint calibration, mathematical linearity, and supervisory fault disable are managed digitally by the **STM32G474 microcontroller**.
 
 #### 1. Dynamic 12-Bit DAC Voltage Steering Derivation:
-The LM5176 internal error amplifier regulates the feedback node $V_{FB}$ to an internal reference of $V_{REF} = 1.200\,\text{V}$. Rather than using noisy mechanical potentiometers or bandwidth-limited digital pots, MCU DAC1 injects offset current into $V_{FB}$ through precision resistor $R_{DAC}$:
+The LM5176 internal error amplifier regulates the feedback node $V_{FB}$ to an internal reference of $V_{REF} = 1.200\,\text{V}$. Rather than using noisy mechanical potentiometers or bandwidth-limited digital pots, MCU DAC injects offset current into $V_{FB}$ through precision resistor $R_{DAC}$:
 
 ```text
                   DAC Feedback Summing Node Equivalent Circuit
@@ -409,7 +405,7 @@ The LM5176 internal error amplifier regulates the feedback node $V_{FB}$ to an i
       │       │       │
       │      GND      To LM5176 Internal Error Amplifier
       ▲
-   From MCU 12-Bit DAC1 (0.00V - 3.30V)
+   From MCU 12-Bit DAC (0.00V - 3.30V)
 ```
 
 Applying Kirchhoff's Current Law (KCL) at the summing junction:
@@ -430,15 +426,11 @@ $$\mathbf{V_{OUT} = 23.05\,\text{V} - 4.536 \cdot V_{DAC}}$$
   $$\Delta V_{OUT} = \frac{V_{DAC,max}}{4096} \times K_{DAC} = \frac{3.30\,\text{V}}{4096} \times 4.536 = \mathbf{3.65\,\text{mV / LSB}}$$
   This easily achieves the required $10\,\text{mV}$ step size with full monotonicity and zero hunting!
 
-#### 2. Autonomous Hardware Fast Constant Current (CC) Clamping:
-When driving sensitive loads or in the event of an accidental output short-circuit, relying on firmware interrupts to detect overcurrent and ramp down the DAC takes several milliseconds—more than enough time to destroy the power MOSFETs or the Device Under Test (DUT).
-
-The SPPS solves this with a dedicated hardware analog clamp:
-1. High-speed bidirectional current sense amplifier (**TI INA240A2**, Gain = $50\,\text{V/V}$, $400\,\text{kHz}$ bandwidth) monitors the $10\,\text{m}\Omega$ Kelvin shunt:
-   $$V_{ISENSE} = I_{OUT} \times 0.010\,\Omega \times 50\,\text{V/V} = I_{OUT} \times 0.50\,\text{V/A}$$
-2. Fast analog comparator (**TI TLV3501**, $4.5\,\text{ns}$ propagation delay) continuously compares $V_{ISENSE}$ against the programmable current limit reference $V_{ISET}$ generated by MCU DAC2 ($0.1\,\text{A} \dots 3.0\,\text{A} \rightarrow 0.05\,\text{V} \dots 1.50\,\text{V}$).
-3. When $I_{OUT}$ exceeds $I_{SET}$, the comparator trips high in nanoseconds, conducting through a **BAT54** Schottky diode directly into the LM5176 `COMP` pin.
-4. Clamping `COMP` immediately collapses the internal PWM duty cycle in **$< 5\,\mu\text{s}$**, holding the output current strictly constant at the programmed threshold while folding back the output voltage!
+#### 2. Built-in Cycle-by-Cycle Peak Current Limiting & MCU Supervisory Shutdown:
+Protection against overcurrent and short-circuits uses standard, reliable industry hardware:
+1. **LM5176 Built-in Cycle-by-Cycle Limiting**: Output current passes through a $10\,\text{m}\Omega$ precision shunt resistor connected directly to the controller's differential `CSP` and `CSN` sense pins. When current reaches the programmed threshold, the controller immediately truncates the current switching pulse on every 300 kHz cycle, preventing MOSFET and inductor overstress without external analog comparator loops.
+2. **MCU Supervisory Disable**: The MCU reads output current via the INA226 power monitor over I2C at 10 Hz. In the event of a sustained overload or thermal fault, the MCU asserts a logic LOW on the LM5176 `ENABLE` pin to completely shut off power delivery.
+3. **Primary AC Fuse**: A 2.0A time-lag ceramic fuse ($F_1$) safeguards against catastrophic AC mains faults.
 
 ---
 
@@ -685,12 +677,12 @@ When presenting your block diagram to your mentor, use these structured talking 
 ## 8. Summary & Deliverables Reference
 
 The complete architectural package includes:
-1. **Interactive Vector Graphic**: [`smart_programmable_power_supply_system_block_diagram.svg`](file:///home/tthhongs/build_tthongs/tasks_aa_ii/vvdn/smart_programmable_power_supply/smart_programmable_power_supply_system_block_diagram.svg)
-2. **High-Resolution Presentation PNG**: [`smart_programmable_power_supply_system_block_diagram.png`](file:///home/tthhongs/build_tthongs/tasks_aa_ii/vvdn/smart_programmable_power_supply/smart_programmable_power_supply_system_block_diagram.png)
-3. **Subsystem Level-2 Visual Diagrams**:
-   - Stage 1 AC-DC Flyback: [`block_diagram_stage1_flyback.svg`](file:///home/tthhongs/build_tthongs/tasks_aa_ii/vvdn/smart_programmable_power_supply/block_diagram_stage1_flyback.svg)
-   - Stage 2 Buck-Boost: [`block_diagram_stage2_buckboost.svg`](file:///home/tthhongs/build_tthongs/tasks_aa_ii/vvdn/smart_programmable_power_supply/block_diagram_stage2_buckboost.svg)
-   - Mixed-Signal Control & Clamp: [`block_diagram_control_feedback.svg`](file:///home/tthhongs/build_tthongs/tasks_aa_ii/vvdn/smart_programmable_power_supply/block_diagram_control_feedback.svg)
-   - Dual-Domain Telemetry: [`block_diagram_telemetry_efficiency.svg`](file:///home/tthhongs/build_tthongs/tasks_aa_ii/vvdn/smart_programmable_power_supply/block_diagram_telemetry_efficiency.svg)
-   - Auxiliary Power Distribution: [`block_diagram_aux_power_distribution.svg`](file:///home/tthhongs/build_tthongs/tasks_aa_ii/vvdn/smart_programmable_power_supply/block_diagram_aux_power_distribution.svg)
-4. **Diagram Generation Source Script**: [`build_all_block_diagrams.py`](file:///home/tthhongs/build_tthongs/tasks_aa_ii/vvdn/smart_programmable_power_supply/build_all_block_diagrams.py)
+1. **Simplified 4-Stage Power Flow**: [`diagram_simple_power_flow.png`](diagram_simple_power_flow.png)
+2. **Master System Block Diagram**: [`smart_programmable_power_supply_system_block_diagram.png`](smart_programmable_power_supply_system_block_diagram.png)
+3. **Subsystem Architecture Diagrams**:
+   - Stage 1 Mains Protection & EMI: [`diagram_inside_stage1_mains.png`](diagram_inside_stage1_mains.png)
+   - Stage 2 Rectifier & Bulk DC: [`diagram_inside_stage2_rectifier.png`](diagram_inside_stage2_rectifier.png)
+   - Stage 3 Isolated QR Flyback: [`diagram_inside_stage3_flyback.png`](diagram_inside_stage3_flyback.png)
+   - Stage 4 Synchronous Buck-Boost: [`diagram_inside_stage4_final_stage.png`](diagram_inside_stage4_final_stage.png)
+   - Dual-Domain Power Telemetry: [`block_diagram_telemetry_efficiency.png`](block_diagram_telemetry_efficiency.png)
+   - Auxiliary Power Distribution: [`block_diagram_aux_power_distribution.png`](block_diagram_aux_power_distribution.png)
