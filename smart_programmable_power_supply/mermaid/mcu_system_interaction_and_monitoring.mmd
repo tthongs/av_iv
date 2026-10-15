@@ -1,0 +1,158 @@
+flowchart TB
+    %% ==========================================
+    %% GLOBAL STYLES & DEFINITIONS
+    %% ==========================================
+    classDef mcuCore fill:#E1F5FE,stroke:#01579B,stroke-width:2.5px,color:#01579B,font-weight:bold;
+    classDef priStyle fill:#ECEFF1,stroke:#37474F,stroke-width:1.8px,color:#263238;
+    classDef isoStyle fill:#FFEBEE,stroke:#C62828,stroke-width:2px,stroke-dasharray: 5 5,color:#B71C1C;
+    classDef pwrStyle fill:#E8F5E9,stroke:#2E7D32,stroke-width:1.8px,color:#1B5E20;
+    classDef ctrlStyle fill:#F3E5F5,stroke:#6A1B9A,stroke-width:1.8px,color:#4A148C;
+    classDef senseStyle fill:#FFF8E1,stroke:#F57F17,stroke-width:1.8px,color:#E65100;
+    classDef commStyle fill:#EDE7F6,stroke:#512DA8,stroke-width:1.8px,color:#311B92;
+    classDef auxStyle fill:#FFFDE7,stroke:#FBC02D,stroke-width:1.8px,color:#F57F17;
+
+    %% ==========================================
+    %% CENTRAL MICROCONTROLLER CORE
+    %% ==========================================
+    subgraph MCU_SUBSYSTEM ["CENTRAL EMBEDDED MICROCONTROLLER: STM32G474RET6 (LQFP-64, 170 MHz)"]
+        MCU_CORE["<b>STM32G474RET6 Microcontroller</b><br/>• ARM Cortex-M4F Core @ 170 MHz<br/>• 512KB Flash / 128KB SRAM<br/>• Hardware CORDIC & Math Accel"]:::mcuCore
+
+        subgraph MCU_PERIPHERALS ["Internal MCU Hardware Peripherals"]
+            PERIPH_SINC3["<b>Hardware Sinc3 Decimation Filter</b><br/>Demodulates High-Speed Delta-Sigma"]:::mcuCore
+            PERIPH_ADC["<b>Multi-Channel 12-Bit Fast ADC</b><br/>• ADC1_IN1 (AC Current)<br/>• ADC2_IN2 (Thermal NTC)"]:::mcuCore
+            PERIPH_DAC1["<b>12-Bit DAC1 (Channel 1)</b><br/>Voltage Steering (0.00V - 3.30V)"]:::mcuCore
+            PERIPH_DAC2["<b>12-Bit DAC2 (Channel 2)</b><br/>Hardware CC Limit (0.05V - 1.50V)"]:::mcuCore
+            PERIPH_I2C["<b>I2C1 Master Peripheral</b><br/>Fast-Mode (400 kHz) Engine"]:::mcuCore
+            PERIPH_TIM["<b>TIM2 / TIM3 Quadrature Decoders</b><br/>Dual Optical Rotary Encoders"]:::mcuCore
+            PERIPH_GPIO["<b>EXTI & GPIO Controller</b><br/>Push-Buttons, LEDs & Enable Pins"]:::mcuCore
+            PERIPH_SDIO["<b>SDMMC / High-Speed SPI</b><br/>25 MHz SD Storage Channel"]:::mcuCore
+            PERIPH_USB["<b>USB 2.0 Full-Speed PHY</b><br/>12 Mbps USB-CDC Virtual COM"]:::mcuCore
+        end
+
+        subgraph FIRMWARE_ENGINES ["Firmware Processing Engines (FreeRTOS)"]
+            EFF_MATH["<b>Real-Time Efficiency Engine (10 Hz)</b><br/>P_ac = (1/N) Σ v(t)·i(t) [True Active Watts]<br/>P_dc = V_out × I_out [True DC Watts]<br/><b>η(t) = (P_dc / P_ac) × 100%</b> (8-tap EMA)"]:::mcuCore
+            SCPI_PARSER["<b>SCPI Command Parser Task</b><br/>IEEE 488.2 Engine (:VOLT, :CURR, :MEAS)"]:::mcuCore
+        end
+    end
+
+    %% ==========================================
+    %% 1. PRIMARY AC TELEMETRY & ISOLATION
+    %% ==========================================
+    subgraph AC_GRID_DOMAIN ["PRIMARY HIGH-VOLTAGE AC DOMAIN (HOT: 85V - 265V AC RMS)"]
+        AC_MAINS["AC Mains Line & Neutral<br/>(85V - 265V AC RMS, 47-63 Hz)"]:::priStyle
+        HV_DIVIDER["4-Stage Resistor Divider<br/>4x 1MΩ (1206) + 2kΩ 0.1% Shunt<br/>(375Vpk → 187.5mV)"]:::priStyle
+        CT_SENSOR["Talema AC1005 (1000:1 CT)<br/>Toroidal Current Transformer"]:::priStyle
+        CT_BURDEN["Precision Burden Resistor<br/>100Ω 0.1% (2mA → 200mV RMS)"]:::priStyle
+
+        AC_MAINS -->|"High Voltage"| HV_DIVIDER
+        AC_MAINS -->|"Primary Current Loop"| CT_SENSOR
+        CT_SENSOR -->|"1000:1 Current"| CT_BURDEN
+    end
+
+    subgraph ISOLATION_BARRIER ["REINFORCED SAFETY ISOLATION BARRIER (IEC 62368-1 / 5000V RMS)"]
+        AMC1311["<b>TI AMC1311DWVR</b><br/>Isolated ΔΣ Modulator<br/>(5kV RMS Isolation, 20MHz Bitstream)"]:::isoStyle
+        HV_DIVIDER -->|"VINP, VINN (±200mV)"| AMC1311
+    end
+
+    %% AC Connections to MCU
+    AMC1311 ==>|"<b>AMC_DAT / AMC_CLK</b><br/>[Digital Bitstream across barrier]"| PERIPH_SINC3
+    CT_BURDEN -->|"<b>CT_SIG</b><br/>[Analog AC Signal: 0-300mV RMS]"| PERIPH_ADC
+    PERIPH_SINC3 -->|"Demodulated v_ac(t)"| EFF_MATH
+    PERIPH_ADC -->|"Sampled i_ac(t) @ 10kHz"| EFF_MATH
+
+    %% ==========================================
+    %% 2. SECONDARY DC POWER STAGE & SENSING
+    %% ==========================================
+    subgraph POST_REGULATOR ["STAGE 4: 4-SWITCH SYNCHRONOUS BUCK-BOOST (TI LM5176)"]
+        LM5176["<b>TI LM5176 Controller</b><br/>250 kHz Synchronous PWM<br/>Integrated 4x MOSFET Drivers"]:::pwrStyle
+        H_BRIDGE["4-Switch H-Bridge (BSC034N04LS)<br/>+ 10µH Wurth Flat-Wire Inductor"]:::pwrStyle
+        KELVIN_SHUNT["10mΩ 0.1% Kelvin Shunt<br/>Bourns CSS2H-2512R-L010F (3W)"]:::pwrStyle
+        DC_OUTPUT["<b>DC Output Terminals</b><br/>5.0V - 20.0V DC @ 0.1A - 3.0A<br/>(Sub-25mV Ripple)"]:::pwrStyle
+
+        LM5176 -->|"4x Gate Drives"| H_BRIDGE
+        H_BRIDGE --> KELVIN_SHUNT
+        KELVIN_SHUNT --> DC_OUTPUT
+    end
+
+    subgraph DC_TELEMETRY ["SECONDARY DC LOAD TELEMETRY (I2C)"]
+        INA226["<b>TI INA226AIDGSR</b><br/>16-Bit I2C Power Monitor<br/>• 1.25 mV/LSB (VBUS Sense)<br/>• 100 µA/LSB (Shunt Drop)<br/>• Internal Math Multiplier (P_dc)"]:::senseStyle
+        KELVIN_SHUNT -->|"Kelvin Force/Sense (IN+, IN-)"| INA226
+        DC_OUTPUT -->|"Bus Voltage (VBUS)"| INA226
+    end
+
+    %% DC Telemetry to MCU
+    INA226 <==>|"<b>I2C1_SDA / I2C1_SCL</b><br/>[Fast-Mode 400 kHz Bus]"| PERIPH_I2C
+    PERIPH_I2C -->|"Polled V_dc, I_dc, P_dc (10 Hz)"| EFF_MATH
+
+    %% ==========================================
+    %% 3. VOLTAGE STEERING & HARDWARE CC CLAMP
+    %% ==========================================
+    subgraph ANALOG_CONTROL ["MIXED-SIGNAL REGULATION & HARDWARE PROTECTION"]
+        DAC_SUMMING["<b>Resistor Summing Junction (V_FB)</b><br/>• R_top = 49.9kΩ 0.1% (to VOUT)<br/>• R_bot = 3.65kΩ 0.1% (to AGND)<br/>• R_DAC = 11.0kΩ 0.1% (from DAC1)"]:::ctrlStyle
+        INA240["<b>TI INA240A2 CS Amp</b><br/>Gain = 50 V/V, 400 kHz BW<br/>V_ISENSE = 0.50 V/A"]:::ctrlStyle
+        TLV3501["<b>TI TLV3501 Comparator</b><br/>4.5ns Propagation Delay<br/>Autonomous Hardware OCP"]:::ctrlStyle
+        BAT54_CLAMP["BAT54 Schottky Clamp Diode<br/>Pulls COMP Pin to Ground"]:::ctrlStyle
+
+        DC_OUTPUT -->|"VOUT Sense Line"| DAC_SUMMING
+        DAC_SUMMING -->|"V_FB Steering (1.200V Ref)"| LM5176
+        KELVIN_SHUNT -->|"Kelvin Sense Leads"| INA240
+        INA240 -->|"V_ISENSE (0.05V - 1.50V)"| TLV3501
+        TLV3501 -->|"Overcurrent Trip"| BAT54_CLAMP
+        BAT54_CLAMP ==>|"<b>FAST CLAMP (< 2.5µs)</b>"| LM5176
+    end
+
+    %% MCU Control Lines
+    PERIPH_DAC1 -->|"<b>DAC1_VSET</b><br/>[Analog: 0.00V - 3.30V (3.65mV/LSB)]"| DAC_SUMMING
+    PERIPH_DAC2 -->|"<b>DAC2_ISET</b><br/>[Analog Ref: 0.05V - 1.50V]"| TLV3501
+    PERIPH_GPIO -->|"<b>LM5176_EN</b><br/>[GPIO Output: Run/Stop]"| LM5176
+    TLV3501 -.->|"<b>CC_ALERT / EXTI</b><br/>[Hardware CC Status Interrupt]"| PERIPH_GPIO
+
+    %% ==========================================
+    %% 4. THERMAL SUPERVISORY SENSING
+    %% ==========================================
+    subgraph THERMAL_SENSING ["THERMAL HEALTH & SAFETY MONITORING"]
+        NTC_HEATSINK["10kΩ NTC Thermistors<br/>• MOSFET Thermal Copper Plane<br/>• Power Inductor Body"]:::senseStyle
+    end
+    NTC_HEATSINK -->|"<b>TEMP_SENSE</b><br/>[Analog Divider: 0 - 3.3V]"| PERIPH_ADC
+
+    %% ==========================================
+    %% 5. USER INTERFACE (HMI) & CONTROLS
+    %% ==========================================
+    subgraph FRONT_PANEL_HMI ["FRONT PANEL USER INTERFACE & CONTROLS"]
+        OLED["<b>1.3 inch Monochrome OLED</b><br/>128x64 SH1106 / SSD1306<br/>Live V, I, P, η Meters & Gauges"]:::commStyle
+        ENC_V["<b>Voltage Rotary Dial</b><br/>Quadrature Encoder + Push-BTN"]:::commStyle
+        ENC_I["<b>Current Rotary Dial</b><br/>Quadrature Encoder + Push-BTN"]:::commStyle
+        LEDS["<b>Status Indicator LEDs</b><br/>• Green (Output ON)<br/>• Amber (CC Limit Active)<br/>• Red (Fault / OTP)"]:::commStyle
+    end
+
+    PERIPH_I2C ==>|"<b>I2C1_SDA / I2C1_SCL</b><br/>[OLED Graphics Stream (10 fps)]"| OLED
+    ENC_V -->|"<b>ENC_V_A, ENC_V_B, SW</b><br/>[TIM2 Channel 1/2 Quad Decode]"| PERIPH_TIM
+    ENC_I -->|"<b>ENC_I_A, ENC_I_B, SW</b><br/>[TIM3 Channel 1/2 Quad Decode]"| PERIPH_TIM
+    PERIPH_GPIO -->|"<b>LED_OUT / LED_CC / LED_FLT</b><br/>[GPIO Push-Pull Outputs]"| LEDS
+
+    %% ==========================================
+    %% 6. DATA LOGGING & HOST AUTOMATION
+    %% ==========================================
+    subgraph LOGGING_AND_HOST ["STORAGE & HOST TELEMETRY"]
+        SD_CARD["<b>MicroSD Card Socket</b><br/>FAT32 CSV File System<br/>(10 Hz Autonomous Log)"]:::commStyle
+        USB_C["<b>USB Type-C Port</b><br/>USBLC6-2SC6 ESD Clamp<br/>Automated SCPI / ATE Link"]:::commStyle
+    end
+
+    EFF_MATH -->|"Telemetry Records"| PERIPH_SDIO
+    PERIPH_SDIO <==>|"<b>SD_CLK, SD_CMD, SD_DAT0..3</b><br/>[25 MHz SDIO / SPI Bus]"| SD_CARD
+    SCPI_PARSER <==> PERIPH_USB
+    PERIPH_USB <==>|"<b>USB_D+, USB_D-</b><br/>[12 Mbps Full-Speed USB-CDC]"| USB_C
+
+    %% ==========================================
+    %% 7. AUXILIARY BIAS POWER DISTRIBUTION
+    %% ==========================================
+    subgraph AUX_POWER_SUPPLY ["PRECISION POWER & ANALOG REFERENCES"]
+        TPS7A25["<b>TI TPS7A25 LDO</b><br/>+3.3V Clean Digital Rail (500mA)"]:::auxStyle
+        REF3030["<b>TI REF3030</b><br/>+3.000V Precision Bandgap (0.2%)<br/>15 ppm/°C Low-Drift Reference"]:::auxStyle
+        STAR_GND["Single-Point Star Ground<br/>(GND_SEC_ANA to GND_SEC_PWR)"]:::auxStyle
+    end
+
+    TPS7A25 -.->|"<b>+3.3V VDD</b>"| MCU_CORE
+    REF3030 -.->|"<b>+3.000V VDDA / VREF+</b>"| PERIPH_ADC
+    REF3030 -.->|"<b>+3.000V VREF+</b>"| PERIPH_DAC1
+    STAR_GND -.->|"Quiet Return"| MCU_CORE
