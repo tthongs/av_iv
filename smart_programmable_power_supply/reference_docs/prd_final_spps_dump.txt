@@ -1,0 +1,568 @@
+=== PARAGRAPH 11 [Subtitle] ===
+Product Requirement Document (PRD)
+
+=== PARAGRAPH 18 [normal] ===
+Revision History
+
+=== PARAGRAPH 40 [normal] ===
+Customer Sign Off
+
+=== PARAGRAPH 44 [normal] ===
+Internal Sign Off 
+
+=== PARAGRAPH 46 [normal] ===
+Table of Contents
+
+=== PARAGRAPH 48 [normal] ===
+List of Tables
+
+=== PARAGRAPH 49 [normal] ===
+List of Figures
+
+=== PARAGRAPH 52 [Heading 1] ===
+Introduction
+
+=== PARAGRAPH 53 [Heading 2] ===
+Purpose 
+
+=== PARAGRAPH 54 [normal] ===
+This document describes the system-level requirements for the design and development of 'VVDN_SPPS_2026' (Smart Programmable Voltage Supply Module) for internal VVDN and client test bench applications. The document will be used as a reference for further engineering documents, circuit schematics,PCB layout rules, and laboratory validation. The device's functional and technical requirements must meet all parameters specified herein. These requirements have been derived from client specifications and subsequent engineering design discussions.
+
+=== PARAGRAPH 55 [normal] ===
+This document captures all Electrical, Mechanical, and Hardware requirements to be delivered for the complete 4-Stage Power Supply PCBA module. VVDN_SPPS_2026 is the project ID for this project and it will be referenced in every document related to this project.
+
+=== PARAGRAPH 56 [Heading 2] ===
+Document Conventions
+
+=== PARAGRAPH 57 [normal] ===
+This PRD shall be taken as the sole authoritative reference baseline for all hardware requirements. Requirements marked with [MUST] are mandatory non-negotiable specifications essential for safety, electrical regulation, and compliance. Requirements marked with [SHOULD] represent performance targets where design trade-offs require SME approval. Requirements marked with [MAY] represent optional enhancements. All electrical units follow SI conventions.
+
+=== PARAGRAPH 58 [Heading 2] ===
+Intended Audience and Reading Suggestions
+
+=== PARAGRAPH 59 [normal] ===
+This PRD is made for the reference of Product Management, Hardware Architects, the Trainee Hardware Design Owner, Firmware Developers, Quality Assurance / DVT Engineers, and Production / DFM Engineers.
+
+=== PARAGRAPH 69 [Heading 2] ===
+Abbreviation
+
+=== PARAGRAPH 70 [normal] ===
+Table 1: Abbreviation
+
+=== PARAGRAPH 78 [Heading 2] ===
+References
+
+=== PARAGRAPH 80 [normal] ===
+Table 2: Reference
+
+=== PARAGRAPH 83 [Heading 1] ===
+Product Overview
+
+=== PARAGRAPH 84 [Heading 2] ===
+Product - Business Perspective
+
+=== PARAGRAPH 85 [normal] ===
+The Smart Programmable Voltage Supply Module is an intelligent, high-density benchtop and automated test equipment (ATE) power supply delivering a tightly regulated, programmable DC voltage output from 5.0 V to 20.0 V at currents up to 3.0 A (60 W continuous output power) from universal grid AC mains input (85 V to 265 V AC RMS, 47 Hz to 63 Hz).
+
+=== PARAGRAPH 86 [normal] ===
+Traditional bench power supplies rely on bulky 50 Hz iron-core transformers, inefficient linear regulators, and manual dials, which lead to high thermal dissipation, large footprint, and lack of automated telemetry. This product eliminates those limitations by integrating a universal mains (QR) Flyback converter, an ultra-efficient 4-switch synchronous Buck-Boost post-regulator, real-time dual-domain power telemetry, and autonomous analog hardware protection into a single compact board.
+
+=== PARAGRAPH 87 [normal] ===
+All requirements and functional parameters in this document are captured from the perspective of high-efficiency benchtop prototyping and automated modular test racks.
+
+=== PARAGRAPH 88 [Heading 2] ===
+Product – Technical Perspective
+
+=== PARAGRAPH 89 [normal] ===
+The Smart Programmable Power Supply is a 4-stage AC-to-DC conversion and regulation system in which the power stage and mixed-signal microcontroller work together to deliver precise, clean, and safe DC power. The module connects directly to universal grid AC mains (85V–265V AC) through an input protection and EMI filter stage, rectifies it to a high-voltage bulk DC rail (+120V to +375V DC), isolates and steps it down via a Flyback stage to an intermediate +24.0V DC bus (72W), and regulates it through a synchronous 4-switch Buck-Boost stage to provide the commanded 5.0V to 20.0V DC output at up to 3.0A.
+
+The onboard microcontroller (STM32G474) acts as the system brain by reading dual-domain electrical telemetry (primary AC input power and secondary DC load power), computing real-time conversion efficiency, updating the 1.3-inch OLED dashboard, and driving the precision 12-bit DAC voltage steering network. Circuit protection relies on robust, standard, industry-proven hardware protections: primary AC fuse, inrush NTC, surge MOV, primary cycle-by-cycle Flyback current limiting, and secondary LM5176 built-in cycle-by-cycle overcurrent protection with thermal shutdown.
+
+In simple terms, the power conversion stages handle the heavy electrical energy flow across certified 3000V RMS galvanic isolation, while the built-in controller protections and MCU provide safety, precision regulation, and live telemetry.
+
+The primary power supply functionality includes:
+• Universal AC Grid Operation: Accepts 85V to 265V AC RMS (47–63 Hz) without manual line selector switches.
+• Reinforced Galvanic Isolation: Certified 3000V AC RMS (1 min) isolation meeting IEC 62368-1 SELV.
+• Intermediate Regulated Rail: Flyback converter generates a stable +24.0V DC bus (72W) with > 90% peak efficiency.
+• Wide Programmable DC Output: 4-switch synchronous Buck-Boost post-regulator delivers 5.0V to 20.0V DC at up to 3.0A continuous (60W continuous power).
+• High-Resolution DAC Voltage Steering: 12-bit DAC network achieves 10mV monotonic setpoint resolution.
+• Built-in Cycle-by-Cycle Hardware Current Limiting: LM5176 monitors output current through a dedicated 10mΩ shunt across its CSP/CSN pins, natively limiting peak inductor current on every switching cycle without external analog complexity.
+• Built-in Controller Protections: Integrated input fuse (2A), NTC inrush limiter (10Ω), MOV transient clamp (300V), LM5176 internal thermal shutdown (165°C), and Under-Voltage Lockout (UVLO).
+• Real-Time Dual-Domain Telemetry: Measures AC input power and DC load power, computing live efficiency (η) at 10 Hz.
+• Interactive Local Dashboard: 1.3" OLED display shows live V, I, P, and efficiency meters; dual rotary encoders allow intuitive tuning; front-panel LEDs indicate CV, Current Limit, and Fault states.
+• Low Standby Power: Consumes < 150 mW in idle state when output is disabled.
+
+=== PARAGRAPH 92 [normal] ===
+Figure 1: Boundary Diagram / Simplified 4-Stage Power Flow Block Diagram
+
+=== PARAGRAPH 96 [normal] ===
+Table 3: High Level Technical Requirement
+
+=== PARAGRAPH 98 [normal] ===
+The product is designed as a unified Embedded Hardware Power Supply Module (System 1). Primary hardware stages include AC Mains Protection & EMI Filter, GBU606 Bridge Rectifier & Bulk Capacitor (+120V to +375V DC), Stage 1 Isolated Flyback Converter (+24V DC, 72W), Stage 2 Synchronous 4-Switch Buck-Boost Post-Regulator (5V–20V / 3A DC), and Analog DAC Steering & Built-in Hardware Protections.
+
+=== PARAGRAPH 99 [Heading 2] ===
+Use Cases
+
+=== PARAGRAPH 100 [normal] ===
+The primary power supply functionality includes four operating modes:
+• Constant Voltage (CV) Mode: Regulates output voltage within ±0.2% across varying load currents below the current limit.
+• Current-Limited (OCP) Mode: Restricts peak inductor current cycle-by-cycle via LM5176 CS/CSG sense during overload or short-circuit.
+• MCU Supervisory Protection Mode: Safely disables switching via LM5176 ENABLE pin on persistent overload or over-temperature.
+• Standby / Idle Mode: Output power stage disabled while +24V intermediate rail is maintained with standby power < 150mW.
+
+=== PARAGRAPH 102 [normal] ===
+The benchtop operator interacts with the power supply using front-panel dual rotary controls and a 1.3" graphical OLED display. Power is delivered to the device under test (DUT) via heavy-duty 4mm binding posts, and operational status is indicated via front-panel mode LEDs.
+
+=== PARAGRAPH 105 [normal] ===
+Table 4: Product Usecase
+
+=== PARAGRAPH 107 [Heading 2] ===
+Product Interfaces
+
+=== PARAGRAPH 108 [normal] ===
+Physical hardware interfaces include an IEC 320-C14 AC inlet with integrated fuse drawer, heavy-duty 4mm gold binding posts, dual optical rotary encoders for voltage and current limit tuning, a tactile output enable push-button with status LED, a 1.3" monochrome OLED display, and dedicated PCB bring-up test points.
+
+=== PARAGRAPH 109 [Heading 3] ===
+Hardware Interfaces
+
+=== PARAGRAPH 110 [normal] ===
+The hardware interfaces provide rugged, low-impedance connections: binding posts carry 3.0A continuous load current with < 5mΩ contact resistance; IEC inlet provides 250V / 10A rating with earth grounding; test points allow high-voltage differential probing across all switching nodes.
+
+=== PARAGRAPH 113 [normal] ===
+Table 5: Hardware Interface
+
+=== PARAGRAPH 129 [Heading 3] ===
+Software Interfaces
+
+=== PARAGRAPH 130 [normal] ===
+The SPPS module contains an onboard STM32G474 mixed-signal microcontroller that coordinates telemetry sampling, closed-loop DAC voltage steering, status display, and fault handling. The following table describes the interface, protocol/mode, and usage of each interface:
+
+=== PARAGRAPH 131 [normal] ===
+Table 6: Software Interfaces
+
+=== PARAGRAPH 132 [Heading 1] ===
+Systems & Domains Involved
+
+=== PARAGRAPH 133 [normal] ===
+The engineering domains involved in the development of the SPPS module are summarized in Table 7 below:
+
+=== PARAGRAPH 135 [normal] ===
+Table 7: Domain
+
+=== PARAGRAPH 139 [Heading 1] ===
+Product Requirement
+
+=== PARAGRAPH 140 [Heading 2] ===
+System1 Requirements
+
+=== PARAGRAPH 141 [normal] ===
+System 1 represents the physical Hardware Power Supply Module, comprising the universal AC input, EMI filter, isolated Flyback stage, 4-switch synchronous Buck-Boost post-regulator, built-in controller hardware protection, and microcontroller sensing. The detailed engineering specifications are defined in the tables below:
+
+=== PARAGRAPH 142 [normal] ===
+Table 4.1: AC-DC Isolated Flyback Power Stage Engineering Requirements
+
+=== PARAGRAPH 161 [normal] ===
+Table 4.2: 4-Switch Synchronous Buck-Boost Post-Regulator Requirements
+
+=== PARAGRAPH 162 [normal] ===
+Table 4.3: Real-Time Dual-Domain Telemetry & Monitoring Requirements
+
+=== PARAGRAPH 176 [normal] ===
+Table 4.4: Protection, Safety, EMC & Environmental Requirements
+
+=== PARAGRAPH 179 [Heading 3] ===
+Specific Requirements
+
+=== PARAGRAPH 180 [normal] ===
+Specific hardware layout constraints mandate a physical 6.4 mm surface creepage distance and a 2.0 mm milled air slot through the PCB substrate beneath the transformer and optocoupler barriers to guarantee IEC 62368-1 reinforced safety isolation.
+
+=== PARAGRAPH 183 [Heading 4] ===
+Inside Bridge Rectifier & High-Voltage Bulk DC Subsystem :
+
+=== PARAGRAPH 185 [Heading 2] ===
+System2 Requirements
+
+=== PARAGRAPH 186 [normal] ===
+System 2 represents the Secondary Stage 4-Switch Synchronous Buck-Boost Post-Regulator, Analog Closed-Loop Control, DAC Steering Network, and Autonomous Hardware CC Protection Subsystem. The detailed electrical hardware specifications are defined in Table 4.5 below:
+
+=== PARAGRAPH 187 [normal] ===
+Table 4.5: Analog Closed-Loop Control, DAC Steering & Hardware Protection Specifications
+
+=== PARAGRAPH 188 [Heading 3] ===
+Specific Requirements
+
+=== PARAGRAPH 190 [Heading 4] ===
+Inside Stage 3: Converter DC-DC (Isolated Flyback) Subsystem
+
+=== PARAGRAPH 192 [Heading 1] ===
+Assumptions
+
+=== PARAGRAPH 193 [normal] ===
+The following points are considered as assumptions for further project execution:
+• Grid AC mains is nominal sinusoidal waveform with Total Harmonic Distortion (THD) ≤ 5%.
+• Operating ambient temperature is -20°C to +50°C under natural convection airflow.
+• Secondary DC ground is floating with reinforced galvanic isolation (≥ 3000V RMS) from Earth and AC mains.
+• Connected prototype loads are predominantly resistive or capacitive (C_load ≤ 1000 µF).
+
+=== PARAGRAPH 195 [Heading 1] ===
+Dependencies
+
+=== PARAGRAPH 196 [normal] ===
+The following dependencies are included in the design and development of the SPPS module:
+• Component sourcing and lead times for TI LM5176, UCC28740, INA226, AMC1311, and ST STM32G474.
+• Laboratory equipment availability: AC source, DC electronic load, 3000V RMS Hi-Pot tester, and thermal camera.
+• Mechanical front-panel drawings for binding post spacing (19.05mm)
+• Firmware device drivers for SSD1306 OLED display, INA226 power monitor, and STM32 internal 12-bit DAC.
+
+=== PARAGRAPH 198 [Heading 1] ===
+Standard Deliverables & Release Order
+
+=== PARAGRAPH 199 [normal] ===
+The hardware deliverables and release documentation across project milestones are defined in the table below:
+
+=== PARAGRAPH 200 [Heading 2] ===
+Product Development Plan 
+
+=== PARAGRAPH 201 [normal] ===
+Phase 1 — Requirement & Architecture and Class A BOM:
+Definition of functional and electrical requirements; 4-stage system architecture design; block diagram and interface specifications.
+
+Phase 2 — Component Selection & Circuit Design:
+Transformer PQ26/20 magnetics sizing; component stress derating calculations; closed-loop feedback and DAC steering design; companion HDD authoring.
+
+Phase 3 — Schematic Design and Review:
+Complete 4-stage Altium schematics capture; LM5176 cycle-by-cycle current limit sensing and MCU enable control.
+
+Phase 4 — PCB Layout & DFM Review:
+PCB stackup; high-voltage isolation partitioning with 2.0mm milled slot; switching loop routing; DFM/DFA checks.
+
+Phase 5 — Prototype Bring-up & Design Validation Plan (DVT):
+PCB fabrication and assembly (5 units); cold resistance checks; supervised Variac bring-up; line/load regulation, ripple, efficiency, and Hi-Pot validation.
+
+=== PARAGRAPH 215 [Heading 2] ===
+System1 Development Plan
+
+=== PARAGRAPH 216 [normal] ===
+Table 8: Standard Deliverables & Release Order
+
+=== PARAGRAPH 218 [Heading 1] ===
+Architecture
+
+=== PARAGRAPH 219 [normal] ===
+The power supply hardware architecture consists of two galvanically isolated power conversion stages followed by synchronous post-regulation and built-in controller hardware protection:
+
+=== PARAGRAPH 220 [Heading 2] ===
+8.1 System 1: Inside Stage 4 (Synchronous 4-Switch Buck-Boost Post-Regulator Subsystem)
+
+=== PARAGRAPH 221 [normal] ===
+Figure 6: Inside Stage 4 - 4-Switch Buck-Boost Post-Regulator Subsystem Architecture
+
+=== PARAGRAPH 223 [Heading 2] ===
+System1: Domain2 Architecture
+
+=== PARAGRAPH 224 [normal] ===
+< Architecture Diagram with caption, shall be inserted here. No explanation of architecture is required. Below architecture diagram, there shall be a note “This is the proposed architecture and it might get changed during the design stage” and “Ensure the license compliance for usage of open source tools”.>
+
+=== PARAGRAPH 225 [Heading 2] ===
+System2: Domain1 Architecture
+
+=== PARAGRAPH 226 [normal] ===
+< Architecture Diagram with caption, shall be inserted here. No explanation of architecture is required. Below architecture diagram, there shall be a note “This is the proposed architecture and it might get changed during the design stage” and “Ensure the license compliance for usage of open source tools”.>
+
+=== PARAGRAPH 234 [Heading 1] ===
+Bill Of Material
+
+=== PARAGRAPH 235 [normal] ===
+Note: This is the expected BOM and it might get changed during the design stage. The BOM does not contain any pricing/cost information.
+
+=== PARAGRAPH 236 [Heading 2] ===
+System1: Product BOM
+
+=== PARAGRAPH 237 [normal] ===
+Refer to detailed bill of materials in the respective subsystem tables below.
+
+=== PARAGRAPH 238 [normal] ===
+Table 9.1: System 1 Product BOM (Primary & Flyback Stages)
+
+=== PARAGRAPH 239 [Heading 2] ===
+System2: Product BOM
+
+=== PARAGRAPH 240 [normal] ===
+Refer to detailed bill of materials in the respective subsystem tables below.
+
+=== PARAGRAPH 241 [normal] ===
+Table 9.2: System 2 Product BOM (Buck-Boost, Protection & Control)
+
+=== PARAGRAPH 243 [Heading 1] ===
+Out of Scope 
+
+=== PARAGRAPH 244 [normal] ===
+The following points are not included in the scope of project:
+
+=== PARAGRAPH 245 [normal] ===
+Active Power Factor Correction (Active Boost PFC) — passive EMI filtering is used since < 75W is exempt under IEC 61000-3-2.
+
+=== PARAGRAPH 246 [normal] ===
+Complex External Protection Circuits — dedicated analog crowbar thyristors and discrete fast comparator pull-down networks are excluded in favor of built-in controller protection and MCU supervisory shutdown.
+
+=== PARAGRAPH 247 [normal] ===
+Three-phase 400V/480V AC industrial grid input operation (module is single-phase 85V–265V AC RMS only). Negative/bipolar rails and wireless IoT interfaces are excluded.
+
+=== PARAGRAPH 251 [Heading 1] ===
+Open Items
+
+=== PARAGRAPH 252 [normal] ===
+The following points are included in the scope of project but not included in urrent revision: 
+
+=== PARAGRAPH 253 [normal] ===
+Current shunt value trade-off: Evaluating 5mΩ vs 10mΩ for thermal dissipation vs low-current sensing resolution.
+
+=== PARAGRAPH 254 [normal] ===
+Auxiliary 24V DC barrel input option: Evaluating a 24V DC auxiliary input to bypass AC mains for vehicle/field use.
+
+=== PARAGRAPH 255 [normal] ===
+Secondary heatsink copper area optimization: Evaluating 2oz vs 3oz copper pours for D2PAK primary FET.
+
+
+
+################ TABLE 0 (rows: 4, cols: 2) ################
+Row 0: Project Code | VVDN_SPPS_2026
+Row 1: Project Name | Smart Programmable Voltage Supply Module (85–265 V AC In, 5–20 V / 3 A DC Out)
+Row 2: Revision | A1_001
+Row 3: Date | 15th Oct 2026
+
+
+################ TABLE 1 (rows: 3, cols: 6) ################
+Row 0: Date | Revision No. | Description | Prepared/Revised By | Reviewed By | Approved By
+Row 1:  |  |  |  |  | 
+Row 2:  |  |  |  |  | 
+
+
+################ TABLE 2 (rows: 15, cols: 3) ################
+Row 0: CUSTOMER SIGN-OFF FORM | CUSTOMER SIGN-OFF FORM | CUSTOMER SIGN-OFF FORM
+Row 1: Customer | Technical In-Charge | Program In-Charge
+Row 2: Name: |  | 
+Row 3: Designation: |  | 
+Row 4: Email ID: |  | 
+Row 5: Address:  |  | 
+Row 6: Comments: |  | 
+Row 7: Signature & Date: |  | 
+Row 8: VVDN SIGN-OFF FORM | Technical In-Charge | Program In-Charge
+Row 9: Name: |  | 
+Row 10: Designation: |  | 
+Row 11: Email ID: |  | 
+Row 12: Address:  |  | 
+Row 13: Comments: |  | 
+Row 14: Signature & Date: |  | 
+
+
+################ TABLE 3 (rows: 5, cols: 2) ################
+Row 0: INTERNAL SIGN-OFF | INTERNAL SIGN-OFF
+Row 1: Level 1 | 
+Row 2: Name: | 
+Row 3: Comments: | 
+Row 4: Signature & Date: | 
+
+
+################ TABLE 4 (rows: 30, cols: 2) ################
+Row 0: Acronym | Definition
+Row 1: VVDN_SPPS_2026 | VVDN Smart Programmable Power Supply (Project Identifier)
+Row 2: PRD | Product Requirement Document
+Row 3: HDD | Hardware Design Document (Detailed Engineering Design Specification)
+Row 4: AC | Alternating Current (Grid Mains Input, 85 V – 265 V AC RMS)
+Row 5: DC | Direct Current (Regulated Output, 5.0 V – 20.0 V DC)
+Row 6: SELV | Safety Extra-Low Voltage (< 60 V DC limit per IEC 62368-1)
+Row 7: PFC | Power Factor Correction
+Row 8: CC | Constant Current Mode (Autonomous Hardware Current Limit)
+Row 9: CV | Constant Voltage Mode (Precision Closed-Loop Voltage Regulation)
+Row 10: DAC | Digital-to-Analog Converter (12-bit Voltage Setpoint Injection)
+Row 11: ADC | Analog-to-Digital Converter (Microcontroller Telemetry Sampling)
+Row 12: OVP | Over-Voltage Protection
+Row 13: OCP | Over-Current Protection
+Row 14: OTP | Over-Temperature Protection
+Row 15: SCP | Short-Circuit Protection
+Row 16: DMM | Digital Multimeter
+Row 17: CT | Current Transformer (AC Primary Current Sensing)
+Row 18: I2C | Inter-Integrated Circuit Serial Communication Bus
+Row 19: SPI | Serial Peripheral Interface Bus
+Row 20: UART | Universal Asynchronous Receiver-Transmitter
+Row 21: PWM | Pulse Width Modulation
+Row 22: EMI | Electromagnetic Interference
+Row 23: EMC | Electromagnetic Compatibility
+Row 24: NTC | Negative Temperature Coefficient Thermistor (Inrush Limiter)
+Row 25: MOV | Metal Oxide Varistor (Surge & Transient Voltage Clamp)
+Row 26: ESR | Equivalent Series Resistance
+Row 27: DVT | Design Verification Testing
+Row 28: ATE | Automated Test Equipment
+Row 29: DUT | Device Under Test
+
+
+################ TABLE 5 (rows: 6, cols: 2) ################
+Row 0: SL No | Description (with Version & Reference)
+Row 1: REF-001 | Statement of Work (SOW): Smart Programmable Voltage Supply Module v1.0, VVDN Technologies
+Row 2: REF-002 | IEC 62368-1 (3rd Edition): Audio/video, information and communication technology equipment – Safety requirements
+Row 3: REF-003 | Texas Instruments LM5176: High-Performance 4-Switch Synchronous Buck-Boost Controller Datasheet (SNVSAR4)
+Row 4: REF-004 | Texas Instruments UCC28740: Constant-Voltage Constant-Current Isolated Flyback Controller Datasheet (SLUSBL2)
+Row 5: REF-005 | VVDN Hardware Design Document (HDD): Smart Programmable Power Supply Circuit Design, Derivations & Schematics
+
+
+################ TABLE 6 (rows: 12, cols: 3) ################
+Row 0: S.No | Parameters | Inputs For SPPS Board Design
+Row 1: 1 | Input Voltage Range | 85 V to 265 V AC RMS, 47 Hz to 63 Hz (Universal Grid Compatibility)
+Row 2: 2 | Continuous Output Current | 0.0 A to 3.0 A DC Continuous across full voltage range
+Row 3: 3 | Programmable Output Voltage | 5.0 V to 20.0 V DC 
+Row 4: 4 | Maximum Output Power | 60.0 W Continuous DC Output (20.0 V @ 3.0 A)
+Row 5: 5 | Intermediate Bus Voltage | +24.0 V DC ± 1.0% (72.0 W continuous rating from primary Flyback stage)
+Row 6: 6 | Output Voltage Ripple | < 25 mV pk-pk under full 3.0 A load (measured across 20 MHz bandwidth)
+Row 7: 7 | End-to-End System Efficiency | > 85.0% @ 230 V AC Full Load (Flyback > 90%, Buck-Boost > 95%)
+Row 8: 8 | Galvanic Safety Isolation | 3,000 V AC RMS (1 minute withstand) meeting IEC 62368-1 SELV
+Row 9: 9 | Overcurrent Protection | LM5176 built-in cycle-by-cycle hardware peak current limit via CSP/CSN
+Row 10: 10 | User Interface & Control | 1.3" I2C OLED display, dual rotary encoders, Status LEDs
+Row 11: 11 | Conducted & Radiated EMC | Compliant with CISPR 32 / EN 55032 Class B limits
+
+
+################ TABLE 7 (rows: 13, cols: 2) ################
+Row 0: S.N. | Usecase
+Row 1: 1 | Universal AC mains soft startup and inrush current suppression (< 25 A peak)
+Row 2: 2 | AC full-wave rectification and high-voltage DC bulk energy holdup (> 10 ms)
+Row 3: 3 | Galvanically isolated Flyback conversion (+24.0 V DC, 72 W)
+Row 4: 4 | Synchronous 4-switch Buck-Boost step-down/step-up post-regulation (5 V – 20 V DC)
+Row 5: 5 | High-precision 10 mV digital voltage steering via 12-bit DAC summing network
+Row 6: 6 | LM5176 built-in cycle-by-cycle overcurrent protection via CSP/CSN pins
+Row 7: 7 | Primary Flyback cycle-by-cycle current limit via UCC28740 CS resistor
+Row 8: 8 | Controller internal thermal shutdown and board temperature monitoring
+Row 9: 9 | Primary AC input power measurement via isolated delta-sigma amplifier and CT
+Row 10: 10 | Secondary DC load voltage, current, and power monitoring via 16-bit I2C monitor
+Row 11: 11 | Real-time conversion efficiency computation and 1.3" OLED dashboard display update
+Row 12: 12 | Local front-panel rotary encoder tuning, tactile output enable, and status LED indication
+
+
+################ TABLE 8 (rows: 9, cols: 5) ################
+Row 0: Sl. No | Entity 1 | Entity 2 | Interface | Usage Description
+Row 1: 1 | AC Grid Mains | SPPS Board | IEC 320-C14 Inlet | Universal 85V–265V AC RMS, 50/60Hz grounded power input with 2A fuse
+Row 2: 2 | SPPS Board | DUT / Load | 4mm Binding Posts | Regulated 5.0V–20.0V DC / 3.0A power delivery to device under test
+Row 3: 4 | SPPS Board | Local Operator | 1.3" OLED Display | Real-time graphical dashboard for V, I, P, efficiency (η), and operating mode
+Row 4: 5 | SPPS Board | Local Operator | Output Enable Button | Tactile push-button for safe electronic enable/disable of output power
+Row 5: 6 | SPPS Board | Local Operator | Status Mode LEDs | Visual indication of Output Active (Green), Limit (Amber), and Fault (Red) states
+Row 6: 7 | SPPS Board | Debug Programmer | SWD Header | Microcontroller firmware flashing and debug tracing
+Row 7: 8 | SPPS Board | Lab Oscilloscope | PCB Test Points | Diagnostic test loops for measuring intermediate rail, ripple, and noise
+Row 8: 9 | Primary Side | Secondary Side | 6.4mm Milled Slot | Physical 2.0mm air slot beneath transformer enforcing IEC 62368-1 isolation
+
+
+################ TABLE 9 (rows: 10, cols: 6) ################
+Row 0: S. No | Entity 1 | Entity 2 | Interface | Interface Protocol / Mode | Usage Description
+Row 1: 1 | STM32G474 MCU | INA226 Monitor | Secondary Telemetry | I2C  | Reads 16-bit DC output voltage, current, and bus power at 10 Hz rate
+Row 2: 2 | STM32G474 MCU | 1.3" OLED (SSD1306) | Display Dashboard | I2C  | Updates numerical readouts, mode text, and efficiency bar graph at 10 Hz
+Row 3: 3 | STM32G474 MCU | AMC1311 Iso-Amp | Primary AC Voltage | Analog ADC Channel | Samples galvanically isolated AC mains voltage waveform for Pac calculation
+Row 4: 4 | STM32G474 MCU | Current Transformer | Primary AC Current | Analog ADC Channel | Samples burden resistor voltage from 1000:1 CT for AC mains current sensing
+Row 5: 5 | STM32G474 MCU | LM5176 FB Node | Voltage Steering | Internal 12-Bit DAC | Sends current into summing node to set Vout between 5.0V and 20.0V
+Row 6: 6 | STM32G474 MCU | Rotary Encoders | User Input | Timer Encoder Interface | Rotary dials with debounced push-switches
+Row 7: 7 | STM32G474 MCU | Status LEDs | Status Annunciation | GPIO Digital Outputs | Drives Green (Active), Amber (Limit), and Red (Fault) status indicator LEDs
+Row 8: 8 | STM32G474 MCU | LM5176 Enable Pin | Output Control | GPIO Digital Output | Controls post-regulator run state during standby, soft-start, and fault disable
+Row 9: 9 | STM32G474 MCU | Host PC / ATE | Calibration & SCPI | UART | Optional serial channel for automated calibration and factory test commands
+
+
+################ TABLE 10 (rows: 6, cols: 4) ################
+Row 0: Domain Names | System 1 (SPPS Device) | Trainee Responsibility Scope | Mentor Review Mechanism
+Row 1: Hardware - HW | Yes | 4-Stage power conversion schematics, component selection, layout, and bring-up | Gate Review
+Row 2: Mechanical - ME | Yes | Enclosure integration, thermal copper heatsinking, binding post cutouts | Mechanical Review
+Row 3: Firmware - FW | Yes | Bare-metal drivers (ADC, DAC, I2C, Timers), OLED dashboard, efficiency math | Firmware Review
+Row 4: PC App - PAP | Optional | Python-based automated calibration and DVT sweep script over USB-UART | Optional
+Row 5: Test Firmware | Yes | Dedicated bring-up routines for peripheral check, DAC sweep, and zeroing | Lab Bring-up Sign-off
+
+
+################ TABLE 11 (rows: 9, cols: 3) ################
+Row 0: Req ID | Parameter / Feature | Specification / Target
+Row 1: FR-01 | AC Input Voltage Range | 85 V – 265 V AC RMS [MUST]
+Row 2: FR-02 | Intermediate DC Bus Voltage | +24.0 V DC ± 1.0% [MUST]
+Row 3: FR-03 | Continuous Primary Power | 72.0 W Continuous [MUST]
+Row 4: FR-04 | Peak Power Capability | 84.0 W for 500 ms [SHOULD]
+Row 5: FR-05 | Primary Stage Efficiency | > 90.0% @ 230V AC Full Load [MUST]
+Row 6: FR-06 | Safety Galvanic Isolation | 3,000 V AC RMS (1 min) [MUST]
+Row 7: FR-07 | Cold-Start Inrush Current | < 25.0 A Peak [MUST]
+Row 8: FR-08 | No-Load Standby Power | < 150 mW Standby [SHOULD]
+
+
+################ TABLE 12 (rows: 8, cols: 4) ################
+Row 0: Req ID | Parameter / Feature | Specification / Target | Condition
+Row 1: BB-01 | Output Voltage Range | 5.0 V – 20.0 V DC Programmable [MUST] | Continuous linear adjustment
+Row 2: BB-02 | Continuous Output Current | 0.0 A – 3.0 A DC Continuous [MUST] | Across full 5V–20V voltage span
+Row 3: BB-03 | Maximum Output Power | 60.0 W Continuous Output [MUST] | Vout = 20.0V, Iout = 3.0A
+Row 4: BB-04 | Output Voltage Ripple | < 25 mV pk-pk ripple [MUST] | Full load 3A, 20MHz bandwidth
+Row 5: BB-05 | Buck-Boost Efficiency | > 95.0% @ 20V/3A; > 92.0% @ 5V/3A [MUST] | Vin = 24V, Sync Rectification
+Row 6: BB-06 | Switching Frequency | 300 kHz ± 10% [MUST] | Fixed frequency PWM
+Row 7: BB-07 | Hardware Current Limiting | Cycle-by-cycle current limit via CSP/CSN [MUST] | Overload condition
+
+
+################ TABLE 13 (rows: 6, cols: 4) ################
+Row 0: Req ID | Parameter / Feature | Specification / Target | Condition
+Row 1: TM-01 | Primary AC Voltage Sensing | Isolated AMC1311 (0-300V AC) [MUST] | ± 1.0% accuracy across 85-265V
+Row 2: TM-02 | Primary AC Current Sensing | Current Transformer 1000:1 [MUST] | ± 1.5% accuracy from 0.1A–2A
+Row 3: TM-03 | Dual-Domain Telemetry Rate | 10.0 Hz Real-Time Loop Rate [MUST] | Pac, Pdc, and η computed at 100ms
+Row 4: TM-04 | Galvanic Isolation Barrier | 3,000 V AC RMS (1 min) [MUST] | Primary-to-secondary isolation
+Row 5: TM-05 | Calibration Test Points | Dedicated PCB Test Loops [MUST] | Vout, bulk DC, and aux rails
+
+
+################ TABLE 14 (rows: 9, cols: 4) ################
+Row 0: Req ID | Parameter / Feature | Specification / Target | Condition
+Row 1: PR-01 | Input Fuse Protection | 2.0A Ceramic Fuse [MUST] | AC mains short-circuit
+Row 2: PR-02 | Input Inrush Current Limit | 10Ω NTC Thermistor (< 25A peak) [MUST] | Cold start at 265V AC
+Row 3: PR-03 | Built-in Controller OCP | LM5176 cycle-by-cycle CSP/CSN clamp [MUST] | Load current > 3.5A limit
+Row 4: PR-04 | Over-Temperature (OTP) | LM5176 internal shutdown (165°C) [MUST] | Severe thermal rise
+Row 5: PR-05 | Safety Compliance Standard | IEC 62368-1 Reinforced Isolation [MUST] | SELV touch-safe (< 60V DC)
+Row 6: PR-06 | Creepage & Clearance | Creepage ≥ 6.4mm; Clearance ≥ 5.0mm [MUST] | Primary-Secondary milled slot
+Row 7: PR-07 | Conducted & Radiated EMC | CISPR 32 / EN 55032 Class B [MUST] | 150 kHz – 1 GHz emission limits
+Row 8: PR-08 | Operating Ambient Temp | –20°C to +50°C Full Load [MUST] | Natural convection in chassis
+
+
+################ TABLE 15 (rows: 6, cols: 3) ################
+Row 0: BRIDGE RECTIFIER & BULK FILTER SEQUENCE | BRIDGE RECTIFIER & BULK FILTER SEQUENCE | BRIDGE RECTIFIER & BULK FILTER SEQUENCE
+Row 1: Step 1 | Filtered AC Input | Takes 85V–265V AC RMS sinusoidal voltage from Stage 1 EMI filter.
+Row 2: Step 2 | Full-Wave Rectification | GBU606 single-phase bridge rectifies AC into 100Hz/120Hz unipolar DC pulses (120Vpk–375Vpk).
+Row 3: Step 3 | Bulk Capacitive Filtering | 100µF/450V electrolytic cap smooths ripple and guarantees > 10ms holdup time across line dropouts.
+Row 4: Step 4 | High-Frequency Decoupling | 100nF/630V ceramic cap bypasses fast 80kHz primary switching edge ringing.
+Row 5: Step 5 | Safety Discharge Bleeder | 3x 330kΩ resistor string drains bulk capacitor to < 50V SELV within 60s per IEC 62368-1. 
+
+
+################ TABLE 16 (rows: 5, cols: 3) ################
+Row 0: Req ID | Parameter / Feature | Specification / Target
+Row 1: CT-01 | DAC Voltage Steering Network | Resistor summing into LM5176 FB node [MUST]
+Row 2: CT-02 | Current Sense Resistor | 10 mΩ Metal Element Shunt, 3W, 0.1% [MUST]
+Row 3: CT-03 | MCU Supervisory Shutdown | GPIO pulling LM5176 ENABLE pin low [MUST]
+Row 4: CT-04 | Auxiliary Bias Regulation | +14V Flyback VCC, +12V gate, +5V, +3.3V rails [MUST]
+
+
+################ TABLE 17 (rows: 9, cols: 5) ################
+Row 0: System Name | Domain Name | Deliverables Domain3 [Embedded Software] Domain4 | Deliverables Domain3 [Embedded Software] Domain4 | Deliverables Domain3 [Embedded Software] Domain4
+Row 1: VVDN_SPPS_2026 | Systems / PRD | Product Requirement Document (PRD) — Baseline Specifications & Acceptance Criteria | Product Requirement Document (PRD) — Baseline Specifications & Acceptance Criteria | Product Requirement Document (PRD) — Baseline Specifications & Acceptance Criteria
+Row 2: SPPS Module | Hardware (HW) | Hardware Design Document (HDD) with complete circuit derivations & stress calculations | Hardware Design Document (HDD) with complete circuit derivations & stress calculations | Hardware Design Document (HDD) with complete circuit derivations & stress calculations
+Row 3: SPPS Module | Hardware (HW) | Altium Designer Complete Schematics | Altium Designer Complete Schematics | Altium Designer Complete Schematics
+Row 4: SPPS Module | Hardware (HW) | Class A Engineering Bill of Materials (BOM) with manufacturer part numbers | Class A Engineering Bill of Materials (BOM) with manufacturer part numbers | Class A Engineering Bill of Materials (BOM) with manufacturer part numbers
+Row 5: SPPS Module | Hardware (HW) | 4-Layer PCB Layout & Gerber RS-274X Fabrication Package (ODB++, NC Drill, Pick-and-Place) | 4-Layer PCB Layout & Gerber RS-274X Fabrication Package (ODB++, NC Drill, Pick-and-Place) | 4-Layer PCB Layout & Gerber RS-274X Fabrication Package (ODB++, NC Drill, Pick-and-Place)
+Row 6: SPPS Module | Hardware (HW) | Design Verification Testing (DVT) Report & Acceptance Certificate | Design Verification Testing (DVT) Report & Acceptance Certificate | Design Verification Testing (DVT) Report & Acceptance Certificate
+Row 7: SPPS Module | Firmware (FW) | Microcontroller Telemetry & Display Firmware Source Code | Microcontroller Telemetry & Display Firmware Source Code | Microcontroller Telemetry & Display Firmware Source Code
+Row 8: SPPS Module | Compliance / Safety | Hi-Pot Dielectric Withstand Certificate (3000V RMS) & Pre-Compliance EMC Report | Hi-Pot Dielectric Withstand Certificate (3000V RMS) & Pre-Compliance EMC Report | Hi-Pot Dielectric Withstand Certificate (3000V RMS) & Pre-Compliance EMC Report
+
+
+################ TABLE 18 (rows: 6, cols: 3) ################
+Row 0: STAGE 4: 4-SWITCH BUCK-BOOST POST-REGULATOR SEQUENCE | STAGE 4: 4-SWITCH BUCK-BOOST POST-REGULATOR SEQUENCE | STAGE 4: 4-SWITCH BUCK-BOOST POST-REGULATOR SEQUENCE
+Row 1: Step 1 | +24.0V DC Rail Input | Accepts +24.0V DC intermediate rail from Stage 3 Flyback.
+Row 2: Step 2 | 4-Switch Synchronous Bridge | TI LM5176 modulates four 40V MOSFETs in H-bridge around a 10µH flat-wire power inductor.
+Row 3: Step 3 | Seamless Mode Transitions | Operates in pure Buck mode for 5V–18V outputs (>96% eff) and 4-switch Buck-Boost mode near 20V (>95% eff).
+Row 4: Step 4 | Precision DAC Steering | Resistor summing network (R_top=49.9kΩ, R_bot=3.65kΩ, R_DAC=11kΩ) steers output from 5V to 20V in 10mV steps.
+Row 5: Step 5 | Cycle-by-Cycle Current Limit | LM5176 senses current via 10mΩ shunt across CSP/CSN, natively clamping peak inductor current on every 300 kHz cycle.
+
+
+################ TABLE 19 (rows: 5, cols: 5) ################
+Row 0: Sl.No | Description | Qty | Mfg | Mfg Part No
+Row 1: Subsystem 1: AC Mains Protection, EMI Filtering & Rectifier Stage (Electrical) | Subsystem 1: AC Mains Protection, EMI Filtering & Rectifier Stage (Electrical) | Subsystem 1: AC Mains Protection, EMI Filtering & Rectifier Stage (Electrical) | Subsystem 1: AC Mains Protection, EMI Filtering & Rectifier Stage (Electrical) | Subsystem 1: AC Mains Protection, EMI Filtering & Rectifier Stage (Electrical)
+Row 2:  |  |  |  | 
+Row 3: Subsystem 2: Flyback Power Stage & Galvanic Isolation (Electrical) | Subsystem 2: Flyback Power Stage & Galvanic Isolation (Electrical) | Subsystem 2: Flyback Power Stage & Galvanic Isolation (Electrical) | Subsystem 2: Flyback Power Stage & Galvanic Isolation (Electrical) | Subsystem 2: Flyback Power Stage & Galvanic Isolation (Electrical)
+Row 4:  |  |  |  | 
+
+
+################ TABLE 20 (rows: 3, cols: 5) ################
+Row 0: Sl.No | Description | Qty | Mfg | Mfg Part No
+Row 1: Subsystem 1: 4-Switch Synchronous Buck-Boost Post-Regulator (Electrical) | Subsystem 1: 4-Switch Synchronous Buck-Boost Post-Regulator (Electrical) | Subsystem 1: 4-Switch Synchronous Buck-Boost Post-Regulator (Electrical) | Subsystem 1: 4-Switch Synchronous Buck-Boost Post-Regulator (Electrical) | Subsystem 1: 4-Switch Synchronous Buck-Boost Post-Regulator (Electrical)
+Row 2:  |  |  |  | 
