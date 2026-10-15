@@ -356,13 +356,13 @@ def generate_prd_docx():
         ("3", "Galvanically isolated Quasi-Resonant Flyback conversion (+24.0 V DC, 72 W)"),
         ("4", "Synchronous 4-switch Buck-Boost step-down/step-up post-regulation (5 V – 20 V DC)"),
         ("5", "High-precision 10 mV digital voltage steering via 12-bit DAC summing network"),
-        ("6", "Autonomous sub-5 µs analog hardware Constant-Current (CC) clamping"),
-        ("7", "Fast analog Over-Voltage Protection (OVP) crowbar disconnect (< 5 µs)"),
-        ("8", "Thermal monitoring and automatic Over-Temperature Protection (OTP at 90°C)"),
+        ("6", "LM5176 built-in cycle-by-cycle overcurrent protection via CSP/CSN pins"),
+        ("7", "Primary Flyback cycle-by-cycle current limit via UCC28740 CS resistor"),
+        ("8", "Controller internal thermal shutdown and board temperature monitoring"),
         ("9", "Primary AC input power measurement via isolated delta-sigma amplifier and CT"),
         ("10", "Secondary DC load voltage, current, and power monitoring via 16-bit I2C monitor"),
         ("11", "Real-time conversion efficiency computation and 1.3\" OLED dashboard display update"),
-        ("12", "Local front-panel rotary encoder tuning, tactile output enable, and mode LED indication")
+        ("12", "Local front-panel rotary encoder tuning, tactile output enable, and status LED indication")
     ]
     set_cell_background(t6.rows[0].cells[0], "BFBFBF")
     set_cell_background(t6.rows[0].cells[1], "BFBFBF")
@@ -384,12 +384,12 @@ def generate_prd_docx():
     hw_interfaces = [
         ("1", "AC Grid Mains", "SPPS Board", "IEC 320-C14 Inlet", "Universal 85V–265V AC RMS, 50/60Hz grounded power input with 2A fuse"),
         ("2", "SPPS Board", "DUT / Load", "4mm Binding Posts", "Regulated 5.0V–20.0V DC / 3.0A power delivery to device under test"),
-        ("3", "SPPS Board", "Local Operator", "Dual Rotary Encoders", "Quadrature rotary controls for setting voltage (10mV) and current limit (10mA)"),
+        ("3", "SPPS Board", "Local Operator", "Dual Rotary Encoders", "Quadrature rotary controls for setting voltage (10mV resolution)"),
         ("4", "SPPS Board", "Local Operator", "1.3\" OLED Display", "Real-time graphical dashboard for V, I, P, efficiency (η), and operating mode"),
         ("5", "SPPS Board", "Local Operator", "Output Enable Button", "Tactile push-button for safe electronic enable/disable of output power"),
-        ("6", "SPPS Board", "Local Operator", "Status Mode LEDs", "Visual indication of CV (Green), CC (Amber), and System Fault (Red) states"),
+        ("6", "SPPS Board", "Local Operator", "Status Mode LEDs", "Visual indication of Output Active (Green), Limit (Amber), and Fault (Red) states"),
         ("7", "SPPS Board", "Debug Programmer", "SWD Header", "Microcontroller firmware flashing, register inspection, and debug tracing"),
-        ("8", "SPPS Board", "Lab Oscilloscope", "PCB Test Points", "Diagnostic test loops for measuring switching waveforms, ripple, and noise"),
+        ("8", "SPPS Board", "Lab Oscilloscope", "PCB Test Points", "Diagnostic test loops for measuring intermediate rail, ripple, and noise"),
         ("9", "Primary Side", "Secondary Side", "6.4mm Milled Slot", "Physical 2.0mm air slot beneath transformer enforcing IEC 62368-1 isolation")
     ]
     for cell in t7.rows[0].cells:
@@ -420,11 +420,10 @@ def generate_prd_docx():
         ("3", "STM32G474 MCU", "AMC1311 Iso-Amp", "Primary AC Voltage", "Analog ADC Channel", "Samples galvanically isolated AC mains voltage waveform for Pac calculation"),
         ("4", "STM32G474 MCU", "Current Transformer", "Primary AC Current", "Analog ADC Channel", "Samples burden resistor voltage from 1000:1 CT for AC mains current sensing"),
         ("5", "STM32G474 MCU", "LM5176 FB Node", "Voltage Steering", "Internal 12-Bit DAC", "Injects current into summing node to set Vout between 5.0V and 20.0V"),
-        ("6", "STM32G474 MCU", "TLV3501 Comparator", "Current Limit Ref", "Internal 12-Bit DAC", "Sets analog reference voltage for autonomous hardware CC comparator"),
-        ("7", "STM32G474 MCU", "Rotary Encoders", "User Input", "Timer Encoder Interface", "Hardware quadrature decoding of dual rotary dials with debounced push-switches"),
-        ("8", "STM32G474 MCU", "Mode LEDs", "Status Annunciation", "GPIO Digital Outputs", "Drives Green (CV), Amber (CC), and Red (Fault) status indicator LEDs"),
-        ("9", "STM32G474 MCU", "LM5176 Enable Pin", "Output Control", "GPIO Digital Output", "Controls post-regulator run state during standby, soft-start, and fault trip"),
-        ("10", "STM32G474 MCU", "Host PC / ATE", "Calibration & SCPI", "UART / VCP (115.2 kbps)", "Optional serial channel for automated calibration and factory test commands")
+        ("6", "STM32G474 MCU", "Rotary Encoders", "User Input", "Timer Encoder Interface", "Hardware quadrature decoding of rotary dials with debounced push-switches"),
+        ("7", "STM32G474 MCU", "Status LEDs", "Status Annunciation", "GPIO Digital Outputs", "Drives Green (Active), Amber (Limit), and Red (Fault) status indicator LEDs"),
+        ("8", "STM32G474 MCU", "LM5176 Enable Pin", "Output Control", "GPIO Digital Output", "Controls post-regulator run state during standby, soft-start, and fault disable"),
+        ("9", "STM32G474 MCU", "Host PC / ATE", "Calibration & SCPI", "UART / VCP (115.2 kbps)", "Optional serial channel for automated calibration and factory test commands")
     ]
     for cell in t8.rows[0].cells:
         set_cell_background(cell, "BFBFBF")
@@ -576,15 +575,13 @@ def generate_prd_docx():
             ("8", "Compensation Network Type-II Caps & Resistors", "4", "Murata / Yageo", "C0G & 0.1% Thin Film SMD")
         ]),
         ("Subsystem 2: Analog Closed-Loop Control, Sensing & Protection (Electrical)", [
-            ("9", "Precision Current Shunt Resistor 10mΩ 0.1% 3W 2512", "1", "Bourns", "CSS2H-2512R-L010F"),
-            ("10", "Precision Current Sense Amplifier 50V/V SC70", "1", "Texas Instruments", "INA240A2EDCKR"),
-            ("11", "High-Speed Analog Comparator 4.5ns SOT-23-6", "1", "Texas Instruments", "TLV3501AIDBVR"),
-            ("12", "Mixed-Signal MCU & 12-Bit DAC Core LQFP-64", "1", "STMicroelectronics", "STM32G474RET6"),
-            ("13", "Isolated Delta-Sigma Modulator SOIC-8 (AC Sense)", "1", "Texas Instruments", "AMC1311DWVR"),
-            ("14", "Toroidal Current Transformer 1000:1 (AC Current)", "1", "Talema", "AC1005 (PCB Mount)"),
-            ("15", "16-Bit I2C Power Monitor IC VSSOP-10 (DC Rail)", "1", "Texas Instruments", "INA226AIDGSR"),
-            ("16", "Heavy-Duty 4mm Gold-Plated Binding Posts (Red/Blk)", "2", "Pomona Electronics", "3770-0 / 3770-2"),
-            ("17", "IEC 320-C14 AC Inlet Receptacle with Fuse Drawer", "1", "Schurter", "6200.2100")
+            ("9", "Precision Current Shunt Resistor 10mΩ 0.1% 3W 2512 (CSP/CSN)", "1", "Bourns", "CSS2H-2512R-L010F"),
+            ("10", "Mixed-Signal MCU & 12-Bit DAC Core LQFP-64", "1", "STMicroelectronics", "STM32G474RET6"),
+            ("11", "Isolated Delta-Sigma Modulator SOIC-8 (AC Sense)", "1", "Texas Instruments", "AMC1311DWVR"),
+            ("12", "Toroidal Current Transformer 1000:1 (AC Current)", "1", "Talema", "AC1005 (PCB Mount)"),
+            ("13", "16-Bit I2C Power Monitor IC VSSOP-10 (DC Rail)", "1", "Texas Instruments", "INA226AIDGSR"),
+            ("14", "Heavy-Duty 4mm Gold-Plated Binding Posts (Red/Blk)", "2", "Pomona Electronics", "3770-0 / 3770-2"),
+            ("15", "IEC 320-C14 AC Inlet Receptacle with Fuse Drawer", "1", "Schurter", "6200.2100")
         ])
     ]
 
@@ -681,21 +678,20 @@ def generate_prd_docx():
                 "and regulates it through a synchronous 4-switch Buck-Boost stage to provide the commanded 5.0V to 20.0V DC output at up to 3.0A.\n\n"
                 "The onboard microcontroller (STM32G474) acts as the system brain by reading dual-domain electrical telemetry (primary AC input power "
                 "and secondary DC load power), computing real-time conversion efficiency, updating the 1.3-inch OLED dashboard, and driving the "
-                "precision 12-bit DAC voltage steering network. Crucially, high-speed circuit protection (constant-current clamping and over-voltage crowbar) "
-                "is implemented in autonomous analog hardware with sub-5 microsecond response time, operating completely independent of firmware "
-                "to guarantee fail-safe protection during load faults or dead short-circuits.\n\n"
+                "precision 12-bit DAC voltage steering network. Circuit protection relies on robust, standard, industry-proven hardware protections: "
+                "primary AC fuse, inrush NTC, surge MOV, primary cycle-by-cycle Flyback current limiting, and secondary LM5176 built-in cycle-by-cycle overcurrent protection with thermal shutdown.\n\n"
                 "In simple terms, the power conversion stages handle the heavy electrical energy flow across certified 3000V RMS galvanic isolation, "
-                "while the analog protection loops and MCU provide autonomous safety, precision regulation, and live telemetry.\n\n"
+                "while the built-in controller protections and MCU provide safety, precision regulation, and live telemetry.\n\n"
                 "The primary power supply functionality includes:\n"
                 "• Universal AC Grid Operation: Accepts 85V to 265V AC RMS (47–63 Hz) without manual line selector switches.\n"
                 "• Reinforced Galvanic Isolation: Certified 3000V AC RMS (1 min) isolation meeting IEC 62368-1 SELV.\n"
                 "• Intermediate Regulated Rail: Quasi-Resonant Flyback converter generates a stable +24.0V DC bus (72W) with > 90% peak efficiency.\n"
                 "• Wide Programmable DC Output: 4-switch synchronous Buck-Boost post-regulator delivers 5.0V to 20.0V DC at up to 3.0A continuous (60W continuous power).\n"
                 "• High-Resolution DAC Voltage Steering: 12-bit DAC network achieves 10mV monotonic setpoint resolution.\n"
-                "• Autonomous Sub-5µs Hardware CC Clamping: Analog shunt amplifier and high-speed comparator pull down the regulator COMP pin in < 5µs on overcurrent.\n"
-                "• Hardware Over-Voltage & Over-Temperature Protection: Analog crowbar trips at Vset + 1.5V, and NTC sensor trips shutdown at 90°C.\n"
+                "• Built-in Cycle-by-Cycle Hardware Current Limiting: LM5176 monitors output current through a dedicated 10mΩ shunt across its CSP/CSN pins, natively limiting peak inductor current on every switching cycle without external analog complexity.\n"
+                "• Built-in Controller Protections: Integrated input fuse (2A), NTC inrush limiter (10Ω), MOV transient clamp (300V), LM5176 internal thermal shutdown (165°C), and Under-Voltage Lockout (UVLO).\n"
                 "• Real-Time Dual-Domain Telemetry: Measures AC input power and DC load power, computing live efficiency (η) at 10 Hz.\n"
-                "• Interactive Local Dashboard: 1.3\" OLED display shows live V, I, P, and efficiency meters; dual rotary encoders allow intuitive tuning; front-panel LEDs indicate CV, CC, and Fault states.\n"
+                "• Interactive Local Dashboard: 1.3\" OLED display shows live V, I, P, and efficiency meters; dual rotary encoders allow intuitive tuning; front-panel LEDs indicate CV, Current Limit, and Fault states.\n"
                 "• Low Standby Power: Consumes < 150 mW in idle state when output is disabled."
             )
         elif "Also, if the product comprises of developing multiple systems" in txt:
@@ -703,14 +699,14 @@ def generate_prd_docx():
         elif "A diagram showing various systems of the product" in txt:
             p.text = ""
         elif "< Small description of different systems within the product" in txt:
-            p.text = "The product is designed as a unified Embedded Hardware Power Supply Module (System 1). Primary hardware stages include AC Mains Protection & EMI Filter, GBU606 Bridge Rectifier & Bulk Capacitor (+120V to +375V DC), Stage 1 Isolated Quasi-Resonant Flyback Converter (+24V DC, 72W), Stage 2 Synchronous 4-Switch Buck-Boost Post-Regulator (5V–20V / 3A DC), and Analog DAC Steering & Fast Hardware Protection Loops."
+            p.text = "The product is designed as a unified Embedded Hardware Power Supply Module (System 1). Primary hardware stages include AC Mains Protection & EMI Filter, GBU606 Bridge Rectifier & Bulk Capacitor (+120V to +375V DC), Stage 1 Isolated Quasi-Resonant Flyback Converter (+24V DC, 72W), Stage 2 Synchronous 4-Switch Buck-Boost Post-Regulator (5V–20V / 3A DC), and Analog DAC Steering & Built-in Hardware Protections."
         # Use Cases
         elif "<Summarize the major functions the product must perform" in txt:
             p.text = (
                 "The primary power supply functionality includes four operating modes:\n"
-                "• Constant Voltage (CV) Mode: Regulates output voltage within ±0.2% across varying load currents below Iset.\n"
-                "• Constant Current (CC) Mode: Autonomously clamps output current at Iset within < 5µs during overload or short-circuit.\n"
-                "• Hardware Fault Protection Mode: Immediately shuts down switching on over-voltage (Vset + 1.5V) or over-temperature (90°C).\n"
+                "• Constant Voltage (CV) Mode: Regulates output voltage within ±0.2% across varying load currents below the current limit.\n"
+                "• Current-Limited (OCP) Mode: Restricts peak inductor current cycle-by-cycle via LM5176 CSP/CSN sense during overload or short-circuit.\n"
+                "• MCU Supervisory Protection Mode: Safely disables switching via LM5176 ENABLE pin on persistent overload or over-temperature.\n"
                 "• Standby / Idle Mode: Output power stage disabled while +24V intermediate rail is maintained with standby power < 150mW."
             )
         elif "A picture of the major groups of related requirements" in txt:
@@ -774,7 +770,7 @@ def generate_prd_docx():
             p.text = (
                 "The following dependencies are included in the design and development of the SPPS module:\n"
                 "• Custom transformer engineering samples on Ferroxcube PQ26/20 ferrite cores with triple-insulated Furukawa TEX-E wire required prior to Phase 3 schematic freeze.\n"
-                "• Component sourcing and lead times for TI LM5176, UCC28740, INA240, INA226, AMC1311, and ST STM32G474.\n"
+                "• Component sourcing and lead times for TI LM5176, UCC28740, INA226, AMC1311, and ST STM32G474.\n"
                 "• Laboratory equipment availability: Chroma AC source, DC electronic load, 3000V RMS Hi-Pot tester, and thermal camera.\n"
                 "• Mechanical front-panel drawings for binding post spacing (19.05mm), IEC C14 inlet cutout, and OLED mounting.\n"
                 "• Firmware device drivers for SSD1306 OLED display, INA226 power monitor, and STM32 internal 12-bit DAC."
@@ -790,7 +786,7 @@ def generate_prd_docx():
                 "Phase 2 — Component Selection & Circuit Design:\n"
                 "Transformer PQ26/20 magnetics sizing; component stress derating calculations; closed-loop feedback and DAC steering design; companion HDD authoring.\n\n"
                 "Phase 3 — Schematic Design and Review:\n"
-                "Complete 4-stage Altium schematics capture; autonomous analog protection design; peer review gates with BU SME.\n\n"
+                "Complete 4-stage Altium schematics capture; LM5176 cycle-by-cycle current limit sensing and MCU enable control; peer review gates with BU SME.\n\n"
                 "Phase 4 — PCB Layout & DFM Review:\n"
                 "4-layer PCB stackup; high-voltage isolation partitioning with 2.0mm milled slot; switching loop routing; DFM/DFA checks.\n\n"
                 "Phase 5 — Prototype Bring-up & Design Validation Plan (DVT):\n"
@@ -810,7 +806,7 @@ def generate_prd_docx():
             )
         # Architecture & BOM Notes
         elif "<Architecture section is optional to mention in PRD document" in txt:
-            p.text = "The power supply hardware architecture consists of two galvanically isolated power conversion stages followed by synchronous post-regulation and autonomous analog hardware protection:"
+            p.text = "The power supply hardware architecture consists of two galvanically isolated power conversion stages followed by synchronous post-regulation and built-in controller hardware protection:"
         elif "< Architecture Diagram with caption, shall be inserted here" in txt:
             p.text = ""
         elif "<BOM section is optional to mention in PRD document" in txt:
@@ -826,9 +822,9 @@ def generate_prd_docx():
         elif txt == "Out of scope point 1":
             p.text = "Active Power Factor Correction (Active Boost PFC) — passive EMI filtering is used since < 75W is exempt under IEC 61000-3-2."
         elif txt == "Out of scope point 2":
-            p.text = "Three-phase 400V/480V AC industrial grid input operation (module is single-phase 85V–265V AC RMS only)."
+            p.text = "Complex External Protection Circuits — dedicated analog crowbar thyristors and discrete fast comparator pull-down networks are excluded in favor of built-in controller protection and MCU supervisory shutdown."
         elif txt == "Out of scope point 3":
-            p.text = "Negative/bipolar voltage rails (system provides positive 5.0V to 20.0V DC only). Wireless connectivity (Wi-Fi, BLE) and cloud IoT interfaces are excluded."
+            p.text = "Three-phase 400V/480V AC industrial grid input operation (module is single-phase 85V–265V AC RMS only). Negative/bipolar rails and wireless IoT interfaces are excluded."
         elif txt == "Open Item 1":
             p.text = "Current shunt value trade-off: Evaluating 5mΩ vs 10mΩ for thermal dissipation vs low-current sensing resolution."
         elif txt == "Open Item 2":
@@ -847,9 +843,9 @@ def generate_prd_docx():
         ("6", "Output Voltage Ripple", "< 25 mV pk-pk under full 3.0 A load (measured across 20 MHz bandwidth)"),
         ("7", "End-to-End System Efficiency", "> 85.0% @ 230 V AC Full Load (Flyback > 90%, Buck-Boost > 95%)"),
         ("8", "Galvanic Safety Isolation", "3,000 V AC RMS (1 minute withstand) meeting IEC 62368-1 SELV"),
-        ("9", "Hardware Protection Response", "Autonomous analog CC clamping reaction in < 5.0 µs; Crowbar OVP in < 5.0 µs"),
+        ("9", "Overcurrent Protection", "LM5176 built-in cycle-by-cycle hardware peak current limit via CSP/CSN"),
         ("10", "PCBA Operating Temperature", "–20°C to +50°C Full Load (natural convection in chassis)"),
-        ("11", "User Interface & Control", "1.3\" I2C OLED display, dual rotary encoders, CV/CC/Fault LEDs, tactile Enable switch"),
+        ("11", "User Interface & Control", "1.3\" I2C OLED display, dual rotary encoders, Status LEDs, tactile Enable switch"),
         ("12", "Conducted & Radiated EMC", "Compliant with CISPR 32 / EN 55032 Class B limits")
     ]
 
@@ -938,49 +934,47 @@ def generate_prd_docx():
         ("BB-02", "Continuous Output Current", "0.0 A – 3.0 A DC Continuous [MUST]", "Across full 5V–20V voltage span", "Electronic Load 3A Soak"),
         ("BB-03", "Maximum Output Power", "60.0 W Continuous Output [MUST]", "Vout = 20.0V, Iout = 3.0A", "Thermal Run 60W (2 hrs)"),
         ("BB-04", "Voltage Setpoint Resolution", "10 mV step resolution (12-bit DAC) [MUST]", "Continuous monotonic tuning", "DAC Linearity Calibration"),
-        ("BB-05", "Current Limit Resolution", "10 mA step resolution (12-bit DAC) [MUST]", "Reference input to comparator", "Current Clamp Tuning"),
-        ("BB-06", "Output Voltage Ripple", "< 25 mV pk-pk ripple [MUST]", "Full load 3A, 20MHz bandwidth", "Scope Tip-and-Barrel Probe"),
-        ("BB-07", "Load Transient Recovery", "< 120 µs recovery, < 250mV sag [MUST]", "50% to 100% load step (1.5A to 3A)", "Dynamic Load Stepper"),
-        ("BB-08", "Buck-Boost Efficiency", "> 95.0% @ 20V/3A; > 92.0% @ 5V/3A [MUST]", "Vin = 24V, Sync Rectification", "Dual-Channel Power Meter"),
-        ("BB-09", "Switching Frequency", "300 kHz ± 10% [MUST]", "Fixed frequency PWM", "Frequency Counter"),
-        ("BB-10", "CC Mode Reaction Time", "< 5.0 µs autonomous clamping [MUST]", "Overload short-circuit step", "Fast Current Shunt Scope")
+        ("BB-05", "Output Voltage Ripple", "< 25 mV pk-pk ripple [MUST]", "Full load 3A, 20MHz bandwidth", "Scope Tip-and-Barrel Probe"),
+        ("BB-06", "Load Transient Recovery", "< 150 µs recovery, < 250mV sag [MUST]", "50% to 100% load step (1.5A to 3A)", "Dynamic Load Stepper"),
+        ("BB-07", "Buck-Boost Efficiency", "> 95.0% @ 20V/3A; > 92.0% @ 5V/3A [MUST]", "Vin = 24V, Sync Rectification", "Dual-Channel Power Meter"),
+        ("BB-08", "Switching Frequency", "300 kHz ± 10% [MUST]", "Fixed frequency PWM", "Frequency Counter / Scope"),
+        ("BB-09", "Hardware Current Limiting", "Cycle-by-cycle current limit via CSP/CSN [MUST]", "Overload condition", "Current Probe & Scope")
     ]
 
     req_telemetry = [
-        ("TM-01", "Primary AC Voltage Sensing", "Isolated AMC1311 (0-300V AC RMS) [MUST]", "± 1.0% accuracy across 85-265V", "Precision AC Source Ref"),
-        ("TM-02", "Primary AC Current Sensing", "Current Transformer 1000:1 [MUST]", "± 1.5% accuracy from 0.1A-2A", "Calibrated Current Probe"),
-        ("TM-03", "Secondary DC Voltage Sense", "INA226 16-bit ADC (1.25mV/LSB) [MUST]", "± 0.2% measurement accuracy", "Keysight 34465A DMM"),
+        ("TM-01", "Primary AC Voltage Sensing", "Isolated AMC1311 (0-300V AC RMS) [MUST]", "± 1.0% accuracy across 85-265V", "Precision AC Source Reference"),
+        ("TM-02", "Primary AC Current Sensing", "Current Transformer 1000:1 [MUST]", "± 1.5% accuracy from 0.1A–2A", "Calibrated Current Probe"),
+        ("TM-03", "Secondary DC Voltage Sense", "INA226 16-bit ADC (1.25mV/LSB) [MUST]", "± 0.2% measurement accuracy", "Keysight 34465A 6.5-digit DMM"),
         ("TM-04", "Secondary DC Current Sense", "INA226 16-bit ADC (100µA/LSB) [MUST]", "± 0.5% measurement accuracy", "Precision Shunt Reference"),
-        ("TM-05", "Dual-Domain Telemetry Rate", "10.0 Hz Real-Time Loop Rate [MUST]", "Pac, Pdc, and η computed at 100ms", "Timing Logic Analyzer"),
+        ("TM-05", "Dual-Domain Telemetry Rate", "10.0 Hz Real-Time Loop Rate [MUST]", "Pac, Pdc, and η computed at 100ms", "Logic Analyzer Timing Check"),
         ("TM-06", "Galvanic Isolation Barrier", "3,000 V AC RMS (1 min) [MUST]", "Primary-to-secondary isolation", "Certified Hi-Pot Tester"),
-        ("TM-07", "Hardware Calibration Test Points", "Dedicated PCB Test Points [MUST]", "Vout, Iout, bulk DC, and aux rails", "Scope & Multimeter Check")
+        ("TM-07", "Calibration Test Points", "Dedicated PCB Test Loops [MUST]", "Vout, bulk DC, and aux rails", "Scope & Multimeter Inspection")
     ]
 
     req_protection = [
-        ("PR-01", "Hardware Over-Voltage (OVP)", "Clamps at Vset + 1.5V (< 5µs response) [MUST]", "Independent comparator crowbar", "OVP Trip Verification"),
-        ("PR-02", "Hardware Constant-Current (CC)", "Clamps at Iset ± 20mA (< 5µs reaction) [MUST]", "Analog pull-down on COMP pin", "Direct Dead Short Test"),
-        ("PR-03", "Over-Temperature (OTP)", "Shuts down at Tpcb > 90°C (10°C hyst) [MUST]", "NTC thermistor monitoring", "Thermal Chamber Ramp"),
-        ("PR-04", "Safety Compliance Standard", "IEC 62368-1 Reinforced Isolation [MUST]", "SELV touch-safe (< 60V DC)", "Certified Safety Lab"),
-        ("PR-05", "Creepage & Clearance", "Creepage >= 6.4mm; Clearance >= 5.0mm [MUST]", "Primary-Secondary milled slot", "PCB Mechanical Caliper"),
-        ("PR-06", "Conducted & Radiated EMC", "CISPR 32 / EN 55032 Class B [MUST]", "150 kHz – 1 GHz emission limits", "Semi-Anechoic Chamber"),
-        ("PR-07", "Operating Ambient Temp", "-20°C to +50°C Full Load [MUST]", "Natural convection in chassis", "Environmental Chamber"),
-        ("PR-08", "Mean Time Between Failures", "MTBF > 50,000 Hours @ 40°C [SHOULD]", "Telcordia SR-332 Parts Count", "Reliability Calculation")
+        ("PR-01", "Input Fuse Protection", "2.0A Time-Lag Ceramic Fuse [MUST]", "AC mains short-circuit", "Overcurrent Trip Test"),
+        ("PR-02", "Input Inrush Current Limit", "10Ω NTC Thermistor (< 25A peak) [MUST]", "Cold start at 265V AC", "Scope Current Probe"),
+        ("PR-03", "AC Line Surge Protection", "300V RMS MOV (4.5kA rating) [MUST]", "Line transients per IEC 61000-4-5", "Surge Generator Verification"),
+        ("PR-04", "Built-in Controller OCP", "LM5176 cycle-by-cycle CSP/CSN clamp [MUST]", "Load current > 3.5A limit", "Electronic Load Step"),
+        ("PR-05", "Over-Temperature (OTP)", "LM5176 internal shutdown (165°C) [MUST]", "Severe thermal rise", "Thermal Chamber Sweep"),
+        ("PR-06", "Safety Compliance Standard", "IEC 62368-1 Reinforced Isolation [MUST]", "SELV touch-safe (< 60V DC)", "Certified Safety Laboratory"),
+        ("PR-07", "Creepage & Clearance", "Creepage ≥ 6.4mm; Clearance ≥ 5.0mm [MUST]", "Primary-Secondary milled slot", "PCB Caliper & Gerber Check"),
+        ("PR-08", "Conducted & Radiated EMC", "CISPR 32 / EN 55032 Class B [MUST]", "150 kHz – 1 GHz emission limits", "Semi-Anechoic Chamber"),
+        ("PR-09", "Operating Ambient Temp", "–20°C to +50°C Full Load [MUST]", "Natural convection in chassis", "Environmental Chamber")
     ]
 
     req_control = [
-        ("CT-01", "DAC Voltage Steering Network", "Resistor summing into LM5176 FB node [MUST]", "R_top=49.9kΩ, R_DAC=11kΩ, R_bot=3.65kΩ", "Line/Load Voltage Sweep"),
+        ("CT-01", "DAC Voltage Steering Network", "Resistor summing into LM5176 FB node [MUST]", "R_top=49.9kΩ, R_DAC=11kΩ, R_bot=3.65kΩ", "Precision Line/Load Sweep"),
         ("CT-02", "Voltage Tuning Resolution", "10.0 mV step resolution (12-bit DAC) [MUST]", "Continuous 5.0V to 20.0V DC range", "DAC Linearity Calibration"),
-        ("CT-03", "Hardware Current Sense Shunt", "10 mΩ Metal Element Shunt, 3W, 0.1% [MUST]", "4-wire Kelvin sensing layout", "Precision Shunt DMM Check"),
-        ("CT-04", "Current Sense Amplification", "INA240A2 Precision Amp (50 V/V gain) [MUST]", "Enhanced PWM input spike rejection", "Shunt Amp Linearity Sweep"),
-        ("CT-05", "Fast CC Hardware Clamping", "< 5.0 µs autonomous clamping on COMP pin [MUST]", "TLV3501 4.5ns analog comparator override", "High-Speed Current Probe"),
-        ("CT-06", "Hardware Crowbar Disconnect", "High-side P-MOSFET disconnect on OVP/OTP [MUST]", "Clamps at Vset + 1.5V in < 5.0 µs", "OVP Transient Injection Test"),
-        ("CT-07", "Auxiliary Bias Regulation", "+14V Flyback VCC, +12V gate, +5V, +3.3V rails [MUST]", "Dedicated LDOs & buck off +24V bus", "Multimeter & Rail Scope")
+        ("CT-03", "Current Sense Resistor", "10 mΩ Metal Element Shunt, 3W, 0.1% [MUST]", "Connected across LM5176 CSP/CSN", "Precision Milliohm Meter"),
+        ("CT-04", "MCU Supervisory Shutdown", "GPIO pulling LM5176 ENABLE pin low [MUST]", "Software fault shutdown command", "Scope Response Timing"),
+        ("CT-05", "Auxiliary Bias Regulation", "+14V Flyback VCC, +12V gate, +5V, +3.3V rails [MUST]", "Dedicated LDOs & buck off +24V", "Multimeter & Rail Scope")
     ]
 
     if p_sys1 is not None:
         p_sys1.text = (
             "System 1 represents the physical Hardware Power Supply Module, comprising the universal AC input, EMI filter, "
-            "isolated Quasi-Resonant Flyback stage, 4-switch synchronous Buck-Boost post-regulator, analog protection circuits, "
+            "isolated Quasi-Resonant Flyback stage, 4-switch synchronous Buck-Boost post-regulator, built-in controller hardware protection, "
             "and microcontroller sensing core. The detailed engineering specifications are defined in the tables below:"
         )
         cursor = p_sys1._p
@@ -1053,7 +1047,7 @@ def generate_prd_docx():
         ("2", "4-Switch Synchronous Bridge", "TI LM5176 modulates four 40V MOSFETs in H-bridge around a 10µH flat-wire power inductor."),
         ("3", "Seamless Mode Transitions", "Operates in pure Buck mode for 5V–18V outputs (>96% eff) and 4-switch Buck-Boost mode near 20V (>95% eff)."),
         ("4", "Precision DAC Steering", "Resistor summing network (R_top=49.9kΩ, R_bot=3.65kΩ, R_DAC=11kΩ) steers output from 5V to 20V in 10mV steps."),
-        ("5", "Sub-5µs Hardware Protection", "10mΩ shunt, INA240A2 (50V/V), and TLV3501 (4.5ns comparator) pull COMP pin low in < 5µs on overcurrent.")
+        ("5", "Cycle-by-Cycle Current Limit", "LM5176 senses current via 10mΩ shunt across CSP/CSN, natively clamping peak inductor current on every 300 kHz cycle.")
     ]
 
     # Section 4 Figure 4
@@ -1218,8 +1212,8 @@ def generate_prd_docx():
         ("Q6: How does the DAC steer the output voltage without destabilizing the loop?",
          "The LM5176 regulates by maintaining its feedback pin (FB) at an internal 1.20V reference. Instead of modifying the internal reference, we use a resistive summing junction: R_top (49.9kΩ) connects to V_OUT, R_bot (3.65kΩ) connects to ground, and R_DAC (11.0kΩ) connects to our 12-bit DAC. By injecting current into the FB node from the DAC, when V_DAC = 3.3V, V_OUT is steered to 5.0V. When V_DAC = 0V, V_OUT is steered to 20.0V. Because the loop's AC Type-II compensation network is connected between COMP and ground, DC setpoint steering has zero impact on high-frequency phase margin and stability."),
 
-        ("Q7: Explain how the hardware protects against a short circuit in under 5 microseconds.",
-         "Software is too slow to protect switching MOSFETs during a dead short. We implemented an autonomous analog hardware clamp: a 10mΩ metal shunt resistor feeds an INA240A2 current sense amplifier (gain = 50V/V). The amplified current signal feeds an ultra-fast TLV3501 analog comparator with 4.5ns response time. If load current exceeds the threshold (e.g. 3.2A), the comparator output immediately drives an NPN transistor that pulls down the LM5176's COMP pin to ground. This forces the PWM duty cycle to zero in under 5 microseconds, safely clamping the current before any software can even register an interrupt."),
+        ("Q7: How does the power supply protect against overcurrent and short circuits?",
+         "We use standard, proven industry protections built directly into the hardware controllers: 1) LM5176 Built-in Cycle-by-Cycle Current Limiting: The LM5176 continuously monitors inductor/output current through a 10mΩ precision sense resistor connected to its dedicated CSP and CSN pins. If current exceeds the programmed threshold, the controller immediately truncates the current PWM pulse, capping peak current on every 300 kHz switching cycle. 2) MCU Supervisory Disable: The MCU continuously reads output current via the INA226 power monitor over I2C. If a sustained overload or short-circuit is detected, the MCU pulls the LM5176 ENABLE pin low to safely disable power delivery. 3) Primary AC Fuse: A 2.0A ceramic time-lag fuse on the AC mains provides fail-safe isolation against internal catastrophic short circuits."),
 
         ("Q8: How is safety galvanic isolation guaranteed on the PCB?",
          "We adhere strictly to IEC 62368-1 for reinforced insulation. Primary hot circuits and secondary touch-safe circuits are separated by a minimum physical surface creepage distance of 6.4mm. Across the isolation barrier, we route a 2.0mm wide milled air slot through the PCB substrate directly beneath the PQ26/20 transformer and optocouplers. The transformer secondary uses triple-insulated Furukawa TEX-E wire. The complete assembly is verified on the bench with a 3000V AC RMS Hipot dielectric withstand test for 60 seconds with zero breakdown."),

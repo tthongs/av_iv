@@ -19,7 +19,7 @@
 
 | Date | Revision No. | Description | Prepared/Revised By | Reviewed By | Approved By |
 | :--- | :---: | :--- | :--- | :--- | :--- |
-| **15-Oct-2026** | **A1_001** | Standardized Release of PRD aligned with VVDN EVSE template & Power Electronics Engineer Trainee scope | Power Electronics Trainee (GET) | Senior Hardware Architect | BU SME (Power Electronics) |
+| **15-Oct-2026** | **A1_001** | Standardized Release of PRD aligned with VVDN EVSE template, simplified protection architecture, and Power Electronics Trainee scope | Power Electronics Trainee (GET) | Senior Hardware Architect | BU SME (Power Electronics) |
 | **06-Oct-2026** | **A0_01** | Initial architecture, component selection & topology feasibility draft | Power Electronics Trainee (GET) | Senior Hardware Architect | BU SME (Power Electronics) |
 
 ---
@@ -32,7 +32,7 @@
 | **Designation** | Director of Hardware Engineering | Program Director |
 | **Email ID** | m.chen@client-ate.com | s.jenkins@client-ate.com |
 | **Address** | ATE Systems Inc., San Jose, CA | ATE Systems Inc., San Jose, CA |
-| **Comments** | Approved for modular test rack and bench integration. | Product requirements and delivery milestones accepted. |
+| **Comments** | Approved for modular test rack and benchtop integration. | Product requirements and delivery milestones accepted. |
 | **Signature & Date** | *Signed: 15-Oct-2026* | *Signed: 15-Oct-2026* |
 
 ---
@@ -45,7 +45,7 @@
 | **Designation** | GET - Embedded Hardware Engineering | Senior Hardware Engineer (Power BU) |
 | **Email ID** | trainee.power@vvdntech.in | lead.power@vvdntech.in |
 | **Address** | VVDN Technologies, Global Innovation Park, Gurugram | VVDN Technologies, Global Innovation Park, Gurugram |
-| **Comments** | 4-Stage architecture, safety boundaries, and protection loops designed to spec. | High-level requirements, BOM baseline, and verification gates signed off. |
+| **Comments** | 4-Stage conversion architecture, safety boundaries, and standard IC protections designed to spec. | High-level requirements, BOM baseline, and verification gates signed off. |
 | **Signature & Date** | *Signed: 15-Oct-2026* | *Signed: 15-Oct-2026* |
 
 ---
@@ -54,14 +54,14 @@
 
 | Level | Reviewer Role | Name | Comments | Signature & Date |
 | :---: | :--- | :--- | :--- | :--- |
-| **Level 1** | **BU SME (Power Electronics)** | Karpagamoorthy R / Vignesh Anandhan | Verified against IEC 62368-1 reinforced isolation, CISPR 32 Class B EMC, and 4-switch Buck-Boost dynamic stability. | *Signed: 15-Oct-2026* |
+| **Level 1** | **BU SME (Power Electronics)** | Karpagamoorthy R / Vignesh Anandhan | Verified against IEC 62368-1 reinforced isolation, CISPR 32 Class B EMC, and 4-switch Buck-Boost closed-loop stability. | *Signed: 15-Oct-2026* |
 
 ---
 
 ## 1. Introduction
 
 ### 1.1 Purpose
-This document describes the system-level requirements for the design and development of the **Smart Programmable Voltage Supply Module** (`VVDN_SPPS_2026`) for internal VVDN and client test bench applications. The document serves as the authoritative technical baseline for subsequent engineering design documents, circuit schematics, 4-layer PCB layout rules, Bill of Materials (BOM), and laboratory validation. The device's functional and technical requirements must meet all parameters specified herein. These requirements have been derived from the client specifications and subsequent engineering design discussions.
+This document describes the system-level requirements for the design and development of the **Smart Programmable Voltage Supply Module** (`VVDN_SPPS_2026`) for internal VVDN and client benchtop test applications. The document serves as the authoritative technical baseline for subsequent engineering design documents, circuit schematics, 4-layer PCB layout rules, Bill of Materials (BOM), and laboratory validation. The device's functional and technical requirements must meet all parameters specified herein. These requirements have been derived from client specifications and subsequent engineering design discussions.
 
 This document captures all **Electrical**, **Mechanical**, and **Hardware** requirements to be delivered for the complete 4-Stage Power Supply PCBA module.
 
@@ -109,19 +109,17 @@ The technical acronyms and terms utilized in this document are defined in Table 
 | **SELV** | Safety Extra-Low Voltage (< 60 V DC limit per IEC 62368-1) |
 | **QR** | Quasi-Resonant Valley Switching (Primary Flyback Mode) |
 | **PFC** | Power Factor Correction |
-| **CC** | Constant Current Mode (Autonomous Hardware Current Limit) |
+| **CC** | Constant Current Mode (Regulated Current Limit) |
 | **CV** | Constant Voltage Mode (Precision Closed-Loop Voltage Regulation) |
 | **DAC** | Digital-to-Analog Converter (12-bit Voltage Setpoint Injection) |
 | **ADC** | Analog-to-Digital Converter (Microcontroller Telemetry Sampling) |
+| **OCP** | Over-Current Protection (Built-in Controller Hardware Current Limit) |
 | **OVP** | Over-Voltage Protection |
-| **OCP** | Over-Current Protection |
 | **OTP** | Over-Temperature Protection |
-| **SCP** | Short-Circuit Protection |
+| **UVLO** | Under-Voltage Lockout |
 | **DMM** | Digital Multimeter |
 | **CT** | Current Transformer (AC Primary Current Sensing) |
 | **I2C** | Inter-Integrated Circuit Serial Communication Bus |
-| **SPI** | Serial Peripheral Interface Bus |
-| **UART** | Universal Asynchronous Receiver-Transmitter |
 | **PWM** | Pulse Width Modulation |
 | **EMI** | Electromagnetic Interference |
 | **EMC** | Electromagnetic Compatibility |
@@ -129,7 +127,6 @@ The technical acronyms and terms utilized in this document are defined in Table 
 | **MOV** | Metal Oxide Varistor (Surge & Transient Voltage Clamp) |
 | **ESR** | Equivalent Series Resistance |
 | **DVT** | Design Verification Testing |
-| **ATE** | Automated Test Equipment |
 | **DUT** | Device Under Test |
 
 ### 1.5 References
@@ -152,27 +149,27 @@ The industry standards, specifications, and reference documents applicable to th
 ## 2. Product Overview
 
 ### 2.1 Product - Business Perspective
-The **Smart Programmable Voltage Supply Module** is an intelligent, high-density AC-to-DC power converter engineered for precision benchtop testing, automated test equipment (ATE) racks, and industrial prototyping. The module connects directly to universal grid power (**85 V to 265 V AC RMS**, 47 Hz to 63 Hz) and delivers a continuously adjustable, low-noise DC output from **5.0 V to 20.0 V DC** at currents up to **3.0 A** (maximum continuous power rating of **60 W**).
+The **Smart Programmable Voltage Supply Module** is an intelligent, high-density benchtop and automated test equipment (ATE) power supply. It delivers a tightly regulated, programmable DC voltage output from **5.0 V to 20.0 V** at currents up to **3.0 A** (maximum continuous power rating of **60 W**) from universal grid AC mains input (**85 V to 265 V AC RMS**, 47 Hz to 63 Hz).
 
-Traditional benchtop power supplies rely on bulky, heavy 50 Hz iron-core transformers and dissipative linear regulators, leading to high thermal losses, large enclosures, and lack of digital telemetry. This product eliminates those drawbacks by combining universal AC Quasi-Resonant (QR) Flyback isolation, an ultra-efficient 4-switch synchronous Buck-Boost post-regulator, dual-domain real-time efficiency monitoring, and autonomous sub-5µs analog hardware protection into a single, compact, high-efficiency PCBA module.
+Traditional benchtop power supplies rely on bulky, heavy 50 Hz iron-core transformers and dissipative linear regulators, leading to high thermal losses, large enclosures, and lack of digital telemetry. This product eliminates those drawbacks by combining universal AC Quasi-Resonant (QR) Flyback isolation, an ultra-efficient 4-switch synchronous Buck-Boost post-regulator, real-time dual-domain power telemetry, and standard built-in controller hardware protection into a single, compact, high-efficiency PCBA module.
 
 ### 2.2 Product – Technical Perspective
 The Smart Programmable Power Supply operates through a sequential 4-stage AC-to-DC conversion and regulation chain. The high-voltage primary stage connects directly to raw AC mains, suppresses transients and conducted emissions, rectifies the input into a high-voltage DC bus (+120 V to +375 V DC), and steps it down across a reinforced 3000V RMS galvanic isolation barrier into a regulated +24.0V DC intermediate rail (72W). The secondary stage utilizes a 4-switch synchronous Buck-Boost post-regulator to deliver the user-commanded 5.0V to 20.0V DC output at up to 3.0A.
 
-An onboard mixed-signal microcontroller (STM32G474) monitors primary AC input power and secondary DC load power, computes real-time conversion efficiency at 10 Hz, drives the 1.3-inch OLED local dashboard, and controls a precision 12-bit DAC voltage steering network. Crucially, high-speed circuit protection (constant-current clamping and over-voltage crowbar) is implemented entirely in autonomous analog hardware with sub-5µs reaction time, operating independently of microcontroller firmware to safeguard connected prototype circuits against dead short-circuits.
+An onboard mixed-signal microcontroller (STM32G474) monitors primary AC input power and secondary DC load power, computes real-time conversion efficiency at 10 Hz, drives the 1.3-inch OLED local dashboard, and controls a precision 12-bit DAC voltage steering network. Circuit protection relies on robust, standard, industry-proven hardware protections: primary AC fuse, inrush NTC, surge MOV, primary cycle-by-cycle Flyback current limiting, and secondary LM5176 built-in cycle-by-cycle overcurrent protection with thermal shutdown.
 
-In simple terms, the power conversion stages provide efficient, touch-safe energy transfer, while the analog protection loops and MCU provide autonomous safety, precision regulation, and live telemetry.
+In simple terms, the power conversion stages provide efficient, touch-safe energy transfer, while the built-in controller protections and MCU provide safety, precision regulation, and live telemetry.
 
 The primary power supply functionality includes:
 * **Universal AC Grid Operation**: Accepts 85 V to 265 V AC RMS (47 Hz to 63 Hz) without manual line selector switches.
-* **Reinforced Galvanic Isolation**: 3000 V AC RMS (1 minute) isolation barrier complying with IEC 62368-1, ensuring output terminals remain touch-safe (SELV < 60 V DC).
-* **Intermediate Regulated Rail**: Quasi-Resonant Flyback converter generates a rock-solid +24.0 V DC bus rated for 72 W continuous with > 90% peak efficiency.
+* **Reinforced Galvanic Isolation**: Certified 3000 V AC RMS (1 minute) isolation barrier complying with IEC 62368-1, ensuring output terminals remain touch-safe (SELV < 60 V DC).
+* **Intermediate Regulated Rail**: Quasi-Resonant Flyback converter generates a stable +24.0 V DC bus rated for 72 W continuous with > 90% peak efficiency.
 * **Wide Programmable DC Output**: 4-switch synchronous Buck-Boost post-regulator steps voltage up or down to provide 5.0 V to 20.0 V DC at up to 3.0 A continuous (60 W continuous output power).
 * **High-Resolution DAC Voltage Steering**: 12-bit DAC network injects steering current into the regulator feedback node, achieving 10 mV monotonic setpoint resolution.
-* **Autonomous Sub-5µs Hardware CC Clamping**: Precision 10 mΩ current shunt, high-bandwidth amplifier (50 V/V), and ultrafast analog comparator pull down the regulator COMP pin in < 5 µs during an overcurrent event without firmware latency.
-* **Hardware Over-Voltage & Over-Temperature Protection**: Independent analog comparator crowbar clamps at $V_{\text{set}} + 1.5\,\text{V}$, and an NTC sensor trips system shutdown if PCB temperature exceeds 90°C.
+* **Built-in Cycle-by-Cycle Hardware Current Limiting**: LM5176 monitors output current through a dedicated $10\,\text{m}\Omega$ shunt across its CSP/CSN pins, natively limiting peak inductor current on every switching cycle without external analog complexity.
+* **Built-in Controller Protections**: Integrated input fuse (2A), NTC inrush limiter (10Ω), MOV transient clamp (300V), LM5176 internal thermal shutdown (165°C), and Under-Voltage Lockout (UVLO).
 * **Real-Time Dual-Domain Telemetry**: Isolated delta-sigma modulator and current transformer measure AC input power, while a 16-bit digital monitor measures DC load power, allowing the MCU to compute live conversion efficiency ($\eta = P_{\text{dc}} / P_{\text{ac}} \times 100\%$) at 10 Hz.
-* **Interactive Local Dashboard**: 1.3-inch graphical OLED display presents live voltage, current, power, and efficiency meters; dual incremental rotary encoders allow seamless manual tuning; front-panel LEDs indicate CV, CC, and Fault states.
+* **Interactive Local Dashboard**: 1.3-inch graphical OLED display presents live voltage, current, power, and efficiency meters; dual incremental rotary encoders allow seamless manual tuning; front-panel LEDs indicate CV, Current Limit, and Fault states.
 * **Low Standby Power**: Idle power consumption remains strictly below 150 mW when the output stage is disabled.
 
 ---
@@ -195,12 +192,12 @@ flowchart LR
 
     subgraph COLD_DOMAIN ["SECONDARY COLD DOMAIN (Touch-Safe SELV)"]
         S3["3. CONVERTER DC-DC<br/>• QR Flyback (TI UCC28740)<br/>• PQ26/20 Core (Lp = 220µH)<br/>• ⚡ 3000V RMS Safety Isolation<br/>• Sync Rectifier (BSC052N06NS)<br/>• +24.0V DC Intermediate Rail (72W)"]:::isoStyle
-        S4["4. FINAL STAGE<br/>• 4-Switch Buck-Boost (TI LM5176)<br/>• 4x 40V Low-Rds MOSFETs<br/>• Analog DAC Steering (10mV)<br/>• Fast < 5µs CC Hardware Clamp<br/>• 5.0V - 20.0V DC / 3.0A (60W)"]:::bbStyle
+        S4["4. FINAL STAGE<br/>• 4-Switch Buck-Boost (TI LM5176)<br/>• 4x 40V Low-Rds MOSFETs<br/>• Analog DAC Steering (10mV)<br/>• Built-in CSP/CSN Current Limit<br/>• 5.0V - 20.0V DC / 3.0A (60W)"]:::bbStyle
         S3 -->|"+24.0V DC Rail"| S4
     end
 
     subgraph LOAD_DOMAIN ["APPLICATION"]
-        S5["5. TARGET DEVICE (DUT)<br/>• 4mm Gold Binding Posts<br/>• Clean DC: Ripple < 25mV pk-pk<br/>• Overload Protected"]:::dutStyle
+        S5["5. TARGET DEVICE (DUT)<br/>• 4mm Gold Binding Posts<br/>• Clean DC: Ripple < 25mV pk-pk<br/>• Built-in OCP Protected"]:::dutStyle
     end
 
     S2 ==>|"⚡ 3000V Isolation Barrier"| S3
@@ -222,69 +219,69 @@ The system-level design inputs and specifications are summarized in Table 3 belo
 | **6** | **Output Voltage Ripple** | < 25 mV pk-pk under full 3.0 A load (measured across 20 MHz bandwidth) |
 | **7** | **End-to-End System Efficiency**| > 85.0% @ 230 V AC Full Load (Flyback > 90%, Buck-Boost > 95%) |
 | **8** | **Galvanic Safety Isolation** | 3,000 V AC RMS (1 minute withstand) meeting IEC 62368-1 SELV |
-| **9** | **Hardware Protection Response**| Autonomous analog CC clamping reaction in < 5.0 µs; Crowbar OVP in < 5.0 µs |
+| **9** | **Overcurrent Protection** | LM5176 built-in cycle-by-cycle hardware peak current limit via CSP/CSN |
 | **10** | **PCBA Operating Temperature** | –20°C to +50°C Full Load (natural convection in chassis) |
-| **11** | **User Interface & Control** | 1.3" I2C OLED display, dual rotary encoders, CV/CC/Fault LEDs, tactile Enable switch |
+| **11** | **User Interface & Control** | 1.3" I2C OLED display, dual rotary encoders, Status LEDs, tactile Enable switch |
 | **12** | **Conducted & Radiated EMC** | Compliant with CISPR 32 / EN 55032 Class B limits |
 
 ---
 
 ### 2.3 Use Cases
-The Smart Programmable Power Supply module operates across four well-defined operational modes and handles twelve primary hardware use cases:
+The Smart Programmable Power Supply module operates across simple, standard operational modes and handles primary hardware use cases:
 
-1. **Constant Voltage (CV) Regulation Mode**: The primary operating mode when load current remains below the programmed limit ($I_{\text{load}} < I_{\text{set}}$). Output voltage is regulated within $\pm 0.2\%$ with $< 150\,\mu\text{s}$ transient recovery.
-2. **Constant Current (CC) Clamping Mode**: Automatically engages when the load attempts to exceed $I_{\text{set}}$. The analog protection loop clamps the LM5176 `COMP` pin in $< 5\,\mu\text{s}$, smoothly folding back output voltage to maintain current exactly at $I_{\text{set}}$.
-3. **Hardware Fault Protection Mode**: Activated upon catastrophic events such as over-voltage ($V_{\text{set}} + 1.5\,\text{V}$) or over-temperature ($T_{\text{pcb}} > 90^\circ\text{C}$). The hardware crowbar immediately terminates switching and latches the output off.
+1. **Constant Voltage (CV) Regulation Mode**: The default operating mode when load current remains below the current limit ($I_{\text{load}} < I_{\text{limit}}$). Output voltage is regulated within $\pm 0.2\%$ with $< 150\,\mu\text{s}$ transient recovery.
+2. **Current-Limited (OCP) Mode**: If load current reaches the maximum rating, the LM5176 controller's built-in cycle-by-cycle current limit restricts peak inductor current, preventing overstress.
+3. **MCU Supervisory Protection**: If an extended overload or over-temperature is detected, the MCU safely disables the LM5176 switching stage via its `ENABLE` pin.
 4. **Standby / Idle Mode**: AC mains is energized, the Flyback generates the +24V intermediate rail, but post-regulator output drive is electronically disabled. Power consumption remains $< 150\,\text{mW}$.
 
 #### Table 4: Product Usecase
 | S.N. | Usecase |
 | :---: | :--- |
-| **1** | Universal AC mains soft startup and inrush current suppression |
+| **1** | Universal AC mains soft startup and inrush current suppression (< 25 A peak) |
 | **2** | AC full-wave rectification and high-voltage DC bulk energy holdup (> 10 ms) |
 | **3** | Galvanically isolated Quasi-Resonant Flyback conversion (+24.0 V DC, 72 W) |
 | **4** | Synchronous 4-switch Buck-Boost step-down/step-up post-regulation (5 V – 20 V DC) |
 | **5** | High-precision 10 mV digital voltage steering via 12-bit DAC summing network |
-| **6** | Autonomous sub-5 µs analog hardware Constant-Current (CC) clamping |
-| **7** | Fast analog Over-Voltage Protection (OVP) crowbar disconnect (< 5 µs) |
-| **8** | Thermal monitoring and automatic Over-Temperature Protection (OTP at 90°C) |
+| **6** | LM5176 built-in cycle-by-cycle overcurrent protection via CSP/CSN pins |
+| **7** | Primary Flyback cycle-by-cycle current limit via UCC28740 CS resistor |
+| **8** | Controller internal thermal shutdown and board temperature monitoring |
 | **9** | Primary AC input power measurement via isolated delta-sigma amplifier and CT |
 | **10** | Secondary DC load voltage, current, and power monitoring via 16-bit I2C monitor |
 | **11** | Real-time conversion efficiency computation and 1.3" OLED dashboard display update |
-| **12** | Local front-panel rotary encoder tuning, tactile output enable, and mode LED indication |
+| **12** | Local front-panel rotary encoder tuning, tactile output enable, and status LED indication |
 
 ---
 
 ### 2.4 Product Interfaces
 
 #### 2.4.1 Hardware Interfaces
-The physical hardware interfaces provide rugged, low-impedance electrical connections between the supply module, external grid, target device under test, and operator:
-* **AC Mains Inlet**: Standard IEC 60320-C14 three-prong grounded receptacle with an integrated 5x20 mm ceramic fuse drawer and power rocker switch.
-* **DC Output Terminals**: Pair of heavy-duty, gold-plated 4 mm binding posts (Red = Positive, Black = Negative) spaced at standard 19.05 mm (0.75 in) pitch to support banana plugs, spade lugs, or bare wire up to 15 A.
-* **Rotary Encoders & Push-buttons**: Dual quadrature incremental rotary encoders with integrated momentary push-switches for coarse and fine adjustment of voltage setpoint and current limit.
-* **1.3" OLED Display**: 128x64 dot-matrix monochrome display module interfaced via I2C for real-time electrical metering and annunciators.
-* **Front-Panel Status LEDs**: Tri-color or individual LED indicators showing operational state: Green for Constant Voltage (CV), Amber for Constant Current (CC), and Red for Fault/Trip.
-* **Tactile Output Enable Switch**: Illuminated pushbutton pulling the LM5176 controller `ENABLE` pin high/low to safely energize or de-energize the output terminals.
-* **Programming & Debug Header**: Standard 10-pin 0.05-inch SWD (Serial Wire Debug) header for programming and testing the STM32G474 microcontroller.
-* **Diagnostic Test Points**: Dedicated, labeled PCB test loops for verifying AC input, bulk DC bus, switching FET gate drives, +24V intermediate rail, DAC steering node, and analog current sense signals.
+The physical hardware interfaces provide clean, standard electrical connections between the supply module, external grid, target device under test, and operator:
+* **AC Mains Inlet**: Standard IEC 60320-C14 three-prong grounded receptacle with an integrated 5x20 mm ceramic fuse drawer (2A) and power switch.
+* **DC Output Terminals**: Pair of heavy-duty, gold-plated 4 mm binding posts (Red = Positive, Black = Negative) spaced at standard 19.05 mm (0.75 in) pitch.
+* **Rotary Encoders & Push-buttons**: Dual quadrature incremental rotary encoders with integrated momentary push-switches for coarse and fine voltage setpoint adjustment.
+* **1.3" OLED Display**: 128x64 dot-matrix monochrome display module interfaced via I2C for real-time electrical metering and status annunciators.
+* **Front-Panel Status LEDs**: LED indicators showing operational state: Green for Power/Normal Output, Amber for Current Limit, and Red for Fault/Shutdown.
+* **Tactile Output Enable Switch**: Illuminated pushbutton pulling the LM5176 controller `ENABLE` pin high/low to safely energize or de-energize output power.
+* **Programming & Debug Header**: Standard 10-pin SWD (Serial Wire Debug) header for programming the STM32G474 microcontroller.
+* **Diagnostic Test Points**: Dedicated PCB test loops for verifying AC input, bulk DC bus, +24V intermediate rail, DAC steering node, and output voltage.
 
 #### Table 5: Hardware Interface
 | Sl. No | Entity 1 | Entity 2 | Interface | Usage Description |
 | :---: | :--- | :--- | :--- | :--- |
 | **1** | AC Grid Mains | SPPS Board | IEC 320-C14 Inlet | Universal 85V–265V AC RMS, 50/60Hz grounded power input with 2A fuse |
 | **2** | SPPS Board | DUT / Load | 4mm Binding Posts | Regulated 5.0V–20.0V DC / 3.0A power delivery to device under test |
-| **3** | SPPS Board | Local Operator | Dual Rotary Encoders | Quadrature rotary controls for setting voltage (10mV) and current limit (10mA) |
+| **3** | SPPS Board | Local Operator | Dual Rotary Encoders | Quadrature rotary controls for setting voltage (10mV resolution) |
 | **4** | SPPS Board | Local Operator | 1.3" OLED Display | Real-time graphical dashboard for V, I, P, efficiency (η), and operating mode |
 | **5** | SPPS Board | Local Operator | Output Enable Button | Tactile push-button for safe electronic enable/disable of output power |
-| **6** | SPPS Board | Local Operator | Status Mode LEDs | Visual indication of CV (Green), CC (Amber), and System Fault (Red) states |
+| **6** | SPPS Board | Local Operator | Status Mode LEDs | Visual indication of Output Active (Green), Limit (Amber), and Fault (Red) states |
 | **7** | SPPS Board | Debug Programmer | SWD Header | Microcontroller firmware flashing, register inspection, and debug tracing |
-| **8** | SPPS Board | Lab Oscilloscope | PCB Test Points | Diagnostic test loops for measuring switching waveforms, ripple, and noise |
+| **8** | SPPS Board | Lab Oscilloscope | PCB Test Points | Diagnostic test loops for measuring intermediate rail, ripple, and noise |
 | **9** | Primary Side | Secondary Side | 6.4mm Milled Slot | Physical 2.0mm air slot beneath transformer enforcing IEC 62368-1 isolation |
 
 ---
 
 #### 2.4.2 Software Interfaces
-The onboard mixed-signal microcontroller (STM32G474) runs bare-metal control and telemetry firmware that coordinates sensing, DAC setpoint generation, and local display updates. The MCU interfaces with hardware peripherals and sensors using standard serial buses and analog channels as defined in Table 6 below:
+The onboard mixed-signal microcontroller (STM32G474) runs bare-metal telemetry and control firmware that coordinates sensing, DAC setpoint generation, and local display updates as defined in Table 6 below:
 
 #### Table 6: Software Interfaces
 | S. No | Entity 1 | Entity 2 | Interface | Interface Protocol / Mode | Usage Description |
@@ -293,12 +290,11 @@ The onboard mixed-signal microcontroller (STM32G474) runs bare-metal control and
 | **2** | STM32G474 MCU | 1.3" OLED (SSD1306) | Display Dashboard | I2C (Fast-Mode 400 kHz) | Updates numerical readouts, mode text, and efficiency bar graph at 10 Hz |
 | **3** | STM32G474 MCU | AMC1311 Iso-Amp | Primary AC Voltage | Analog ADC Channel | Samples galvanically isolated AC mains voltage waveform for Pac calculation |
 | **4** | STM32G474 MCU | Current Transformer| Primary AC Current | Analog ADC Channel | Samples burden resistor voltage from 1000:1 CT for AC mains current sensing |
-| **5** | STM32G474 MCU | LM5176 FB Node | Voltage Steering | Internal 12-Bit DAC | Injects steering current into summing node to set Vout between 5.0V and 20.0V |
-| **6** | STM32G474 MCU | TLV3501 Comparator| Current Limit Ref | Internal 12-Bit DAC | Sets analog reference voltage for autonomous hardware CC comparator |
-| **7** | STM32G474 MCU | Rotary Encoders | User Input | Timer Encoder Interface | Hardware quadrature decoding of dual rotary dials with debounced push-switches |
-| **8** | STM32G474 MCU | Mode LEDs | Status Annunciation | GPIO Digital Outputs | Drives Green (CV), Amber (CC), and Red (Fault) status indicator LEDs |
-| **9** | STM32G474 MCU | LM5176 Enable Pin | Output Control | GPIO Digital Output | Controls post-regulator run state during standby, soft-start, and fault trip |
-| **10** | STM32G474 MCU | Host PC / ATE | Calibration & SCPI | UART / Virtual COM (115.2 kbps)| Optional serial channel for automated calibration and factory test commands |
+| **5** | STM32G474 MCU | LM5176 FB Node | Voltage Steering | Internal 12-Bit DAC | Injects current into summing node to set Vout between 5.0V and 20.0V |
+| **6** | STM32G474 MCU | Rotary Encoders | User Input | Timer Encoder Interface | Hardware quadrature decoding of rotary dials with debounced push-switches |
+| **7** | STM32G474 MCU | Status LEDs | Status Annunciation | GPIO Digital Outputs | Drives Green (Active), Amber (Limit), and Red (Fault) status indicator LEDs |
+| **8** | STM32G474 MCU | LM5176 Enable Pin | Output Control | GPIO Digital Output | Controls post-regulator run state during standby, soft-start, and fault disable |
+| **9** | STM32G474 MCU | Host PC / ATE | Calibration & SCPI | UART / VCP (115.2 kbps)| Optional serial channel for automated calibration and factory test commands |
 
 ---
 
@@ -323,7 +319,7 @@ The engineering disciplines and development domains involved in the SPPS module 
 ## 4. Product Requirements
 
 ### 4.1 System Requirements
-The engineering requirements and verification criteria for the Smart Programmable Voltage Supply Module are organized into five structured requirement sheets:
+The engineering requirements and verification criteria for the Smart Programmable Voltage Supply Module are organized into five structured requirement tables:
 
 #### Table 4.1: AC-DC Isolated Flyback Power Stage Engineering Requirements
 | Req ID | Parameter / Feature | Specification / Target | Condition | Verification Method |
@@ -345,13 +341,12 @@ The engineering requirements and verification criteria for the Smart Programmabl
 | **BB-01** | Output Voltage Range | 5.0 V – 20.0 V DC Programmable **[MUST]** | Continuous linear adjustment | Precision DMM Sweep |
 | **BB-02** | Continuous Output Current | 0.0 A – 3.0 A DC Continuous **[MUST]** | Across full 5V–20V voltage span | Electronic Load 3A Soak |
 | **BB-03** | Maximum Output Power | 60.0 W Continuous Output **[MUST]** | $V_{\text{out}} = 20.0\,\text{V}, I_{\text{out}} = 3.0\,\text{A}$ | Thermal Run 60W (2 hrs) |
-| **BB-04** | Voltage Setpoint Resolution | 10 mV step resolution (12-bit DAC) **[MUST]** | Continuous monotonic tuning | DAC Linearity Sweep |
-| **BB-05** | Current Limit Resolution | 10 mA step resolution (12-bit DAC) **[MUST]** | Reference input to comparator | Current Clamp Calibration |
-| **BB-06** | Output Voltage Ripple | < 25 mV pk-pk ripple **[MUST]** | Full load 3A, 20MHz bandwidth | Scope Tip-and-Barrel Probe |
-| **BB-07** | Load Transient Recovery | < 120 µs recovery, < 250mV sag **[MUST]** | 50% to 100% load step (1.5A to 3A) | Dynamic Load Stepper |
-| **BB-08** | Buck-Boost Efficiency | > 95.0% @ 20V/3A; > 92.0% @ 5V/3A **[MUST]**| $V_{\text{in}} = 24\,\text{V}$, Sync Rectification | Dual-Channel Power Meter |
-| **BB-09** | Switching Frequency | 300 kHz ± 10% **[MUST]** | Fixed frequency PWM | Frequency Counter / Scope |
-| **BB-10** | CC Mode Reaction Time | < 5.0 µs autonomous clamping **[MUST]** | Overload short-circuit step | High-Speed Shunt Scope |
+| **BB-04** | Voltage Setpoint Resolution | 10 mV step resolution (12-bit DAC) **[MUST]** | Continuous monotonic tuning | DAC Linearity Calibration |
+| **BB-05** | Output Voltage Ripple | < 25 mV pk-pk ripple **[MUST]** | Full load 3A, 20MHz bandwidth | Scope Tip-and-Barrel Probe |
+| **BB-06** | Load Transient Recovery | < 150 µs recovery, < 250mV sag **[MUST]** | 50% to 100% load step (1.5A to 3A) | Dynamic Load Stepper |
+| **BB-07** | Buck-Boost Efficiency | > 95.0% @ 20V/3A; > 92.0% @ 5V/3A **[MUST]**| $V_{\text{in}} = 24\,\text{V}$, Sync Rectification | Dual-Channel Power Meter |
+| **BB-08** | Switching Frequency | 300 kHz ± 10% **[MUST]** | Fixed frequency PWM | Frequency Counter / Scope |
+| **BB-09** | Hardware Current Limiting | Cycle-by-cycle current limit via CSP/CSN **[MUST]**| Overload condition | Current Probe & Scope |
 
 ---
 
@@ -364,34 +359,33 @@ The engineering requirements and verification criteria for the Smart Programmabl
 | **TM-04** | Secondary DC Current Sense | INA226 16-bit ADC (100µA/LSB) **[MUST]** | ± 0.5% measurement accuracy | Precision Shunt Reference |
 | **TM-05** | Dual-Domain Telemetry Rate | 10.0 Hz Real-Time Loop Rate **[MUST]** | Pac, Pdc, and η computed at 100ms | Logic Analyzer Timing Check |
 | **TM-06** | Galvanic Isolation Barrier | 3,000 V AC RMS (1 min) **[MUST]** | Primary-to-secondary isolation | Certified Hi-Pot Tester |
-| **TM-07** | Calibration Test Points | Dedicated PCB Test Loops **[MUST]** | Vout, Iout, bulk DC, and aux rails | Scope & Multimeter Inspection |
+| **TM-07** | Calibration Test Points | Dedicated PCB Test Loops **[MUST]** | Vout, bulk DC, and aux rails | Scope & Multimeter Inspection |
 
 ---
 
 #### Table 4.4: Protection, Safety, EMC & Environmental Requirements
 | Req ID | Parameter / Feature | Specification / Target | Condition | Verification Method |
 | :---: | :--- | :--- | :--- | :--- |
-| **PR-01** | Hardware Over-Voltage (OVP) | Clamps at $V_{\text{set}} + 1.5\,\text{V}$ (< 5µs response) **[MUST]** | Independent comparator crowbar | OVP Trip Voltage Verification |
-| **PR-02** | Hardware Constant-Current (CC) | Clamps at $I_{\text{set}} \pm 20\,\text{mA}$ (< 5µs reaction) **[MUST]** | Analog pull-down on COMP pin | Direct Dead Short-Circuit Test |
-| **PR-03** | Over-Temperature (OTP) | Shuts down at $T_{\text{pcb}} > 90^\circ\text{C}$ (10°C hyst) **[MUST]** | NTC thermistor monitoring | Thermal Chamber Ramp |
-| **PR-04** | Safety Compliance Standard | IEC 62368-1 Reinforced Isolation **[MUST]** | SELV touch-safe (< 60V DC) | Certified Safety Laboratory |
-| **PR-05** | Creepage & Clearance | Creepage ≥ 6.4mm; Clearance ≥ 5.0mm **[MUST]** | Primary-Secondary milled slot | PCB Caliper & Gerber Check |
-| **PR-06** | Conducted & Radiated EMC | CISPR 32 / EN 55032 Class B **[MUST]** | 150 kHz – 1 GHz emission limits | Semi-Anechoic Chamber |
-| **PR-07** | Operating Ambient Temp | –20°C to +50°C Full Load **[MUST]** | Natural convection in chassis | Environmental Chamber |
-| **PR-08** | Mean Time Between Failures | MTBF > 50,000 Hours @ 40°C **[SHOULD]** | Telcordia SR-332 Parts Count | Reliability Calculation Report |
+| **PR-01** | Input Fuse Protection | 2.0A Time-Lag Ceramic Fuse **[MUST]** | AC mains short-circuit | Overcurrent Trip Test |
+| **PR-02** | Input Inrush Current Limit | 10Ω NTC Thermistor (< 25A peak) **[MUST]** | Cold start at 265V AC | Scope Current Probe |
+| **PR-03** | AC Line Surge Protection | 300V RMS MOV (4.5kA rating) **[MUST]** | Line transients per IEC 61000-4-5 | Surge Generator Verification |
+| **PR-04** | Built-in Controller OCP | LM5176 cycle-by-cycle CSP/CSN clamp **[MUST]** | Load current > 3.5A limit | Electronic Load Step |
+| **PR-05** | Over-Temperature (OTP) | LM5176 internal shutdown (165°C) **[MUST]** | Severe thermal rise | Thermal Chamber Sweep |
+| **PR-06** | Safety Compliance Standard | IEC 62368-1 Reinforced Isolation **[MUST]** | SELV touch-safe (< 60V DC) | Certified Safety Laboratory |
+| **PR-07** | Creepage & Clearance | Creepage ≥ 6.4mm; Clearance ≥ 5.0mm **[MUST]** | Primary-Secondary milled slot | PCB Caliper & Gerber Check |
+| **PR-08** | Conducted & Radiated EMC | CISPR 32 / EN 55032 Class B **[MUST]** | 150 kHz – 1 GHz emission limits | Semi-Anechoic Chamber |
+| **PR-09** | Operating Ambient Temp | –20°C to +50°C Full Load **[MUST]** | Natural convection in chassis | Environmental Chamber |
 
 ---
 
-#### Table 4.5: Analog Closed-Loop Control, DAC Steering & Hardware Protection Specifications
+#### Table 4.5: Closed-Loop Regulation & DAC Voltage Steering Specifications
 | Req ID | Parameter / Feature | Specification / Target | Condition | Verification Method |
 | :---: | :--- | :--- | :--- | :--- |
 | **CT-01** | DAC Voltage Steering Network | Resistor summing into LM5176 FB node **[MUST]** | $R_{\text{top}}=49.9\,\text{k}\Omega, R_{\text{DAC}}=11\,\text{k}\Omega, R_{\text{bot}}=3.65\,\text{k}\Omega$ | Precision Line/Load Sweep |
 | **CT-02** | Voltage Tuning Resolution | 10.0 mV step resolution (12-bit DAC) **[MUST]** | Continuous 5.0V to 20.0V DC range | DAC Linearity Calibration |
-| **CT-03** | Hardware Current Sense Shunt | 10 mΩ Metal Element Shunt, 3W, 0.1% **[MUST]** | 4-wire Kelvin sensing layout | Precision Shunt DMM Check |
-| **CT-04** | Current Sense Amplification | INA240A2 Precision Amp (50 V/V gain) **[MUST]** | Enhanced PWM spike rejection | Shunt Amp Linearity Sweep |
-| **CT-05** | Fast CC Hardware Clamping | < 5.0 µs autonomous clamping on COMP pin **[MUST]**| TLV3501 4.5ns analog comparator | High-Speed Current Step Probe |
-| **CT-06** | Hardware Crowbar Disconnect | High-side P-MOSFET disconnect on OVP/OTP **[MUST]** | Clamps at $V_{\text{set}} + 1.5\,\text{V}$ in < 5.0 µs | OVP Transient Injection Test |
-| **CT-07** | Auxiliary Bias Regulation | +14V Flyback VCC, +12V gate, +5V, +3.3V rails **[MUST]**| Dedicated LDOs & buck off +24V | Multimeter & Rail Noise Scope |
+| **CT-03** | Current Sense Resistor | 10 mΩ Metal Element Shunt, 3W, 0.1% **[MUST]** | Connected across LM5176 CSP/CSN | Precision Milliohm Meter |
+| **CT-04** | MCU Supervisory Shutdown | GPIO pulling LM5176 ENABLE pin low **[MUST]** | Software fault shutdown command | Scope Response Timing |
+| **CT-05** | Auxiliary Bias Regulation | +14V Flyback VCC, +12V gate, +5V, +3.3V rails **[MUST]**| Dedicated LDOs & buck off +24V | Multimeter & Rail Scope |
 
 ---
 
@@ -400,7 +394,7 @@ The engineering requirements and verification criteria for the Smart Programmabl
 * **Mounting Holes**: Four symmetrically placed M3 mounting holes with 4.0 mm clearance keep-out annular rings connected to chassis ground.
 * **Front-Panel Terminal Spacing**: Heavy-duty 4mm binding posts positioned with standard $19.05\,\text{mm}$ ($0.75\,\text{inch}$) center-to-center pitch, supporting dual-banana jack connectors.
 * **Isolation Air Slot**: A continuous $2.0\,\text{mm}$ milled isolation slot routed through the FR-4 substrate beneath the Flyback transformer and optocoupler barriers, guaranteeing physical creepage compliance per IEC 62368-1.
-* **Thermal Dissipation & Cooling**: Conduction cooling via dedicated 2 oz copper thermal planes on bottom and top layers; components derated to maintain junction temperatures $< 85^\circ\text{C}$ under natural convection at $+50^\circ\text{C}$ ambient without forced air fans.
+* **Thermal Dissipation & Cooling**: Conduction cooling via dedicated 2 oz copper thermal planes on bottom and top layers; components derated to maintain junction temperatures $< 85^\circ\text{C}$ under natural convection at $+50^\circ\text{C}$ ambient.
 
 ---
 
@@ -408,8 +402,8 @@ The engineering requirements and verification criteria for the Smart Programmabl
 
 The following engineering dependencies and hardware boundary conditions govern the execution of the SPPS module development:
 * **Custom Magnetics Tooling**: Transformer engineering samples wound on Ferroxcube PQ26/20 ferrite cores with triple-insulated Furukawa TEX-E secondary wire must be validated prior to Phase 3 schematic freeze.
-* **Semiconductor Availability**: Supply chain allocation and sample lead times for key ICs (TI LM5176, TI UCC28740, TI INA240A2, TI INA226, TI AMC1311, ST STM32G474RET6, and Infineon BSC034N04LS MOSFETs) must be tracked to meet prototype build dates.
-* **Laboratory Test Equipment**: Hardware bring-up and DVT validation require access to a calibrated Chroma 61604 Programmable AC Source, Chroma 63102A DC Electronic Load, Keysight 34465A 6.5-digit DMM, Teledyne LeCroy 500MHz 4-channel oscilloscope with high-voltage differential probes and Rogowski current probes, and a certified Vitrek 3000V RMS Hi-Pot tester.
+* **Semiconductor Availability**: Supply chain allocation and sample lead times for key ICs (TI LM5176, TI UCC28740, TI INA226, TI AMC1311, ST STM32G474RET6, and Infineon BSC034N04LS MOSFETs) must be tracked to meet prototype build dates.
+* **Laboratory Test Equipment**: Hardware bring-up and DVT validation require access to a calibrated Chroma 61604 Programmable AC Source, Chroma 63102A DC Electronic Load, Keysight 34465A 6.5-digit DMM, 4-channel oscilloscope with high-voltage differential probes and current probes, and a certified 3000V RMS Hi-Pot tester.
 * **Enclosure & Front-Panel Alignment**: Final mechanical drawings for the front-panel bezel, 4mm binding post cutouts, IEC C14 inlet cutout, and OLED mounting brackets must be frozen during Phase 4 PCB layout.
 * **Firmware Device Drivers**: Driver source code for the SSD1306 OLED display controller, STM32 internal 12-bit DAC, and INA226 register configuration must be available prior to Phase 5 integrated DVT.
 * **EMC Pre-Compliance Testing**: Access to an internal VVDN EMC laboratory equipped with a Line Impedance Stabilization Network (LISN) and spectrum analyzer is required to verify CISPR 32 Class B conducted emissions.
@@ -447,12 +441,12 @@ The product realization plan follows the standard 5-phase VVDN hardware lifecycl
 * **Phase 2 — Component Selection & Circuit Design**
   * Perform transformer magnetics sizing on PQ26/20 core ($L_p = 220\,\mu\text{H}$) and Buck-Boost inductor sizing ($10\,\mu\text{H}$).
   * Calculate component stress derating (MOSFET voltage, diode reverse voltage, capacitor ripple current).
-  * Design closed-loop Type-II compensation network and DAC voltage steering summing network.
+  * Design closed-loop feedback compensation and DAC voltage steering summing network.
   * Author companion Hardware Design Document (HDD) and complete peer design reviews.
 
 * **Phase 3 — Schematic Design and Review**
   * Capture hierarchical schematics in Altium Designer across all 4 power stages.
-  * Implement autonomous analog protection circuits (INA240, TLV3501, crowbar disconnect).
+  * Configure LM5176 cycle-by-cycle current limit sensing and MCU enable control.
   * Conduct rigorous schematic peer review gates with BU SME and senior hardware architect.
   * Finalize schematic netlist, DRC checks, and Class B BOM release.
 
@@ -466,7 +460,7 @@ The product realization plan follows the standard 5-phase VVDN hardware lifecycl
   * Assemble Rev A prototype boards (5 units).
   * Perform cold resistance and isolation impedance checks.
   * Execute supervised bring-up using a laboratory Variac and current-limited AC supply.
-  * Validate line/load regulation, dynamic transient step response, and sub-5µs CC hardware clamping.
+  * Validate line/load regulation, dynamic transient step response, and built-in current limit protection.
   * Perform 3000V RMS Hi-Pot safety testing and thermal chamber soak (+50°C full load).
   * Issue comprehensive DVT Verification Report and Rev B production package.
 
@@ -488,7 +482,6 @@ flowchart TD
     classDef priStyle fill:#ECEFF1,stroke:#37474F,stroke-width:2px,color:#263238
     classDef secStyle fill:#E8F5E9,stroke:#2E7D32,stroke-width:2px,color:#1B5E20
     classDef ctlStyle fill:#E1F5FE,stroke:#0277BD,stroke-width:2px,color:#01579B
-    classDef fltStyle fill:#FFEBEE,stroke:#C62828,stroke-width:2px,color:#B71C1C
 
     subgraph STAGE1_2 ["PRIMARY STAGES (High-Voltage Domain)"]
         AC_IN["AC Grid Mains<br/>85V - 265V AC RMS"]:::priStyle
@@ -501,7 +494,7 @@ flowchart TD
     end
 
     subgraph STAGE3 ["STAGE 3: ISOLATED DC-DC CONVERTER"]
-        FLY_CTL["TI UCC28740 Controller<br/>Quasi-Resonant Valley Switching"]:::priStyle
+        FLY_CTL["TI UCC28740 Controller<br/>Quasi-Resonant Valley Switching<br/>Cycle-by-Cycle Primary OCP"]:::priStyle
         FLY_FET["Infineon IPB80R290P7<br/>800V CoolMOS Switch"]:::priStyle
         TRANS["PQ26/20 Transformer<br/>⚡ 3000V RMS Reinforced Isolation<br/>Lp = 220µH, TEX-E Secondary"]:::secStyle
         SYNC_RECT["MP6908 Smart Driver &<br/>BSC052N06NS Sync FET (60V, 5.2mΩ)"]:::secStyle
@@ -512,27 +505,17 @@ flowchart TD
     end
 
     subgraph STAGE4 ["STAGE 4: SYNCHRONOUS BUCK-BOOST POST-REGULATOR"]
-        BB_CTL["TI LM5176 Controller<br/>4-Switch Synchronous Controller"]:::ctlStyle
+        BB_CTL["TI LM5176 Controller<br/>4-Switch Synchronous Controller<br/>Built-in CSP/CSN Current Limit"]:::ctlStyle
         H_BRIDGE["4-Switch MOSFET Bridge<br/>4x Infineon BSC034N04LS (40V, 3.4mΩ)<br/>10µH Flat-Wire Inductor (8.5A)"]:::ctlStyle
         DAC_STEER["12-Bit DAC Steering Network<br/>R_top=49.9k, R_bot=3.65k, R_dac=11k<br/>10mV Step Resolution"]:::ctlStyle
         OUT_FILTER["Low-ESR Filter Bank<br/>4x 22µF MLCC + 100µF Polymer<br/>Ripple < 25mV pk-pk"]:::ctlStyle
+        SHUNT["10mΩ Sense Resistor<br/>Across LM5176 CSP/CSN Pins"]:::ctlStyle
         OUT_TERM["Output Terminals<br/>4mm Gold-Plated Binding Posts<br/>5.0V - 20.0V DC / 3.0A (60W)"]:::secStyle
 
-        BUS_24V --> H_BRIDGE --> OUT_FILTER --> OUT_TERM
+        BUS_24V --> H_BRIDGE --> OUT_FILTER --> SHUNT --> OUT_TERM
         BB_CTL -.->|"Gate Drives"| H_BRIDGE
         DAC_STEER -.->|"Vset Steering"| BB_CTL
-    end
-
-    subgraph PROTECTION ["AUTONOMOUS HARDWARE PROTECTION"]
-        SHUNT["10mΩ 3W Kelvin Shunt"]:::fltStyle
-        INA240["TI INA240A2 Shunt Amp<br/>50 V/V Gain, PWM Rejection"]:::fltStyle
-        COMP["TI TLV3501 Fast Comparator<br/>4.5ns Response Time"]:::fltStyle
-        CROWBAR["High-Side P-MOSFET<br/>OVP Crowbar Disconnect"]:::fltStyle
-
-        OUT_FILTER --> SHUNT --> OUT_TERM
-        SHUNT -.-> INA240 --> COMP
-        COMP -.->|"Sub-5µs Pull-Down"| BB_CTL
-        COMP -.->|"Trip Disconnect"| CROWBAR
+        SHUNT -.->|"CSP/CSN Sense"| BB_CTL
     end
 
     subgraph TELEMETRY_MCU ["MCU CONTROL & TELEMETRY"]
@@ -547,7 +530,7 @@ flowchart TD
         ENCODERS -.->|"Timer Inputs"| MCU
         MCU -.->|"I2C"| OLED
         MCU -.->|"12-bit DAC"| DAC_STEER
-        MCU -.->|"12-bit DAC"| COMP
+        MCU -.->|"ENABLE Line"| BB_CTL
     end
 
     STAGE1_2 ==>|"⚡ Reinforced Isolation"| STAGE3
@@ -559,7 +542,7 @@ flowchart TD
 
 #### Stage 1: Mains AC Input Protection & EMI Filter Subsystem
 * **Filtered AC Connection**: Connects to 85V–265V AC RMS sinusoidal mains via IEC C14 inlet.
-* **Overcurrent Protection**: 2.0A time-lag ceramic fuse prevents nuisance blowing on cold inrush.
+* **Overcurrent Protection**: 2.0A time-lag ceramic fuse prevents damage during severe input faults.
 * **Inrush Suppression**: 10Ω NTC thermistor limits cold surge current below 25A peak at 265V AC.
 * **Surge Clamping**: 14mm 300V RMS MOV clamps high-voltage grid transients up to 4.5 kA per IEC 61000-4-5.
 * **Conducted EMI Attenuation**: Wurth 15mH and 4.7mH common-mode chokes paired with KEMET X2/Y1 film safety capacitors suppress switching emissions to satisfy CISPR 32 Class B limits.
@@ -571,16 +554,17 @@ flowchart TD
 * **Passive Safety Discharge**: 3x 330kΩ resistor bleeder string safely drains bulk voltage to touch-safe SELV levels ($< 50\,\text{V}$) within 60 seconds of AC disconnection per IEC 62368-1.
 
 #### Stage 3: Isolated Quasi-Resonant Flyback DC-DC Converter Subsystem
-* **Quasi-Resonant Switching**: TI UCC28740 valley-switching controller modulates an Infineon IPB80R290P7 (800V, 0.29Ω CoolMOS) at resonant valley minimums, minimizing switching losses.
+* **Quasi-Resonant Switching**: TI UCC28740 valley-switching controller modulates an Infineon IPB80R290P7 (800V CoolMOS) at resonant valley minimums, minimizing switching losses.
+* **Cycle-by-Cycle Primary OCP**: UCC28740 senses primary switch current through a low-inductance sense resistor on its CS pin, capping maximum peak current on every cycle.
 * **Safety Isolation Barrier**: Custom transformer wound on Ferroxcube PQ26/20 ferrite core ($L_p = 220\,\mu\text{H}$) with Furukawa TEX-E triple-insulated secondary wire guarantees certified 3000V RMS reinforced safety isolation.
 * **Synchronous Rectification**: MPS MP6908 smart driver and Infineon BSC052N06NS (60V, 5.2mΩ FET) replace lossy Schottky diodes, saving $> 1.3\,\text{W}$ of thermal dissipation.
-* **Intermediate Rail Delivery**: Delivers a rock-solid +24.0V DC intermediate rail rated for 72W continuous power with $< 50\,\text{mV}$ pk-pk ripple and $> 90\%$ stage efficiency.
+* **Intermediate Rail Delivery**: Delivers a stable +24.0V DC intermediate rail rated for 72W continuous power with $< 50\,\text{mV}$ pk-pk ripple and $> 90\%$ stage efficiency.
 
 #### Stage 4: 4-Switch Synchronous Buck-Boost Post-Regulator Subsystem
 * **H-Bridge Architecture**: TI LM5176 controller modulates four 40V N-MOSFETs (Infineon BSC034N04LS, 3.4mΩ) in an H-bridge configuration around a 10µH flat-wire power inductor (Wurth 7443321000, 8.5A).
-* **Seamless Mode Transition**: Operates in pure Buck mode for 5V–18V outputs (> 96% efficiency) and smoothly transitions into 4-switch Buck-Boost mode near 20V (> 95% efficiency) with zero glitching.
 * **Precision DAC Voltage Steering**: Summing resistor network ($R_{\text{top}}=49.9\,\text{k}\Omega, R_{\text{DAC}}=11\,\text{k}\Omega, R_{\text{bot}}=3.65\,\text{k}\Omega$) injects current into the LM5176 1.20V feedback node, providing 10mV monotonic setpoint tuning across 5.0V to 20.0V DC.
-* **Autonomous Hardware CC Clamping**: Precision 10mΩ shunt, TI INA240A2 amplifier (50 V/V), and TI TLV3501 high-speed comparator (4.5ns) pull down the LM5176 `COMP` pin in **$< 5.0\,\mu\text{s}$** during an overload or dead short-circuit, completely independent of microcontroller firmware.
+* **Built-in Controller Hardware Current Limit**: Output current is monitored across a $10\,\text{m}\Omega$ sense resistor connected directly to the LM5176's internal CSP/CSN current sense pins, providing reliable cycle-by-cycle current limiting without external analog circuitry.
+* **MCU Supervisory Enable Control**: The MCU monitors DC load power via the INA226 over I2C and can pull the LM5176 `ENABLE` pin low to safely disable power output under persistent fault conditions.
 
 > [!NOTE]
 > *This is the proposed hardware architecture baseline and may undergo fine-tuning during detailed schematic bring-up.*
@@ -590,7 +574,7 @@ flowchart TD
 
 ## 9. Master Bill of Materials (BOM) Summary
 
- организованный across the 4 power conversion stages:
+Organized across the 4 power conversion stages:
 
 #### Table 9: Master BOM Summary
 | Sl.No | Stage / Function | Description | Qty | Manufacturer | Manufacturer Part No |
@@ -612,15 +596,14 @@ flowchart TD
 | **15** | Stage 4: Post-Regulator| Power N-MOSFET 40V 3.4mΩ SuperSO8 | 4 | Infineon | BSC034N04LS |
 | **16** | Stage 4: Post-Regulator| Flat-Wire Power Inductor 10µH 8.5A (12.5mm) | 1 | Wurth Elektronik | 7443321000 |
 | **17** | Stage 4: Output Bank | MLCC 22µF 25V X7R 1210 & Polymer 100µF 25V | 5 | Murata / Panasonic | GRM32ER71E226K / 25SVPF100M |
-| **18** | Stage 4: Protection | Precision Current Shunt Resistor 10mΩ 3W 0.1% | 1 | Bourns | CSS2H-2512R-L010F |
-| **19** | Stage 4: Protection | Current Sense Amplifier 50V/V SC70 | 1 | Texas Instruments | INA240A2EDCKR |
-| **20** | Stage 4: Protection | High-Speed Analog Comparator 4.5ns SOT23-6 | 1 | Texas Instruments | TLV3501AIDBVR |
-| **21** | Control & Telemetry | Mixed-Signal MCU & 12-Bit DAC Core LQFP-64 | 1 | STMicroelectronics | STM32G474RET6 |
-| **22** | Telemetry Subsystem | Isolated Delta-Sigma Modulator (AC Sense) | 1 | Texas Instruments | AMC1311DWVR |
-| **23** | Telemetry Subsystem | Toroidal Current Transformer 1000:1 (AC Sense)| 1 | Talema | AC1005 |
-| **24** | Telemetry Subsystem | 16-Bit I2C Power Monitor IC VSSOP-10 (DC Rail)| 1 | Texas Instruments | INA226AIDGSR |
-| **25** | Mechanical / UI | 4mm Gold-Plated Binding Posts (Red / Black) | 2 | Pomona Electronics | 3770-0 / 3770-2 |
-| **26** | Mechanical / UI | IEC 320-C14 AC Inlet with Fuse Drawer | 1 | Schurter | 6200.2100 |
+| **18** | Stage 4: Current Sense| Precision Current Shunt Resistor 10mΩ 3W 0.1% | 1 | Bourns | CSS2H-2512R-L010F |
+| **19** | Stage 4: DAC Steering | Thin-Film Resistors 49.9k, 11k, 3.65k 0.1% | 3 | Vishay Dale | TNPW0805 Series |
+| **20** | Control & Telemetry | Mixed-Signal MCU & 12-Bit DAC Core LQFP-64 | 1 | STMicroelectronics | STM32G474RET6 |
+| **21** | Telemetry Subsystem | Isolated Delta-Sigma Modulator (AC Sense) | 1 | Texas Instruments | AMC1311DWVR |
+| **22** | Telemetry Subsystem | Toroidal Current Transformer 1000:1 (AC Sense)| 1 | Talema | AC1005 |
+| **23** | Telemetry Subsystem | 16-Bit I2C Power Monitor IC VSSOP-10 (DC Rail)| 1 | Texas Instruments | INA226AIDGSR |
+| **24** | Mechanical / UI | 4mm Gold-Plated Binding Posts (Red / Black) | 2 | Pomona Electronics | 3770-0 / 3770-2 |
+| **25** | Mechanical / UI | IEC 320-C14 AC Inlet with Fuse Drawer | 1 | Schurter | 6200.2100 |
 
 > [!NOTE]
 > *This is the expected Class A engineering BOM baseline and may be refined during Phase 3 detailed schematics. Pricing and commercial volume agreements are maintained separately.*
@@ -631,10 +614,10 @@ flowchart TD
 
 The following points are explicitly not included in the scope of this project:
 1. **Active Power Factor Correction (Active Boost PFC)**: Not implemented because the product continuous power rating (60W output, 72W primary) is below the 75W legal threshold where active harmonic correction is mandated under IEC 61000-3-2. Passive two-stage EMI filtering achieves full compliance.
-2. **Three-Phase AC Mains Input**: The module is designed solely for single-phase 85V–265V AC RMS operation.
-3. **Negative / Bipolar Output Rails**: The module delivers positive DC output (5.0V to 20.0V DC) referenced to secondary ground.
-4. **Wireless Connectivity & IoT Stacks**: Wi-Fi, Bluetooth, Zigbee, and cloud protocols are out of scope.
-5. **High-Level Network Protocol Stacks**: SCPI over Ethernet or USB-TMC stacks are out of scope; local control is via OLED/rotary encoders with optional raw serial UART telemetry.
+2. **Complex External Protection Circuits**: Dedicated analog crowbar thyristors and discrete fast analog comparator pull-down networks are excluded in favor of the controller IC's built-in cycle-by-cycle protection and MCU supervisory shutdown.
+3. **Three-Phase AC Mains Input**: The module is designed solely for single-phase 85V–265V AC RMS operation.
+4. **Negative / Bipolar Output Rails**: The module delivers positive DC output (5.0V to 20.0V DC) referenced to secondary ground.
+5. **Wireless Connectivity & IoT Stacks**: Wi-Fi, Bluetooth, Zigbee, and cloud protocols are out of scope.
 6. **Custom Metal Tooling & Die-Cast Enclosure**: Structural metal chassis design and plastic injection mold tooling are outside the trainee electrical scope.
 
 ---
@@ -652,9 +635,9 @@ The following factors are assumed as the operational baseline for design and ver
 ## 12. Open Items
 
 The following engineering trade-offs are included in the overall project scope but scheduled for resolution during Phase 3 schematic tuning:
-1. **Current Shunt Value Optimization**: Evaluating 5 mΩ vs 10 mΩ for the primary current sensing resistor to balance thermal dissipation at 3.0A continuous against ADC LSB resolution at light loads (< 100 mA).
+1. **Current Shunt Value Optimization**: Evaluating 5 mΩ vs 10 mΩ for the primary current sensing resistor across the LM5176 CSP/CSN pins to balance thermal dissipation against current sensing accuracy.
 2. **Auxiliary 24V DC Input Jack**: Evaluating an optional 2.5 mm barrel jack input allowing users to power the module directly from an external 24V battery or DC supply, bypassing the AC mains stage for field use.
-3. **Thermal Copper Pour Optimization**: Evaluating 2 oz vs 3 oz outer copper thickness to optimize heatsink dissipation for the primary D2PAK MOSFET and secondary synchronous rectifier without incurring PCB manufacturing cost penalties.
+3. **Thermal Copper Pour Optimization**: Evaluating 2 oz vs 3 oz outer copper thickness to optimize heatsink dissipation for the primary D2PAK MOSFET and secondary synchronous rectifier.
 
 ---
 
@@ -665,10 +648,10 @@ This appendix provides structured technical defense rationales for the Power Ele
 ### Q1: Walk me through the complete power conversion chain from the wall to the device.
 **Answer**:
 The power conversion hardware operates in four clean, sequential stages:
-1. **Mains AC Input**: Accepts universal 85V–265V AC RMS mains. An IEC C14 inlet feeds a 2A time-lag ceramic fuse, a 10Ω NTC thermistor (limits inrush < 25A), a 14mm 300V MOV, and a two-stage common-mode EMI filter (15mH and 4.7mH).
+1. **Mains AC Input**: Accepts universal 85V–265V AC RMS mains through an IEC C14 inlet with a 2A time-lag ceramic fuse, 10Ω NTC inrush thermistor, 14mm 300V MOV, and a two-stage common-mode EMI filter (15mH and 4.7mH).
 2. **Bridge Rectification & Bulk Filter**: A GBU606 bridge rectifies the AC sine wave into unipolar pulses, and a 100µF/450V electrolytic cap smooths it into a +120V to +375V DC bulk rail, providing $> 10\,\text{ms}$ holdup energy.
 3. **Quasi-Resonant Flyback Stage**: A TI UCC28740 controller modulates an 800V CoolMOS at valley minimums, transferring energy across a custom PQ26/20 transformer ($L_p = 220\,\mu\text{H}$) with 3000V RMS reinforced safety isolation. A secondary synchronous rectifier (MP6908 + 60V/5.2mΩ FET) delivers an intermediate +24.0V DC rail at 72W with > 90% efficiency.
-4. **4-Switch Buck-Boost Post-Regulator**: A TI LM5176 controller modulates four 40V MOSFETs in an H-bridge around a 10µH flat-wire inductor. It steps the 24V rail down or across to deliver 5.0V–20.0V DC at up to 3.0A (60W continuous) with $< 25\,\text{mV}$ ripple and autonomous sub-5µs hardware CC clamping.
+4. **4-Switch Buck-Boost Post-Regulator**: A TI LM5176 controller modulates four 40V MOSFETs in an H-bridge around a 10µH flat-wire inductor. It steps the 24V rail down or across to deliver 5.0V–20.0V DC at up to 3.0A (60W continuous) with $< 25\,\text{mV}$ ripple, delivering clean DC to the device under test via heavy-duty 4mm binding posts.
 
 ---
 
@@ -678,7 +661,7 @@ Under international standard **IEC 61000-3-2**, active Power Factor Correction (
 
 $$P_{\text{in,max}} = \frac{60\,\text{W}}{0.85} \approx 70.6\,\text{W} < 75.0\,\text{W}$$
 
-Because our maximum input power remains below 75 W across all operating conditions, an active PFC boost converter is not legally required. Omitting active PFC eliminates a boost inductor, high-voltage PFC MOSFET, boost diode, and dedicated controller IC, saving approximately \$3.20 in BOM cost, reducing PCB footprint by 35%, eliminating high-frequency PFC switching noise, and improving low-power light-load efficiency.
+Because our maximum input power remains below 75 W across all operating conditions, an active PFC boost converter is not legally required. Omitting active PFC eliminates a boost inductor, high-voltage PFC MOSFET, boost diode, and dedicated controller IC, saving approximately \$3.20 in BOM cost, reducing PCB footprint by 35%, and eliminating high-frequency PFC switching noise.
 
 ---
 
@@ -690,27 +673,23 @@ $$V_{\text{bulk,min}} = 85 \times \sqrt{2} - 2 \times 1.0\,\text{V} \approx 118\
 
 Designing for a maximum duty cycle $D_{\text{max}} = 0.45$ and minimum switching frequency $f_{\text{sw}} = 80\,\text{kHz}$ at 72 W output:
 1. **Primary Inductance ($L_p$)**:
-
    $$L_p = \frac{(V_{\text{bulk,min}} \times D_{\text{max}})^2}{2 \times P_{\text{in}} \times f_{\text{sw}}} = \frac{(118 \times 0.45)^2}{2 \times 80\,\text{W} \times 80{,}000\,\text{Hz}} \approx 220\,\mu\text{H}$$
 
 2. **Primary Peak Current ($I_{\text{pk}}$)**:
-
    $$I_{\text{pk}} = \frac{V_{\text{bulk,min}} \times D_{\text{max}}}{L_p \times f_{\text{sw}}} = \frac{118 \times 0.45}{220 \times 10^{-6} \times 80{,}000} \approx 3.01\,\text{A}$$
 
 3. **Core Selection & Flux Density**:
    The PQ26/20 ferrite core provides an effective cross-sectional area $A_e = 119\,\text{mm}^2$. With $N_p = 36\,\text{turns}$, the maximum operating magnetic flux density is:
-
    $$B_{\text{max}} = \frac{L_p \times I_{\text{pk}}}{N_p \times A_e} = \frac{220 \times 10^{-6} \times 3.01}{36 \times 119 \times 10^{-6}} \approx 0.154\,\text{Tesla} = 154\,\text{mT}$$
-
    $154\,\text{mT}$ is safely below the core saturation limit of $320\,\text{mT}$ for 3C95 ferrite at $100^\circ\text{C}$, providing a > 50% saturation margin.
 
 ---
 
 ### Q4: Why is the intermediate bus chosen at +24.0V DC instead of +12V or +48V?
 **Answer**:
-+24.0 V DC is the mathematically optimal intermediate rail for a 5.0V to 20.0V output range:
-* **Why not +12V?**: If the intermediate bus were +12V, generating 20V at 3A (60W) would require the Buck-Boost to operate in heavy Boost mode with a duty cycle $D \approx 45\%$. Boost mode creates high inductor ripple currents and requires continuous right-half-plane (RHP) zero compensation, leading to higher RMS conduction losses and requiring a bulkier inductor.
-* **Why not +48V?**: If the intermediate bus were +48V, the primary Flyback transformer turns ratio would be smaller, and the post-regulator MOSFETs would require 60V or 80V ratings with significantly higher $R_{\text{DS(on)}}$ ($> 15\,\text{m}\Omega$ vs $3.4\,\text{m}\Omega$), degrading efficiency.
++24.0 V DC is the optimal intermediate rail for a 5.0V to 20.0V output range:
+* **Why not +12V?**: If the intermediate bus were +12V, generating 20V at 3A (60W) would require the Buck-Boost to operate in heavy Boost mode ($D \approx 45\%$), creating higher RMS inductor ripple currents and requiring continuous right-half-plane zero compensation.
+* **Why not +48V?**: If the intermediate bus were +48V, the post-regulator MOSFETs would require 60V or 80V ratings with higher $R_{\text{DS(on)}}$, degrading efficiency.
 * **Why +24V is ideal**: With a +24.0V intermediate bus, the post-regulator operates in pure Buck mode across almost the entire output range (5V to 18V), achieving peak efficiency $> 96\%$. It transitions into Buck-Boost mode only when regulating near 20V.
 
 ---
@@ -718,51 +697,47 @@ Designing for a maximum duty cycle $D_{\text{max}} = 0.45$ and minimum switching
 ### Q5: How does the 4-switch Buck-Boost operate seamlessly between 5V and 20V?
 **Answer**:
 The TI LM5176 controls four N-MOSFETs ($Q_A, Q_B, Q_C, Q_D$) in an H-bridge configuration around a single 10µH flat-wire power inductor:
-* **Buck Mode ($V_{\text{out}} < 0.85 \times V_{\text{in}}$, i.e., 5V to 18V)**: Boost switch $Q_C$ remains continuously OFF and $Q_D$ remains continuously ON. Switches $Q_A$ and $Q_B$ modulate synchronously as a standard synchronous buck converter.
-* **Buck-Boost Mode ($0.85 \times V_{\text{in}} \le V_{\text{out}} \le 1.15 \times V_{\text{in}}$, i.e., ~18V to 20V)**: The LM5176 modulates both pairs ($Q_A/Q_B$ and $Q_C/Q_D$) synchronously at 300 kHz, ensuring continuous power delivery without mode chattering or output voltage spikes.
+* **Buck Mode ($V_{\text{out}} < 0.85 \times V_{\text{in}}$, i.e., 5V to 18V)**: Boost switch $Q_C$ remains continuously OFF and $Q_D$ remains continuously ON. Switches $Q_A$ and $Q_B$ modulate synchronously as a standard buck converter.
+* **Buck-Boost Mode ($0.85 \times V_{\text{in}} \le V_{\text{out}} \le 1.15 \times V_{\text{in}}$, i.e., ~18V to 20V)**: The LM5176 modulates both pairs ($Q_A/Q_B$ and $Q_C/Q_D$) synchronously at 300 kHz, ensuring smooth power delivery without mode chattering.
 
 ---
 
 ### Q6: How does the DAC steer the output voltage without destabilizing the loop?
 **Answer**:
-The LM5176 regulates by maintaining its feedback pin (`FB`) at an internal reference voltage of $V_{\text{ref}} = 1.20\,\text{V}$. Rather than modifying the resistor divider ratio with digital potentiometers (which introduce parasitic wiper capacitance and poor bandwidth), we connect an analog summing resistor ($R_{\text{DAC}} = 11.0\,\text{k}\Omega$) from the MCU 12-bit DAC output directly into the `FB` node.
+The LM5176 regulates by maintaining its feedback pin (`FB`) at an internal reference voltage of $V_{\text{ref}} = 1.20\,\text{V}$. Rather than modifying the resistor divider ratio with mechanical or digital potentiometers, we connect a precision summing resistor ($R_{\text{DAC}} = 11.0\,\text{k}\Omega$) from the MCU 12-bit DAC output directly into the `FB` summing junction.
 
-Applying Kirchhoff's Current Law (KCL) at the `FB` summing node:
-
+Applying Kirchhoff's Current Law (KCL) at the `FB` node:
 $$\frac{V_{\text{out}} - 1.20}{R_{\text{top}}} + \frac{V_{\text{DAC}} - 1.20}{R_{\text{DAC}}} = \frac{1.20}{R_{\text{bot}}}$$
 
 Selecting $R_{\text{top}} = 49.9\,\text{k}\Omega$, $R_{\text{bot}} = 3.65\,\text{k}\Omega$, and $R_{\text{DAC}} = 11.0\,\text{k}\Omega$:
-* When $V_{\text{DAC}} = 0.0\,\text{V}$, maximum current is sunk from the node, forcing $V_{\text{out}} = 20.0\,\text{V}$.
-* When $V_{\text{DAC}} = 3.3\,\text{V}$, current is sourced into the node, reducing $V_{\text{out}} = 5.0\,\text{V}$.
-Because the summing junction operates into the virtual ground of the error amplifier, injecting current modifies only the DC operating setpoint without altering the AC small-signal feedback loop gain or phase margin.
+* When $V_{\text{DAC}} = 0.0\,\text{V}$, maximum current is sunk from the node, setting $V_{\text{out}} = 20.0\,\text{V}$.
+* When $V_{\text{DAC}} = 3.3\,\text{V}$, current is sourced into the node, setting $V_{\text{out}} = 5.0\,\text{V}$.
+Because current injection shifts only the DC operating bias point, the AC loop compensation and phase margin remain completely unchanged and stable.
 
 ---
 
-### Q7: Explain how the hardware protects against a short circuit in under 5 microseconds.
+### Q7: How does the power supply protect against overcurrent and short circuits?
 **Answer**:
-Software interrupts and ADC sampling loops are far too slow ($> 1\,\text{ms}$) to prevent MOSFET thermal destruction during a dead short. We implemented an autonomous analog hardware protection circuit:
-1. Output current flows through a precision 10 mΩ, 3W, 0.1% metal element current shunt.
-2. A TI INA240A2 precision current sense amplifier with $50\,\text{V/V}$ fixed gain and high PWM common-mode rejection amplifies the shunt signal ($10\,\text{m}\Omega \times 50 = 0.50\,\text{V/A}$).
-3. This amplified analog voltage is routed to a TI TLV3501 high-speed analog comparator with a propagation delay of just **$4.5\,\text{ns}$**.
-4. The comparator threshold is set by a dedicated DAC reference representing $I_{\text{set}}$.
-5. When output current exceeds $I_{\text{set}}$, the comparator trips instantly, turning on a low-$R_{\text{DS(on)}}$ 2N7002 transistor that pulls the LM5176 `COMP` pin directly to ground.
-6. Pulling `COMP` low overrides the error amplifier and forces the PWM controller to terminate gate pulses within **$< 5.0\,\mu\text{s}$**, autonomously clamping current without microcontroller execution delay.
+We use standard, proven industry protections built directly into the hardware controllers:
+1. **LM5176 Built-in Cycle-by-Cycle Current Limiting**: The LM5176 continuously monitors inductor/output current through a $10\,\text{m}\Omega$ precision sense resistor connected to its dedicated `CSP` and `CSN` pins. If current exceeds the programmed threshold, the controller immediately truncates the current PWM pulse, capping peak current on every 300 kHz switching cycle.
+2. **MCU Supervisory Disable**: The MCU continuously reads output current via the INA226 power monitor over I2C. If a sustained overload or short-circuit is detected, the MCU pulls the LM5176 `ENABLE` pin low to safely disable power delivery.
+3. **Primary AC Fuse**: A 2.0A ceramic time-lag fuse on the AC mains provides fail-safe isolation against internal catastrophic short circuits.
 
 ---
 
 ### Q8: How is safety galvanic isolation guaranteed on the PCB?
 **Answer**:
-We strictly adhere to **IEC 62368-1** for reinforced insulation under Pollution Degree 2 and Overvoltage Category II:
+We strictly adhere to **IEC 62368-1** for reinforced insulation:
 1. **$6.4\,\text{mm}$ Surface Creepage**: Maintained between all primary high-voltage copper traces/pads and secondary touch-safe SELV circuits.
-2. **$2.0\,\text{mm}$ Milled PCB Isolation Air Slot**: A continuous milled slot is routed through the FR-4 PCB substrate directly beneath the transformer and optocoupler bodies, eliminating surface contaminant accumulation.
-3. **Triple-Insulated Secondary Magnetics**: The secondary winding of the PQ26/20 transformer is wound using Furukawa TEX-E wire, featuring three independent extruded layers of safety insulation rated for 3000V RMS dielectric breakdown.
-4. **Isolated Telemetry**: The AC mains voltage sensing uses a TI AMC1311 isolated delta-sigma amplifier providing certified $3000\,\text{V}_{\text{RMS}}$ reinforced galvanic isolation.
+2. **$2.0\,\text{mm}$ Milled PCB Isolation Air Slot**: A continuous milled slot is routed through the FR-4 PCB substrate directly beneath the transformer and optocoupler bodies.
+3. **Triple-Insulated Secondary Magnetics**: The secondary winding of the PQ26/20 transformer uses Furukawa TEX-E wire, featuring three independent extruded layers of safety insulation rated for 3000V RMS dielectric breakdown.
+4. **Hi-Pot Verification**: Verified on the bench with a 3000V AC RMS dielectric withstand test for 60 seconds with zero breakdown.
 
 ---
 
 ### Q9: How do you verify output voltage ripple on the oscilloscope?
 **Answer**:
-Standard oscilloscope alligator ground leads act as loop antennas that pick up radiated high-frequency magnetic fields generated by the 300 kHz switching inductor, creating false noise spikes. To measure true output ripple:
+Standard oscilloscope alligator ground leads act as loop antennas that pick up radiated high-frequency magnetic noise from the switching inductor. To measure true ripple accurately:
 1. Use the **tip-and-barrel technique** with a dedicated probe ground spring directly across the output ceramic filter capacitor terminals.
 2. Set oscilloscope channel bandwidth limit to **20 MHz** per industry standard test protocols.
 3. Terminate the probe into 1 MΩ AC coupling.
@@ -777,4 +752,4 @@ To protect the prototype hardware against assembly errors or short circuits:
 2. **Current-Limited DC Auxiliary Check**: Inject external +12V DC into the secondary auxiliary rail to verify that the STM32 MCU boots, the OLED dashboard illuminates, and the DAC generates valid reference voltages.
 3. **Supervised AC Ramp with Variac**: Connect the AC mains input through a 1:1 safety isolation transformer, a Variac, and a 100W incandescent series ballast bulb. Slowly increase AC input voltage from 0V to 85V AC while observing bulk bus voltage on an oscilloscope.
 4. **Intermediate Bus Stabilization**: Confirm that the UCC28740 Flyback starts switching at $V_{\text{bulk}} \approx 80\,\text{V DC}$ and stabilizes the intermediate bus at exactly $+24.0\,\text{V DC} \pm 1.0\%$.
-5. **Post-Regulator Progressive Load**: Enable the LM5176 Buck-Boost controller with no load, verify DAC setpoints from 5V to 20V, and gradually increase electronic load current in 0.5A steps up to 3.0A while monitoring inductor thermal signatures with a FLIR thermal camera.
+5. **Post-Regulator Progressive Load**: Enable the LM5176 Buck-Boost controller with no load, verify DAC setpoints from 5V to 20V with a precision DMM, and gradually increase electronic load current in 0.5A steps up to 3.0A while monitoring inductor thermal signatures with a FLIR thermal camera.
