@@ -1,0 +1,108 @@
+digraph SystemPowerFlow {
+    graph [
+        rankdir=LR,
+        bgcolor="#FFFFFF",
+        compound=true,
+        fontname="Helvetica, Arial, sans-serif",
+        fontsize=12,
+        nodesep=0.45,
+        ranksep=0.65,
+        pad="0.25,0.25",
+        splines=true
+    ];
+
+    node [
+        fontname="Helvetica, Arial, sans-serif",
+        fontsize=9.5,
+        shape=box,
+        style="filled,rounded",
+        penwidth=1.8,
+        margin="0.18,0.12"
+    ];
+
+    edge [
+        fontname="Helvetica, Arial, sans-serif",
+        fontsize=8.5,
+        penwidth=2.0,
+        color="#37474F",
+        arrowsize=0.85
+    ];
+
+    s1 [
+        label=<<table border="0" cellborder="0" cellspacing="2">
+            <tr><td><b>1. AC MAINS POWER SUPPLY</b></td></tr>
+            <hr/>
+            <tr><td align="left">• 85 V to 265 V AC RMS, 47-63 Hz</td></tr>
+            <tr><td align="left">• IEC 320-C14 Inlet (Line, Neutral, PE)</td></tr>
+            <tr><td align="left">• 2.0A Time-Lag Ceramic Fuse (F1)</td></tr>
+            <tr><td align="left">• 10 Ohm Inrush Thermistor (NTC1)</td></tr>
+            <tr><td align="left">• 300V MOV Surge Clamp (MOV1)</td></tr>
+        </table>>,
+        fillcolor="#ECEFF1",
+        color="#37474F"
+    ];
+
+    s2 [
+        label=<<table border="0" cellborder="0" cellspacing="2">
+            <tr><td><b>2. AC RECTIFICATION &amp; EMI FILTER</b></td></tr>
+            <hr/>
+            <tr><td align="left">• 2-Stage CM Chokes: 15mH + 4.7mH</td></tr>
+            <tr><td align="left">• Differential X2 Film: 2x 0.22uF + 0.10uF</td></tr>
+            <tr><td align="left">• Common-Mode Y2: 4x 2.2nF to Earth PE</td></tr>
+            <tr><td align="left">• GBU606 Bridge Rectifier (600V, 6A)</td></tr>
+            <tr><td align="left">• 100uF / 450V Bulk Electrolytic Cap</td></tr>
+            <tr><td align="left">• Output: +120V to +375V DC High-Voltage Bus</td></tr>
+        </table>>,
+        fillcolor="#FFF3E0",
+        color="#E65100"
+    ];
+
+    s3 [
+        label=<<table border="0" cellborder="0" cellspacing="2">
+            <tr><td><b>3. FLYBACK CONVERTER SYSTEM</b></td></tr>
+            <hr/>
+            <tr><td align="left">• Uniform 65 kHz Clock (TI UC3843 PWM)</td></tr>
+            <tr><td align="left">• PQ26/20 Core (3C95 Ferrite, Lp=220uH)</td></tr>
+            <tr><td align="left">• 3000V RMS Reinforced Galvanic Barrier</td></tr>
+            <tr><td align="left">• 800V Superjunction MOSFET (Q1)</td></tr>
+            <tr><td align="left">• MBR10100 Schottky Diode + Heatsink</td></tr>
+            <tr><td align="left">• Output: +24.0V DC Intermediate Rail (72W)</td></tr>
+        </table>>,
+        fillcolor="#E8F5E9",
+        color="#2E7D32"
+    ];
+
+    s4 [
+        label=<<table border="0" cellborder="0" cellspacing="2">
+            <tr><td><b>4. BUCK-BOOST POST-REGULATOR</b></td></tr>
+            <hr/>
+            <tr><td align="left">• 4-Switch Synchronous H-Bridge (QA - QD)</td></tr>
+            <tr><td align="left">• Direct PWM Duty Cycle Control (300 kHz)</td></tr>
+            <tr><td align="left">• Modulated by STM32G474 HRTIM Engine</td></tr>
+            <tr><td align="left">• 10uH Flat-Wire Power Inductor (8.5A / 11.5A)</td></tr>
+            <tr><td align="left">• Sub-30ns Hardware Peak Limit (10mOhm Shunt)</td></tr>
+            <tr><td align="left">• D = 20.8% (5V) to 83.3% (20V)</td></tr>
+        </table>>,
+        fillcolor="#E0F7FA",
+        color="#00838F"
+    ];
+
+    s5 [
+        label=<<table border="0" cellborder="0" cellspacing="2">
+            <tr><td><b>5. FINAL DC POWER OUTPUT</b></td></tr>
+            <hr/>
+            <tr><td align="left">• Heavy-Duty 4mm Binding Posts (Red, Black, PE)</td></tr>
+            <tr><td align="left">• 5.0V to 20.0V DC @ 0 - 3.0A (60W)</td></tr>
+            <tr><td align="left">• Output Ripple &lt; 25mV pk-pk (20MHz Limit)</td></tr>
+            <tr><td align="left">• Dynamic Transient Recovery &lt; 150 us</td></tr>
+            <tr><td align="left">• Touch-Safe SELV Compliant Output</td></tr>
+        </table>>,
+        fillcolor="#E8EAF6",
+        color="#283593"
+    ];
+
+    s1 -> s2 [label=" Raw AC Grid"];
+    s2 -> s3 [label=" +120V to +375V DC Bus", color="#E65100"];
+    s3 -> s4 [label=" +24.0V DC Rail (72W)", color="#2E7D32"];
+    s4 -> s5 [label=" 5.0V - 20.0V DC (60W)", color="#00838F"];
+}

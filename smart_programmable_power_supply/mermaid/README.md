@@ -14,6 +14,7 @@ This directory serves as the centralized repository for all **Mermaid architectu
 | **[`four_stage_power_flow.mmd`](four_stage_power_flow.mmd)** | `.mmd` | **Simplified 4-Stage Power Flow Block Diagram**: High-level power path from Universal AC Mains through Rectifier, Isolated QR Flyback, and Buck-Boost post-regulator to DUT. | [README.md](../../README.md) |
 | **[`master_hardware_architecture.mmd`](master_hardware_architecture.mmd)** | `.mmd` | **Master Hardware Architecture Diagram**: Multi-domain hardware flow across Hot Domain, Reinforced Isolation Barrier, SELV Buck-Boost, Control, and Telemetry. | [SYSTEM_BLOCK_DIAGRAM_AND_ARCHITECTURE.md](../SYSTEM_BLOCK_DIAGRAM_AND_ARCHITECTURE.md) |
 | **[`component_connections_block_diagram.mmd`](component_connections_block_diagram.mmd)** | `.mmd` | **Detailed Component Connections Block Diagram**: Full pin-to-pin and net-level hardware interconnect diagram connecting all 51 components across AC Mains, 65kHz Flyback, LM5176 Buck-Boost, Telemetry, and MCU. | [PRODUCT_REQUIREMENT_DOCUMENT_PRD.md](../PRODUCT_REQUIREMENT_DOCUMENT_PRD.md) |
+| **[`system_power_flow_overview.mmd`](system_power_flow_overview.mmd)** | `.mmd` | **General System Power Flow Overview**: High-level detailed flow diagram (`AC Mains Power Supply > AC Rectification & EMI Filter > Flyback System > Buck-Boost > Final Output`) with component parameters. | [COMPONENT_SELECTION_AND_SYSTEM_FLOW_GUIDE.md](../COMPONENT_SELECTION_AND_SYSTEM_FLOW_GUIDE.md) |
 
 ---
 

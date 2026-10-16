@@ -1,0 +1,21 @@
+flowchart LR
+    classDef mainsStyle fill:#ECEFF1,stroke:#37474F,stroke-width:2px,color:#263238
+    classDef rectStyle fill:#FFF3E0,stroke:#E65100,stroke-width:2px,color:#BF360C
+    classDef flybackStyle fill:#E8F5E9,stroke:#2E7D32,stroke-width:2px,color:#1B5E20
+    classDef bbStyle fill:#E0F7FA,stroke:#00838F,stroke-width:2px,color:#004D40
+    classDef outStyle fill:#E8EAF6,stroke:#283593,stroke-width:2px,color:#1A237E
+
+    STAGE1["<b>1. AC MAINS POWER SUPPLY</b><br/>• 85 V to 265 V AC RMS (47 - 63 Hz)<br/>• IEC 320-C14 Chassis Inlet (L, N, PE)<br/>• 2A Time-Lag Fuse (F1) + 10 Ohm NTC<br/>• 300V MOV Surge Clamp (MOV1)<br/>• Peak Inrush &lt; 25A, Max Power 84W"]:::mainsStyle
+
+    STAGE2["<b>2. AC RECTIFICATION & EMI FILTER</b><br/>• 2-Stage CM Filter: 15mH + 4.7mH Chokes<br/>• Differential X2 Caps: 2x 0.22uF + 0.10uF<br/>• Common-Mode Y2 Caps: 4x 2.2nF to Earth PE<br/>• GBU606 Bridge Rectifier (600V, 6A)<br/>• 100uF / 450V Bulk Electrolytic Cap<br/>• Output: +120V to +375V DC Bulk Bus"]:::rectStyle
+
+    STAGE3["<b>3. FLYBACK CONVERTER SYSTEM</b><br/>• Uniform 65 kHz PWM Clock (UC3843 IC)<br/>• PQ26/20 Core (3C95 Ferrite, Lp = 220uH)<br/>• 3000V RMS Reinforced Galvanic Barrier<br/>• 800V Superjunction Power FET (Q1)<br/>• Passive MBR10100 Schottky Diode + Heatsink<br/>• Output: +24.0V DC Intermediate Bus (72W)"]:::flybackStyle
+
+    STAGE4["<b>4. BUCK-BOOST POST-REGULATOR</b><br/>• 4-Switch Synchronous H-Bridge (QA - QD)<br/>• Direct PWM Duty Cycle Control (300 kHz)<br/>• Modulated by STM32G474 HRTIM Engine<br/>• 10uH Flat-Wire Inductor (8.5A RMS / 11.5A Sat)<br/>• Sub-30ns Hardware Peak Limit (10mOhm Shunt)<br/>• Step-down or across to 5.0V - 20.0V DC"]:::bbStyle
+
+    STAGE5["<b>5. FINAL DC POWER OUTPUT</b><br/>• Heavy-Duty 4mm Binding Posts (Red, Black, PE)<br/>• Programmable 5.0V to 20.0V DC @ 0 - 3.0A<br/>• 60W Continuous Power Delivery<br/>• Output Ripple &lt; 25mV pk-pk (20MHz Bandwidth)<br/>• Line/Load Regulation &lt; 0.5% (SELV Safe)"]:::outStyle
+
+    STAGE1 -->|"Raw AC Grid"| STAGE2
+    STAGE2 -->|"+120V to +375V DC Bus"| STAGE3
+    STAGE3 -->|"Isolated +24.0V DC Intermediate Rail"| STAGE4
+    STAGE4 -->|"Precision Regulated DC"| STAGE5
