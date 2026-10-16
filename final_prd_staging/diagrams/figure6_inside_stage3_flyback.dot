@@ -1,0 +1,201 @@
+digraph Figure6Stage3Flyback {
+    graph [
+        rankdir=LR,
+        bgcolor="#FFFFFF",
+        compound=true,
+        fontname="Helvetica, Arial, sans-serif",
+        fontsize=12,
+        nodesep=0.35,
+        ranksep=0.55,
+        pad="0.25,0.25",
+        splines=true
+    ];
+
+    node [
+        fontname="Helvetica, Arial, sans-serif",
+        fontsize=9,
+        shape=box,
+        style="filled,rounded",
+        margin="0.14,0.10",
+        penwidth=1.5
+    ];
+
+    edge [
+        fontname="Helvetica, Arial, sans-serif",
+        fontsize=8,
+        penwidth=1.8,
+        arrowsize=0.8
+    ];
+
+    hvdc_in [
+        label = <<table border="0" cellborder="0" cellspacing="2">
+            <tr><td><b>+HVDC BUS IN</b></td></tr>
+            <tr><td><font color="#E65100">+120V to +375V DC</font></td></tr>
+            <hr/>
+            <tr><td align="left">• From Stage 2 Bulk Cap</td></tr>
+            <tr><td align="left">• Feeds Primary Cell</td></tr>
+        </table>>,
+        fillcolor = "#FFF3E0",
+        color = "#E65100"
+    ];
+
+    subgraph cluster_pri_flyback {
+        label = "PRIMARY CONTROL & SWITCHING CELL (GND_PRI)";
+        style = "filled,rounded";
+        fillcolor = "#FAFAFA";
+        color = "#E65100";
+        penwidth = 1.6;
+
+        uc3843 [
+            label = <<table border="0" cellborder="0" cellspacing="2">
+                <tr><td><b>PWM CONTROLLER</b></td></tr>
+                <tr><td><font color="#0277BD">UC3843 / UCC28C43</font></td></tr>
+                <hr/>
+                <tr><td align="left">• Uniform 65 kHz Clock</td></tr>
+                <tr><td align="left">• RT = 10kΩ, CT = 2.2nF</td></tr>
+                <tr><td align="left">• Totem-Pole Gate Out</td></tr>
+                <tr><td align="left">• Cycle-by-cycle ISENSE</td></tr>
+            </table>>,
+            fillcolor = "#E1F5FE",
+            color = "#0277BD"
+        ];
+
+        q1 [
+            label = <<table border="0" cellborder="0" cellspacing="2">
+                <tr><td><b>PRIMARY MOSFET</b></td></tr>
+                <tr><td><font color="#E65100">STP10NK80Z / 800V</font></td></tr>
+                <hr/>
+                <tr><td align="left">• 800V Superjunction N-FET</td></tr>
+                <tr><td align="left">• R_DS(on) = 0.29Ω</td></tr>
+                <tr><td align="left">• V_DS,pk = 599V (&lt; 75%)</td></tr>
+            </table>>,
+            fillcolor = "#FFE0B2",
+            color = "#E65100"
+        ];
+
+        snub [
+            label = <<table border="0" cellborder="0" cellspacing="2">
+                <tr><td><b>RCD SNUBBER CLAMP</b></td></tr>
+                <tr><td><font color="#E65100">US1M + 22.6kΩ + 1nF</font></td></tr>
+                <hr/>
+                <tr><td align="left">• Clamps leakage spike</td></tr>
+                <tr><td align="left">• V_clamp safely &lt; 650V</td></tr>
+            </table>>,
+            fillcolor = "#FFE0B2",
+            color = "#E65100"
+        ];
+
+        rcs [
+            label = <<table border="0" cellborder="0" cellspacing="2">
+                <tr><td><b>CURRENT SHUNT</b></td></tr>
+                <tr><td><font color="#E65100">R_CS: 0.25Ω / 2W</font></td></tr>
+                <hr/>
+                <tr><td align="left">• Peak current sense</td></tr>
+                <tr><td align="left">• Limit = 2.96A peak</td></tr>
+            </table>>,
+            fillcolor = "#FFE0B2",
+            color = "#E65100"
+        ];
+
+        aux [
+            label = <<table border="0" cellborder="0" cellspacing="2">
+                <tr><td><b>AUX BIAS WINDING</b></td></tr>
+                <tr><td><font color="#0277BD">N_aux = 5T (+14V DC)</font></td></tr>
+                <hr/>
+                <tr><td align="left">• Sustains UC3843 VCC</td></tr>
+                <tr><td align="left">• High-rel bootstrap</td></tr>
+            </table>>,
+            fillcolor = "#E1F5FE",
+            color = "#0277BD"
+        ];
+    }
+
+    subgraph cluster_trans_barrier {
+        label = "⚡ REINFORCED ISOLATION BARRIER (IEC 62368-1)\n3000V RMS Dielectric Withstand | 6.4mm Creepage | 2.0mm Milled Slot";
+        style = "filled,rounded,dashed";
+        fillcolor = "#FFEBEE";
+        color = "#C62828";
+        penwidth = 1.8;
+
+        tx_pri [label="Primary Winding\nPQ26/20 Core (3C95)\nNp=36T, Lp=220µH", fillcolor="#FFFFFF", color="#C62828"];
+        tx_sec [label="Secondary Winding\nNs=6T (TEX-E TIW)\nTurns Ratio = 6:1", fillcolor="#FFFFFF", color="#C62828"];
+        opto [label="Feedback Optocoupler\nPC817 / EL817 (5kV RMS)", fillcolor="#FFFFFF", color="#C62828"];
+    }
+
+    subgraph cluster_sec_flyback {
+        label = "SECONDARY SCHOTTKY RECTIFICATION (GND_SEC)";
+        style = "filled,rounded";
+        fillcolor = "#FAFAFA";
+        color = "#2E7D32";
+        penwidth = 1.6;
+
+        mbr [
+            label = <<table border="0" cellborder="0" cellspacing="2">
+                <tr><td><b>SCHOTTKY RECTIFIER</b></td></tr>
+                <tr><td><font color="#2E7D32">MBR10100 / 100V 10A</font></td></tr>
+                <hr/>
+                <tr><td align="left">• V_F = 0.60V @ 3A</td></tr>
+                <tr><td align="left">• High-rel passive diode</td></tr>
+                <tr><td align="left">• Heatsink mounted</td></tr>
+            </table>>,
+            fillcolor = "#E8F5E9",
+            color = "#2E7D32"
+        ];
+
+        lc [
+            label = <<table border="0" cellborder="0" cellspacing="2">
+                <tr><td><b>LC OUTPUT FILTER</b></td></tr>
+                <tr><td><font color="#2E7D32">470µF Poly + 2.2µH</font></td></tr>
+                <hr/>
+                <tr><td align="left">• Low ESR &lt; 15mΩ</td></tr>
+                <tr><td align="left">• Attenuates 65kHz ripple</td></tr>
+                <tr><td align="left">• Ripple &lt; 40mV pk-pk</td></tr>
+            </table>>,
+            fillcolor = "#E8F5E9",
+            color = "#2E7D32"
+        ];
+
+        tl431 [
+            label = <<table border="0" cellborder="0" cellspacing="2">
+                <tr><td><b>SHUNT REGULATOR</b></td></tr>
+                <tr><td><font color="#2E7D32">TI TL431 + Type-II Loop</font></td></tr>
+                <hr/>
+                <tr><td align="left">• 2.495V Reference</td></tr>
+                <tr><td align="left">• 0.5% Accuracy</td></tr>
+                <tr><td align="left">• Drives Opto Diode</td></tr>
+            </table>>,
+            fillcolor = "#E8F5E9",
+            color = "#2E7D32"
+        ];
+    }
+
+    bus_24v [
+        label = <<table border="0" cellborder="0" cellspacing="2">
+            <tr><td><b>+24.0V DC BUS</b></td></tr>
+            <tr><td><font color="#1B5E20">Intermediate Rail (72W)</font></td></tr>
+            <hr/>
+            <tr><td align="left">• +24.0V DC ± 1.0%</td></tr>
+            <tr><td align="left">• 3.0A Continuous (72W)</td></tr>
+            <tr><td align="left">• Feeds Stage 4 Post-Reg</td></tr>
+        </table>>,
+        fillcolor = "#A5D6A7",
+        color = "#1B5E20",
+        penwidth = 2.0
+    ];
+
+    hvdc_in -> tx_pri [color="#E65100", penwidth=2.2];
+    tx_pri -> q1 [label=" Drain", color="#E65100"];
+    q1 -> snub [dir=both, style=dashed, color="#E65100"];
+    q1 -> rcs [label=" Source", color="#E65100"];
+    rcs -> uc3843 [label=" ISENSE", style=dashed, color="#0277BD"];
+    uc3843 -> q1 [label=" 65kHz Gate", color="#0277BD"];
+    aux -> uc3843 [label=" +14V VCC", color="#0277BD"];
+
+    tx_pri -> tx_sec [label=" 6:1 Ratio", color="#C62828", style=bold];
+    tx_sec -> mbr [label=" Secondary AC", color="#2E7D32", penwidth=2.0];
+    mbr -> lc [label=" Rectified DC", color="#2E7D32", penwidth=2.0];
+    lc -> bus_24v [label=" +24V Rail", color="#1B5E20", penwidth=2.2];
+    bus_24v -> tl431 [label=" Sense", color="#2E7D32"];
+    tl431 -> opto [label=" LED Drive", color="#C62828"];
+    opto -> uc3843 [label=" COMP Pull-Down", color="#C62828"];
+}

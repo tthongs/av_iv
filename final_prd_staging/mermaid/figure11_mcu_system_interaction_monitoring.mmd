@@ -1,0 +1,30 @@
+flowchart TD
+    classDef initStyle fill:#ECEFF1,stroke:#37474F,stroke-width:2px,color:#263238
+    classDef standStyle fill:#FFFDE7,stroke:#F57F17,stroke-width:2px,color:#E65100
+    classDef runStyle fill:#E8F5E9,stroke:#2E7D32,stroke-width:2px,color:#1B5E20
+    classDef warnStyle fill:#FFF3E0,stroke:#E65100,stroke-width:2px,color:#BF360C
+    classDef faultStyle fill:#FFEBEE,stroke:#C62828,stroke-width:2px,color:#B71C1C
+
+    subgraph MCU_STATE_MACHINE ["STM32G474 FIRMWARE OPERATING STATE MACHINE"]
+        STATE_INIT["<b>STATE 0: SYSTEM INITIALIZATION</b><br/>• Clock setup @ 170 MHz, Sinc3 Init<br/>• Self-test peripherals (INA226, OLED, DAC)<br/>• Read factory calibration coefficients<br/>• Set LM5176 ENABLE pin LOW"]:::initStyle
+
+        STATE_STANDBY["<b>STATE 1: STANDBY / IDLE MODE</b><br/>• +24V Intermediate bus active<br/>• Output disabled (LM5176 ENABLE = LOW)<br/>• OLED displays 'STANDBY: Press Enable'<br/>• Standby power &lt; 150 mW<br/>• Mode LED: Amber Flashing"]:::standStyle
+
+        STATE_RAMP["<b>STATE 2: SOFT-START VOLTAGE RAMP</b><br/>• Operator presses Enable button or SCPI :OUTP ON<br/>• MCU steps 12-bit DAC smoothly to target setpoint<br/>• Enables LM5176 post-regulator<br/>• Inrush slew controlled (dV/dt &lt; 1V/ms)"]:::runStyle
+
+        STATE_CV["<b>STATE 3: ACTIVE REGULATION (CV MODE)</b><br/>• LM5176 regulates V_OUT within ±0.2%<br/>• Mode LED: Solid Green<br/>• 10 Hz Telemetry Loop active<br/>• OLED displays live V_out, I_load, P_out, η"]:::runStyle
+
+        STATE_LIMIT["<b>STATE 4: AUTONOMOUS CURRENT LIMIT</b><br/>• Load current exceeds programmed limit<br/>• LM5176 cycle-by-cycle CSP/CSN clamps peak current<br/>• Output voltage folds back<br/>• Mode LED: Solid Amber (Limit Active)<br/>• MCU starts 500 ms persistent timer"]:::warnStyle
+
+        STATE_FAULT["<b>STATE 5: SUPERVISORY FAULT SHUTDOWN</b><br/>• Triggered if overload &gt; 500ms or OTP &gt; 85°C<br/>• MCU drives LM5176 ENABLE pin LOW<br/>• Output disconnected within 2 ms<br/>• Mode LED: Solid Red (Fault)<br/>• OLED displays fault diagnostics"]:::faultStyle
+
+        STATE_INIT -->|Self-Test Passed| STATE_STANDBY
+        STATE_STANDBY -->|Enable Event| STATE_RAMP
+        STATE_RAMP -->|Target Voltage Reached| STATE_CV
+        STATE_CV -->|Output Disable Button / SCPI| STATE_STANDBY
+        STATE_CV -->|Overload Step (I &gt; 3.0A)| STATE_LIMIT
+        STATE_LIMIT -->|Overload Cleared (&lt; 500ms)| STATE_CV
+        STATE_LIMIT -->|Persistent Short (&gt; 500ms)| STATE_FAULT
+        STATE_CV -->|Overtemperature / OTP| STATE_FAULT
+        STATE_FAULT -->|User Clears Fault / Presses Reset| STATE_STANDBY
+    end

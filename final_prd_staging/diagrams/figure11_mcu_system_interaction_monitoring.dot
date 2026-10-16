@@ -1,0 +1,45 @@
+digraph Figure11MCUStateMachine {
+    graph [
+        rankdir=TB,
+        bgcolor="#FFFFFF",
+        compound=true,
+        fontname="Helvetica, Arial, sans-serif",
+        fontsize=12,
+        nodesep=0.40,
+        ranksep=0.50,
+        pad="0.25,0.25"
+    ];
+
+    node [
+        fontname="Helvetica, Arial, sans-serif",
+        fontsize=9.5,
+        shape=box,
+        style="filled,rounded",
+        margin="0.16,0.12",
+        penwidth=1.6
+    ];
+
+    edge [
+        fontname="Helvetica, Arial, sans-serif",
+        fontsize=8.5,
+        penwidth=1.8,
+        arrowsize=0.8
+    ];
+
+    s0 [label="STATE 0: INITIALIZATION & SELF-TEST\n• 170MHz Clock, Sinc3 & ADC setup\n• Verify I2C INA226 & OLED\n• Zero DAC, LM5176 ENABLE = LOW", fillcolor="#ECEFF1", color="#37474F"];
+    s1 [label="STATE 1: STANDBY / IDLE MODE\n• +24V Intermediate rail sustained\n• LM5176 ENABLE = LOW (Output Off)\n• Standby power < 150 mW\n• Amber LED blinking", fillcolor="#FFFDE7", color="#F57F17"];
+    s2 [label="STATE 2: SOFT-START VOLTAGE RAMP\n• Enable pressed / SCPI :OUTP ON\n• 12-Bit DAC slews to target\n• LM5176 ENABLE driven HIGH\n• Slew rate dV/dt < 1V/ms", fillcolor="#E1F5FE", color="#0277BD"];
+    s3 [label="STATE 3: ACTIVE REGULATION (CV MODE)\n• V_OUT maintained ±0.2%\n• Solid Green LED\n• 10 Hz Telemetry Loop running\n• Live OLED Dashboard update", fillcolor="#E8F5E9", color="#2E7D32"];
+    s4 [label="STATE 4: AUTONOMOUS CURRENT LIMIT\n• LM5176 CSP/CSN clamps peak current\n• Solid Amber LED (Limit active)\n• V_OUT folds back to maintain current\n• 500 ms supervisory timer runs", fillcolor="#FFF3E0", color="#E65100"];
+    s5 [label="STATE 5: SUPERVISORY FAULT SHUTDOWN\n• Overload > 500ms or OTP > 85°C\n• MCU drives LM5176 ENABLE LOW\n• Solid Red Fault LED\n• OLED diagnostic alert", fillcolor="#FFEBEE", color="#C62828"];
+
+    s0 -> s1 [label=" POST Passed"];
+    s1 -> s2 [label=" Enable Command"];
+    s2 -> s3 [label=" V_OUT Reached"];
+    s3 -> s1 [label=" Disable Command"];
+    s3 -> s4 [label=" Overload Event (I > 3A)"];
+    s4 -> s3 [label=" Overload Cleared (< 500ms)", color="#2E7D32"];
+    s4 -> s5 [label=" Fault Persistent (> 500ms)", color="#C62828"];
+    s3 -> s5 [label=" Thermal OTP Event", color="#C62828"];
+    s5 -> s1 [label=" Fault Cleared & Reset", color="#37474F"];
+}

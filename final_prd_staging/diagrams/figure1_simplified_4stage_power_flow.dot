@@ -1,0 +1,132 @@
+digraph Figure1PowerFlow {
+    graph [
+        rankdir=LR,
+        bgcolor="#FFFFFF",
+        compound=true,
+        fontname="Helvetica, Arial, sans-serif",
+        fontsize=12,
+        nodesep=0.45,
+        ranksep=0.70,
+        pad="0.25,0.25",
+        splines=true
+    ];
+
+    node [
+        fontname="Helvetica, Arial, sans-serif",
+        fontsize=9.5,
+        shape=box,
+        style="filled,rounded",
+        margin="0.16,0.12",
+        penwidth=1.6
+    ];
+
+    edge [
+        fontname="Helvetica, Arial, sans-serif",
+        fontsize=8.5,
+        penwidth=2.2,
+        arrowsize=0.8
+    ];
+
+    subgraph cluster_hot_domain {
+        label = "PRIMARY HOT DOMAIN (High Voltage Grid)";
+        style = "filled,rounded,dashed";
+        fillcolor = "#F5F5F5";
+        color = "#B71C1C";
+        penwidth = 1.8;
+
+        s1 [
+            label = <<table border="0" cellborder="0" cellspacing="2">
+                <tr><td><b>STAGE 1: MAINS &amp; EMI</b></td></tr>
+                <tr><td><font color="#455A64">AC Protection &amp; Filtering</font></td></tr>
+                <hr/>
+                <tr><td align="left">• 85V – 265V AC RMS, 47–63 Hz</td></tr>
+                <tr><td align="left">• 2A Time-Lag Ceramic Fuse</td></tr>
+                <tr><td align="left">• 10Ω NTC Inrush Limiter</td></tr>
+                <tr><td align="left">• 300V RMS MOV Surge Clamp</td></tr>
+                <tr><td align="left">• 2-Stage Common-Mode Choke</td></tr>
+            </table>>,
+            fillcolor = "#ECEFF1",
+            color = "#37474F"
+        ];
+
+        s2 [
+            label = <<table border="0" cellborder="0" cellspacing="2">
+                <tr><td><b>STAGE 2: RECTIFIER &amp; BULK</b></td></tr>
+                <tr><td><font color="#E65100">AC to Unregulated HVDC</font></td></tr>
+                <hr/>
+                <tr><td align="left">• GBU606 Bridge (600V, 6A)</td></tr>
+                <tr><td align="left">• 100µF / 450V Bulk Electrolytic</td></tr>
+                <tr><td align="left">• Holdup Time &gt; 10 ms</td></tr>
+                <tr><td align="left">• Bleeder Discharge String</td></tr>
+                <tr><td align="left">• Bus: +120V to +375V DC</td></tr>
+            </table>>,
+            fillcolor = "#FFF3E0",
+            color = "#E65100"
+        ];
+
+        s1 -> s2 [label=" Filtered AC", color="#37474F"];
+    }
+
+    subgraph cluster_cold_domain {
+        label = "SECONDARY TOUCH-SAFE SELV DOMAIN";
+        style = "filled,rounded,dashed";
+        fillcolor = "#F1F8E9";
+        color = "#2E7D32";
+        penwidth = 1.8;
+
+        s3 [
+            label = <<table border="0" cellborder="0" cellspacing="2">
+                <tr><td><b>STAGE 3: CONVERTER DC-DC</b></td></tr>
+                <tr><td><font color="#2E7D32">Uniform-Frequency Flyback</font></td></tr>
+                <hr/>
+                <tr><td align="left">• UC3843 PWM @ Uniform 65 kHz</td></tr>
+                <tr><td align="left">• PQ26/20 Core (Lp = 220µH, 6:1)</td></tr>
+                <tr><td align="left">• 800V Superjunction MOSFET</td></tr>
+                <tr><td align="left">• MBR10100 Schottky Diode</td></tr>
+                <tr><td align="left">• Rail: +24.0V DC / 72W (3A)</td></tr>
+            </table>>,
+            fillcolor = "#E8F5E9",
+            color = "#2E7D32"
+        ];
+
+        s4 [
+            label = <<table border="0" cellborder="0" cellspacing="2">
+                <tr><td><b>STAGE 4: POST-REGULATOR</b></td></tr>
+                <tr><td><font color="#00838F">Synchronous 4-Switch Buck-Boost</font></td></tr>
+                <hr/>
+                <tr><td align="left">• TI LM5176 Controller @ 300 kHz</td></tr>
+                <tr><td align="left">• 4x 40V MOSFETs + 10µH Inductor</td></tr>
+                <tr><td align="left">• Precision 12-Bit DAC Steering</td></tr>
+                <tr><td align="left">• Cycle-by-Cycle CSP/CSN Clamp</td></tr>
+                <tr><td align="left">• Output: 5.0V – 20.0V DC / 3.0A</td></tr>
+            </table>>,
+            fillcolor = "#E0F7FA",
+            color = "#00838F"
+        ];
+
+        s3 -> s4 [label=" +24.0V DC Rail\n(72W continuous)", color="#2E7D32"];
+    }
+
+    s5 [
+        label = <<table border="0" cellborder="0" cellspacing="2">
+            <tr><td><b>DEVICE UNDER TEST (DUT)</b></td></tr>
+            <tr><td><font color="#6A1B9A">Benchtop / ATE Load</font></td></tr>
+            <hr/>
+            <tr><td align="left">• 4mm Gold Binding Posts</td></tr>
+            <tr><td align="left">• Clean DC: Ripple &lt; 25mV pk-pk</td></tr>
+            <tr><td align="left">• Output Power: Up to 60W</td></tr>
+            <tr><td align="left">• Touch-Safe SELV Protected</td></tr>
+        </table>>,
+        fillcolor = "#F3E5F5",
+        color = "#6A1B9A"
+    ];
+
+    s2 -> s3 [
+        label = "⚡ 3000V RMS Reinforced Galvanic Barrier\n(IEC 62368-1 SELV, 6.4mm Creepage, 2.0mm Milled Slot)",
+        color = "#C62828",
+        style = "bold",
+        penwidth = 3.0
+    ];
+
+    s4 -> s5 [label=" Regulated DC Output\n(5.0V - 20.0V / 3A)", color="#00838F", penwidth=2.5];
+}

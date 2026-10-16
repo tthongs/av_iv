@@ -1,0 +1,47 @@
+digraph Figure2UseCaseCV {
+    graph [
+        rankdir=TB,
+        bgcolor="#FFFFFF",
+        compound=true,
+        fontname="Helvetica, Arial, sans-serif",
+        fontsize=12,
+        nodesep=0.35,
+        ranksep=0.45,
+        pad="0.25,0.25"
+    ];
+
+    node [
+        fontname="Helvetica, Arial, sans-serif",
+        fontsize=9.5,
+        shape=box,
+        style="filled,rounded",
+        margin="0.14,0.10",
+        penwidth=1.5
+    ];
+
+    edge [
+        fontname="Helvetica, Arial, sans-serif",
+        fontsize=8.5,
+        penwidth=1.8,
+        arrowsize=0.8
+    ];
+
+    user [label="Operator Input / Host ATE\n• Dual Rotary Encoders\n• USB-CDC SCPI Command", fillcolor="#ECEFF1", color="#37474F"];
+    mcu [label="STM32G474 MCU Controller\n• Setpoint Validation (5.0V - 20.0V)\n• Linear DAC Voltage Calculation", fillcolor="#E1F5FE", color="#0277BD"];
+    dac [label="12-Bit Monotonic DAC Channel\n• V_DAC Output: 0.00V to 3.30V\n• 10 mV Fine Resolution", fillcolor="#E8EAF6", color="#283593"];
+    sum [label="Summing Network (R_top, R_DAC, R_bot)\n• Injects steering current into FB\n• Keeps FB at 1.20V Precision Ref", fillcolor="#F3E5F5", color="#6A1B9A"];
+    lm5176 [label="TI LM5176 Controller\n• 300 kHz Synchronous PWM\n• Buck Mode (5-18V) / Buck-Boost (18-20V)", fillcolor="#E0F7FA", color="#00838F"];
+    power_stage [label="4-Switch Synchronous Bridge & Inductor\n• 4x 40V BSC034N04LS MOSFETs\n• 10µH Flat-Wire Power Inductor", fillcolor="#B2EBF2", color="#00695C"];
+    out_rail [label="DC Output Rail (5.0V - 20.0V / 3A)\n• Output Filter (4x 22µF MLCC + 100µF Poly)\n• Dynamic Recovery < 150µs, Sag < 250mV", fillcolor="#C8E6C9", color="#1B5E20"];
+    telemetry [label="Dual Telemetry Verification\n• INA226 16-Bit I2C Power Monitor\n• 1.3\" OLED Dashboard Live Metering", fillcolor="#FFFDE7", color="#F57F17"];
+
+    user -> mcu [label=" Setpoint Target"];
+    mcu -> dac [label=" 12-Bit Word"];
+    dac -> sum [label=" V_DAC Steering Bias"];
+    sum -> lm5176 [label=" V_FB (1.20V Summed)"];
+    lm5176 -> power_stage [label=" 4x Gate Drives"];
+    power_stage -> out_rail [label=" Regulated DC"];
+    out_rail -> telemetry [label=" Kelvin Sensing"];
+    telemetry -> mcu [label=" 10 Hz Telemetry Loop"];
+    out_rail -> sum [label=" V_OUT Sense Feedback", style="dashed", color="#6A1B9A"];
+}

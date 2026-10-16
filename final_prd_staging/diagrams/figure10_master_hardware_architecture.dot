@@ -1,0 +1,150 @@
+digraph Figure10MasterArchitecture {
+    graph [
+        rankdir=LR,
+        bgcolor="#FFFFFF",
+        compound=true,
+        fontname="Helvetica, Arial, sans-serif",
+        fontsize=13,
+        nodesep=0.35,
+        ranksep=0.55,
+        pad="0.25,0.25",
+        splines=true
+    ];
+
+    node [
+        fontname="Helvetica, Arial, sans-serif",
+        fontsize=8.5,
+        shape=box,
+        style="filled,rounded",
+        margin="0.12,0.08",
+        penwidth=1.4
+    ];
+
+    edge [
+        fontname="Helvetica, Arial, sans-serif",
+        fontsize=7.5,
+        penwidth=1.8,
+        arrowsize=0.75
+    ];
+
+    subgraph cluster_mains_frontend {
+        label = "STAGE 1 & 2: MAINS AC FRONTEND & BULK DC (HOT DOMAIN)";
+        style = "filled,rounded";
+        fillcolor = "#F0F4F8";
+        color = "#37474F";
+        penwidth = 1.6;
+
+        ac_in [label="AC Grid Input\n85V - 265V AC\n47 - 63 Hz (C14)", fillcolor="#CFD8DC", color="#263238"];
+        ac_prot [label="Input Protection\n2A Fuse, 10Ω NTC\n300V MOV Clamp", fillcolor="#FFFFFF", color="#455A64"];
+        ac_emi [label="2-Stage EMI Filter\n15mH + 4.7mH Chokes\n3x X2 + 2x Y2 Caps", fillcolor="#FFFFFF", color="#455A64"];
+        ac_rect [label="Bridge & Bulk DC\nGBU606 (600V, 6A)\n100µF/450V Bulk Cap\n+120V to +375V DC", fillcolor="#FFFFFF", color="#455A64"];
+
+        ac_in -> ac_prot;
+        ac_prot -> ac_emi;
+        ac_emi -> ac_rect;
+    }
+
+    subgraph cluster_pri_flyback {
+        label = "STAGE 3: UNIFORM-FREQ FLYBACK (GND_PRI)";
+        style = "filled,rounded";
+        fillcolor = "#FFF3E0";
+        color = "#E65100";
+        penwidth = 1.6;
+
+        tx_pri [label="Transformer Primary\nPQ26/20 (3C95 Ferrite)\nNp = 36T, Lp = 220µH", fillcolor="#FFE0B2", color="#E65100"];
+        snubber [label="RCD Snubber Clamp\nUS1M + 22.6kΩ + 1nF", fillcolor="#FFFFFF", color="#F57C00"];
+        pri_fet [label="STP10NK80Z N-FET\n800V, 0.29Ω D2PAK", fillcolor="#FFFFFF", color="#E65100"];
+        pri_ctrl [label="UC3843 PWM Controller\nUniform 65kHz Fixed Clock\nCycle-by-cycle ISENSE", fillcolor="#FFFFFF", color="#E65100"];
+
+        ac_rect -> tx_pri [label=" +HVDC", color="#D84315", penwidth=2.2];
+        tx_pri -> pri_fet [label=" Drain"];
+        pri_fet -> snubber [dir=both, style=dashed];
+        pri_ctrl -> pri_fet [label=" 65kHz Gate"];
+    }
+
+    subgraph cluster_barrier {
+        label = "⚡ REINFORCED ISOLATION BARRIER (IEC 62368-1)\nCreepage ≥ 6.4mm | Milled Slot 2.0mm | 3000V RMS Withstand";
+        style = "filled,rounded,dashed";
+        fillcolor = "#FFEBEE";
+        color = "#C62828";
+        penwidth = 1.8;
+
+        tx_sec [label="Secondary Winding\nNs = 6T (TEX-E TIW)\n3000V RMS Barrier", fillcolor="#FFFFFF", color="#C62828"];
+        iso_opto [label="Feedback Optocoupler\nPC817 (5kV RMS)", fillcolor="#FFFFFF", color="#C62828"];
+        iso_amc [label="AC Voltage Sensor\nTI AMC1311 (5kV RMS)", fillcolor="#FFFFFF", color="#C62828"];
+        iso_ct [label="AC Current Sensor\nTalema CT (1000:1)", fillcolor="#FFFFFF", color="#C62828"];
+    }
+
+    subgraph cluster_sec_flyback {
+        label = "STAGE 3: SCHOTTKY RECTIFICATION (SELV)";
+        style = "filled,rounded";
+        fillcolor = "#E8F5E9";
+        color = "#2E7D32";
+        penwidth = 1.6;
+
+        mbr [label="Schottky Rectifier\nMBR10100 (100V, 10A)\nPassive TO-220 Heatsink", fillcolor="#FFFFFF", color="#2E7D32"];
+        bus_24v [label="+24.0V Intermediate Bus\nRegulated 24V / 72W\nRipple < 40mV pk-pk", fillcolor="#A5D6A7", color="#1B5E20", penwidth=2.0];
+        tl431 [label="TL431 Shunt Regulator\n2.495V Bandgap Ref", fillcolor="#FFFFFF", color="#2E7D32"];
+
+        tx_sec -> mbr;
+        mbr -> bus_24v [label=" +24V DC", color="#2E7D32", penwidth=2.0];
+        bus_24v -> tl431;
+        tl431 -> iso_opto;
+        iso_opto -> pri_ctrl [label=" COMP Pull-Down", color="#C62828"];
+    }
+
+    subgraph cluster_buck_boost {
+        label = "STAGE 4: SYNCHRONOUS BUCK-BOOST POST-REGULATOR";
+        style = "filled,rounded";
+        fillcolor = "#E0F7FA";
+        color = "#00838F";
+        penwidth = 1.6;
+
+        bb_ctrl [label="TI LM5176 Controller\n300 kHz Synchronous PWM\n4x Integrated Gate Drivers", fillcolor="#FFFFFF", color="#00838F"];
+        h_bridge [label="4-Switch H-Bridge\n4x 40V BSC034N04LS\n10µH Flat-Wire Inductor", fillcolor="#B2EBF2", color="#00838F"];
+        dc_shunt [label="10mΩ Kelvin Shunt\nBourns CSS2H (3W, 0.1%)", fillcolor="#FFFFFF", color="#00838F"];
+        dc_terminals [label="Programmable DC Output\n5.0V - 20.0V DC / 3.0A (60W)\nRipple < 25mV | 4mm Posts", fillcolor="#80CBC4", color="#004D40", penwidth=2.2];
+
+        bus_24v -> h_bridge [label=" +24V Bus", color="#00695C", penwidth=2.0];
+        bb_ctrl -> h_bridge;
+        h_bridge -> dc_shunt;
+        dc_shunt -> dc_terminals [color="#004D40", penwidth=2.2];
+        dc_shunt -> bb_ctrl [label=" CSP/CSN OCP", color="#C62828", style=dashed];
+    }
+
+    subgraph cluster_control_dac {
+        label = "DAC VOLTAGE STEERING NETWORK";
+        style = "filled,rounded";
+        fillcolor = "#F3E5F5";
+        color = "#6A1B9A";
+        penwidth = 1.6;
+
+        dac_sum [label="Summing Junction\nR_top = 49.9k, R_bot = 3.65k\nR_DAC = 11.0k (0.1% Tol)\n10 mV Step Resolution", fillcolor="#FFFFFF", color="#6A1B9A"];
+        dc_terminals -> dac_sum [label=" V_OUT Sense", style=dashed];
+        dac_sum -> bb_ctrl [label=" V_FB (1.20V Ref)"];
+    }
+
+    subgraph cluster_mcu_telemetry {
+        label = "CENTRAL EMBEDDED CONTROLLER & TELEMETRY";
+        style = "filled,rounded";
+        fillcolor = "#E1F5FE";
+        color = "#0277BD";
+        penwidth = 1.8;
+
+        mcu [label="STM32G474RET6 MCU (170 MHz)\n• Hardware Sinc3 Decimation Filter\n• Fast 12-Bit DAC & ADCs\n• Real-Time Efficiency Engine (10Hz)", fillcolor="#B3E5FC", color="#01579B", penwidth=2.0];
+        ina226 [label="TI INA226 Power Monitor\n16-Bit I2C ADC (10Hz)", fillcolor="#FFFFFF", color="#0277BD"];
+        oled [label="1.3\" OLED Display Dashboard\nLive V, I, P, ηReadouts", fillcolor="#FFFFFF", color="#D84315"];
+
+        iso_amc -> mcu [label=" Sinc3 Bitstream", color="#C62828"];
+        iso_ct -> mcu [label=" Analog i_ac"];
+        dc_shunt -> ina226;
+        ina226 -> mcu [label=" I2C (400kHz)"];
+        mcu -> dac_sum [label=" 12-Bit V_DAC", color="#6A1B9A", penwidth=1.8];
+        mcu -> bb_ctrl [label=" ENABLE Pin", color="#00838F"];
+        mcu -> oled [label=" I2C Dashboard", color="#D84315"];
+    }
+
+    ac_emi -> iso_amc [label=" AC Voltage Tap", style=dashed];
+    ac_prot -> iso_ct [label=" AC Current Loop", style=dashed];
+    tx_pri -> tx_sec [color="#C62828", style=bold, penwidth=2.5];
+}

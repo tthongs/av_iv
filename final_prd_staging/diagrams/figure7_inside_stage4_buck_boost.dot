@@ -1,0 +1,187 @@
+digraph Figure7Stage4BuckBoost {
+    graph [
+        rankdir=LR,
+        bgcolor="#FFFFFF",
+        compound=true,
+        fontname="Helvetica, Arial, sans-serif",
+        fontsize=12,
+        nodesep=0.35,
+        ranksep=0.55,
+        pad="0.25,0.25",
+        splines=true
+    ];
+
+    node [
+        fontname="Helvetica, Arial, sans-serif",
+        fontsize=9,
+        shape=box,
+        style="filled,rounded",
+        margin="0.14,0.10",
+        penwidth=1.5
+    ];
+
+    edge [
+        fontname="Helvetica, Arial, sans-serif",
+        fontsize=8,
+        penwidth=1.8,
+        arrowsize=0.8
+    ];
+
+    bus_in [
+        label = <<table border="0" cellborder="0" cellspacing="2">
+            <tr><td><b>+24.0V DC BUS IN</b></td></tr>
+            <tr><td><font color="#1B5E20">From Stage 3 Flyback</font></td></tr>
+            <hr/>
+            <tr><td align="left">• +24.0V DC ± 1.0%</td></tr>
+            <tr><td align="left">• 72W Power Source</td></tr>
+        </table>>,
+        fillcolor = "#A5D6A7",
+        color = "#1B5E20"
+    ];
+
+    subgraph cluster_ctrl {
+        label = "CONTROLLER & COMP (300 kHz)";
+        style = "filled,rounded";
+        fillcolor = "#FAFAFA";
+        color = "#00838F";
+        penwidth = 1.6;
+
+        lm5176 [
+            label = <<table border="0" cellborder="0" cellspacing="2">
+                <tr><td><b>TI LM5176 CONTROLLER</b></td></tr>
+                <tr><td><font color="#00838F">4-Switch Synchronous PWM</font></td></tr>
+                <hr/>
+                <tr><td align="left">• Buck &amp; Buck-Boost</td></tr>
+                <tr><td align="left">• 4x Integrated Drivers</td></tr>
+                <tr><td align="left">• CSP/CSN OCP Clamp</td></tr>
+            </table>>,
+            fillcolor = "#E0F7FA",
+            color = "#00838F"
+        ];
+    }
+
+    subgraph cluster_hbridge {
+        label = "4-SWITCH SYNCHRONOUS H-BRIDGE & INDUCTOR";
+        style = "filled,rounded";
+        fillcolor = "#FAFAFA";
+        color = "#00695C";
+        penwidth = 1.6;
+
+        qa_qb [
+            label = <<table border="0" cellborder="0" cellspacing="2">
+                <tr><td><b>BUCK LEG (SW1)</b></td></tr>
+                <tr><td><font color="#004D40">QA (HS) &amp; QB (LS)</font></td></tr>
+                <hr/>
+                <tr><td align="left">• BSC034N04LS (40V)</td></tr>
+                <tr><td align="left">• R_DS = 3.4mΩ</td></tr>
+            </table>>,
+            fillcolor = "#B2EBF2",
+            color = "#00695C"
+        ];
+
+        ind [
+            label = <<table border="0" cellborder="0" cellspacing="2">
+                <tr><td><b>POWER INDUCTOR</b></td></tr>
+                <tr><td><font color="#004D40">10.0 µH Flat-Wire</font></td></tr>
+                <hr/>
+                <tr><td align="left">• Wurth 7443321000</td></tr>
+                <tr><td align="left">• I_sat = 11.5A, 8.5A RMS</td></tr>
+                <tr><td align="left">• DCR = 11.8 mΩ</td></tr>
+            </table>>,
+            fillcolor = "#B2EBF2",
+            color = "#00695C"
+        ];
+
+        qc_qd [
+            label = <<table border="0" cellborder="0" cellspacing="2">
+                <tr><td><b>BOOST LEG (SW2)</b></td></tr>
+                <tr><td><font color="#004D40">QC (LS) &amp; QD (HS)</font></td></tr>
+                <hr/>
+                <tr><td align="left">• BSC034N04LS (40V)</td></tr>
+                <tr><td align="left">• R_DS = 3.4mΩ</td></tr>
+            </table>>,
+            fillcolor = "#B2EBF2",
+            color = "#00695C"
+        ];
+    }
+
+    subgraph cluster_out_bank {
+        label = "OUTPUT FILTER & CURRENT SENSING";
+        style = "filled,rounded";
+        fillcolor = "#FAFAFA";
+        color = "#2E7D32";
+        penwidth = 1.6;
+
+        out_caps [
+            label = <<table border="0" cellborder="0" cellspacing="2">
+                <tr><td><b>OUTPUT FILTER</b></td></tr>
+                <tr><td><font color="#2E7D32">4x 22µF MLCC + 100µF Poly</font></td></tr>
+                <hr/>
+                <tr><td align="left">• ESR &lt; 2.5 mΩ</td></tr>
+                <tr><td align="left">• Ripple &lt; 25mV pk-pk</td></tr>
+            </table>>,
+            fillcolor = "#C8E6C9",
+            color = "#2E7D32"
+        ];
+
+        shunt [
+            label = <<table border="0" cellborder="0" cellspacing="2">
+                <tr><td><b>10mΩ KELVIN SHUNT</b></td></tr>
+                <tr><td><font color="#B71C1C">Bourns CSS2H (3W, 0.1%)</font></td></tr>
+                <hr/>
+                <tr><td align="left">• Peak current sense</td></tr>
+                <tr><td align="left">• Cycle-by-cycle trip</td></tr>
+            </table>>,
+            fillcolor = "#FFCDD2",
+            color = "#B71C1C"
+        ];
+    }
+
+    subgraph cluster_dac_sum {
+        label = "DAC VOLTAGE STEERING";
+        style = "filled,rounded";
+        fillcolor = "#FAFAFA";
+        color = "#6A1B9A";
+        penwidth = 1.6;
+
+        dac_sum [
+            label = <<table border="0" cellborder="0" cellspacing="2">
+                <tr><td><b>SUMMING JUNCTION</b></td></tr>
+                <tr><td><font color="#6A1B9A">R_top: 49.9k, R_DAC: 11k, R_bot: 3.65k</font></td></tr>
+                <hr/>
+                <tr><td align="left">• V_DAC: 0.0V to 3.3V</td></tr>
+                <tr><td align="left">• 10 mV Step Resolution</td></tr>
+                <tr><td align="left">• V_FB kept at 1.20V Ref</td></tr>
+            </table>>,
+            fillcolor = "#F3E5F5",
+            color = "#6A1B9A"
+        ];
+    }
+
+    out_rail [
+        label = <<table border="0" cellborder="0" cellspacing="2">
+            <tr><td><b>PROGRAMMABLE DC TERMINALS</b></td></tr>
+            <tr><td><font color="#1B5E20">5.0V to 20.0V DC / 3.0A (60W)</font></td></tr>
+            <hr/>
+            <tr><td align="left">• Heavy-duty 4mm binding posts</td></tr>
+            <tr><td align="left">• Sub-25mV ripple @ 20MHz</td></tr>
+            <tr><td align="left">• Dynamic settling &lt; 150µs</td></tr>
+        </table>>,
+        fillcolor = "#A5D6A7",
+        color = "#1B5E20",
+        penwidth = 2.0
+    ];
+
+    bus_in -> qa_qb [color="#00695C", penwidth=2.2];
+    lm5176 -> qa_qb [label=" SW1 Gates", color="#00838F"];
+    qa_qb -> ind [label=" SW1 Node", color="#00695C", penwidth=2.2];
+    ind -> qc_qd [label=" SW2 Node", color="#00695C", penwidth=2.2];
+    lm5176 -> qc_qd [label=" SW2 Gates", color="#00838F"];
+    qc_qd -> out_caps [label=" Filtered DC", color="#00695C", penwidth=2.2];
+    out_caps -> shunt [color="#00695C", penwidth=2.2];
+    shunt -> out_rail [color="#1B5E20", penwidth=2.5];
+
+    shunt -> lm5176 [label=" CSP / CSN Kelvin Sense\n(Cycle-by-Cycle Peak OCP)", style="dashed", color="#B71C1C", penwidth=1.8];
+    out_rail -> dac_sum [label=" V_OUT Sense", style="dashed", color="#6A1B9A"];
+    dac_sum -> lm5176 [label=" V_FB (1.20V)", color="#6A1B9A"];
+}

@@ -1,0 +1,93 @@
+flowchart LR
+    classDef acStyle fill:#ECEFF1,stroke:#37474F,stroke-width:2px,color:#263238
+    classDef priStyle fill:#FFF3E0,stroke:#E65100,stroke-width:2px,color:#BF360C
+    classDef isoStyle fill:#FFEBEE,stroke:#C62828,stroke-width:2px,stroke-dasharray: 5 5,color:#B71C1C
+    classDef secPwrStyle fill:#E8F5E9,stroke:#2E7D32,stroke-width:2px,color:#1B5E20
+    classDef bbStyle fill:#E0F7FA,stroke:#00838F,stroke-width:2px,color:#004D40
+    classDef ctrlStyle fill:#F3E5F5,stroke:#6A1B9A,stroke-width:2px,color:#4A148C
+    classDef mcuStyle fill:#E1F5FE,stroke:#0277BD,stroke-width:2px,color:#01579B
+    classDef uiStyle fill:#FBE9E7,stroke:#D84315,stroke-width:2px,color:#BF360C
+
+    subgraph AC_FRONTEND ["STAGE 1 & 2: MAINS FRONTEND & BULK DC (HOT DOMAIN)"]
+        AC_IN["AC Mains Grid Input<br/>85V - 265V AC RMS (IEC C14)"]:::acStyle
+        FUSE_NTC["Input Protection<br/>• 2A Ceramic Fuse<br/>• 10Ω NTC Limiter<br/>• 300V MOV Surge Clamp"]:::acStyle
+        EMI_FILT["2-Stage EMI Filter<br/>• L_CM1: 15mH, L_CM2: 4.7mH<br/>• 3x X2 Film + 2x Y2 Caps"]:::acStyle
+        RECT_BULK["Bridge & Bulk DC Bus<br/>• BR1: GBU606 (600V, 6A)<br/>• 100µF / 450V Bulk Cap<br/>Bus: +120V to +375V DC"]:::acStyle
+
+        AC_IN --> FUSE_NTC
+        FUSE_NTC --> EMI_FILT
+        EMI_FILT --> RECT_BULK
+    end
+
+    subgraph STAGE3_PRIMARY ["STAGE 3: UNIFORM-FREQ FLYBACK (GND_PRI)"]
+        TX_PRI["Flyback Primary<br/>PQ26/20 Core (3C95)<br/>Np=36T, Lp=220µH"]:::priStyle
+        Q1_FET["Primary FET Q1<br/>STP10NK80Z (800V, 0.29Ω)"]:::priStyle
+        SNUBBER["RCD Clamp Snubber<br/>US1M + 22.6kΩ + 1nF"]:::priStyle
+        PWM_CTRL["UC3843 Controller<br/>Uniform 65kHz Fixed Clock<br/>Cycle-by-cycle ISENSE"]:::priStyle
+
+        RECT_BULK --> TX_PRI
+        TX_PRI --> Q1_FET
+        Q1_FET -.-> SNUBBER
+        PWM_CTRL --> Q1_FET
+    end
+
+    subgraph ISO_BARRIER ["⚡ REINFORCED ISOLATION BARRIER (IEC 62368-1 / 3000V RMS)"]
+        ISO_TX["PQ26/20 TIW Secondary (6T)<br/>3000V RMS Galvanic Barrier"]:::isoStyle
+        ISO_OPTO["PC817 Optocoupler<br/>5000V RMS Voltage Feedback"]:::isoStyle
+        ISO_AMC["TI AMC1311 ΔΣ Modulator<br/>5000V RMS AC Voltage Sense"]:::isoStyle
+        ISO_CT["Talema AC1005 (1000:1 CT)<br/>Galvanic AC Current Sense"]:::isoStyle
+    end
+
+    subgraph STAGE3_SECONDARY ["STAGE 3: SCHOTTKY RECTIFICATION (SELV)"]
+        SCHOTTKY["Schottky Rectifier<br/>MBR10100 (100V, 10A) + Heatsink"]:::secPwrStyle
+        BUS_24V["+24.0V Intermediate Bus<br/>Stable 72W DC Rail (±1.0%)"]:::secPwrStyle
+        TL431["TL431 Precision Shunt<br/>2.495V Ref + Opto Drive"]:::secPwrStyle
+
+        TX_PRI ==> ISO_TX
+        ISO_TX --> SCHOTTKY
+        SCHOTTKY --> BUS_24V
+        BUS_24V --> TL431
+        TL431 --> ISO_OPTO
+        ISO_OPTO -.-> PWM_CTRL
+    end
+
+    subgraph STAGE4_BUCKBOOST ["STAGE 4: SYNCHRONOUS BUCK-BOOST POST-REGULATOR"]
+        LM5176["TI LM5176 Controller<br/>300 kHz Synchronous PWM<br/>4x Gate Drivers Inside"]:::bbStyle
+        H_BRIDGE["4-Switch Synchronous H-Bridge<br/>4x 40V BSC034N04LS MOSFETs<br/>+ 10µH Flat-Wire Inductor"]:::bbStyle
+        OUT_STAGE["Output LC Filter Bank<br/>4x 22µF MLCC + 100µF Poly<br/>10mΩ Kelvin Sense Shunt"]:::bbStyle
+        DC_OUT["Programmable DC Terminals<br/>5.0V - 20.0V DC / 3.0A (60W)<br/>Sub-25mV Ripple | 4mm Posts"]:::bbStyle
+
+        BUS_24V --> H_BRIDGE
+        LM5176 --> H_BRIDGE
+        H_BRIDGE --> OUT_STAGE
+        OUT_STAGE --> DC_OUT
+        OUT_STAGE -.->|CSP / CSN OCP| LM5176
+    end
+
+    subgraph DAC_SUM ["DAC VOLTAGE STEERING"]
+        RES_DIV["Summing Network<br/>R_top: 49.9k, R_DAC: 11k, R_bot: 3.65k"]:::ctrlStyle
+        DC_OUT -.-> RES_DIV
+        RES_DIV --> LM5176
+    end
+
+    subgraph MCU_CORE ["CENTRAL EMBEDDED CONTROLLER"]
+        STM32["STM32G474RET6 MCU (170 MHz)<br/>• Sinc3 Demodulator (AMC1311)<br/>• Fast 12-Bit ADCs & DAC<br/>• Real-Time Efficiency Engine (10Hz)"]:::mcuStyle
+        INA226["TI INA226 Power Monitor<br/>16-Bit I2C DC Bus & Shunt"]:::secPwrStyle
+
+        ISO_AMC ==> STM32
+        ISO_CT --> STM32
+        OUT_STAGE -.-> INA226
+        INA226 ==> STM32
+        STM32 -->|12-Bit DAC| RES_DIV
+        STM32 -->|ENABLE Pin| LM5176
+    end
+
+    subgraph HMI_UI ["USER INTERFACE & MONITORING"]
+        OLED["1.3\" I2C OLED Dashboard<br/>Live V, I, P, η Meters"]:::uiStyle
+        CONTROLS["Dual Rotary Encoders<br/>Tactile Output Enable Switch"]:::uiStyle
+        LEDS["Front-Panel Status LEDs<br/>Green (CV), Amber (Limit), Red (Fault)"]:::uiStyle
+
+        STM32 ==> OLED
+        CONTROLS ==> STM32
+        STM32 ==> LEDS
+    end

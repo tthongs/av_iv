@@ -1,0 +1,25 @@
+flowchart TD
+    classDef startStyle fill:#ECEFF1,stroke:#37474F,stroke-width:2px,color:#263238
+    classDef warnStyle fill:#FFF3E0,stroke:#E65100,stroke-width:2px,color:#BF360C
+    classDef faultStyle fill:#FFEBEE,stroke:#C62828,stroke-width:2px,color:#B71C1C
+    classDef safeStyle fill:#E8F5E9,stroke:#2E7D32,stroke-width:2px,color:#1B5E20
+    classDef mcuStyle fill:#E1F5FE,stroke:#0277BD,stroke-width:2px,color:#01579B
+
+    A["<b>NORMAL OPERATION</b><br/>• Output: 5V - 20V DC<br/>• Load Current: I_load ≤ 3.0A<br/>• Mode: Constant Voltage (CV)"]:::safeStyle
+    B["<b>OVERLOAD / SHORT CIRCUIT EVENT</b><br/>• Heavy Load Step or Direct Short<br/>• Current surges past 3.5A limit"]:::warnStyle
+    C{"<b>LM5176 CSP/CSN COMPARATOR</b><br/>Is V_shunt > 35mV across 10mΩ?<br/>(Peak Inductor Current Sense)"}:::faultStyle
+    D["<b>CYCLE-BY-CYCLE HARDWARE CLAMP</b><br/>• LM5176 truncates active PWM pulse<br/>• Clamps peak inductor current immediately<br/>• Output voltage folds back to sustain limit<br/>• Response Time: &lt; 5 µs autonomous"]:::faultStyle
+    E{"<b>IS OVERLOAD TRANSIENT OR PERSISTENT?</b><br/>Evaluated by MCU Telemetry Task (INA226)"}:::mcuStyle
+    F["<b>TRANSIENT CLEARED (&lt; 500 ms)</b><br/>• Inductor current drops below 3.0A<br/>• LM5176 resumes normal PWM duty<br/>• Seamless return to CV Regulation"]:::safeStyle
+    G["<b>PERSISTENT FAULT (&gt; 500 ms)</b><br/>• MCU detects thermal stress or dead short<br/>• MCU asserts GPIO low to LM5176 ENABLE pin<br/>• Synchronous bridge shut down safely<br/>• Amber / Red Mode LED latched on front panel"]:::faultStyle
+    H["<b>SUPERVISED AUTO-RECOVERY</b><br/>• Operator clears short or presses Enable<br/>• MCU soft-starts LM5176 back to setpoint"]:::safeStyle
+
+    A --> B
+    B --> C
+    C -- "YES" --> D
+    D --> E
+    E -- "Clears Quickly" --> F
+    F --> A
+    E -- "Sustained Overload" --> G
+    G --> H
+    H --> A

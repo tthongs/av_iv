@@ -1,0 +1,34 @@
+flowchart TD
+    classDef priStyle fill:#FFF3E0,stroke:#E65100,stroke-width:2px,color:#BF360C
+    classDef secBusStyle fill:#A5D6A7,stroke:#1B5E20,stroke-width:2px,color:#1B5E20
+    classDef buckStyle fill:#E0F7FA,stroke:#00838F,stroke-width:2px,color:#004D40
+    classDef ldoStyle fill:#E1F5FE,stroke:#0277BD,stroke-width:2px,color:#01579B
+    classDef refStyle fill:#F3E5F5,stroke:#6A1B9A,stroke-width:2px,color:#4A148C
+
+    subgraph AUX_DISTRIBUTION ["AUXILIARY BIAS POWER RAIL DISTRIBUTION SUBSYSTEM"]
+        subgraph PRIMARY_HOT_AUX ["PRIMARY AUXILIARY DOMAIN (GND_PRI)"]
+            TX_AUX["<b>FLYBACK AUXILIARY WINDING</b><br/>TX1_AUX: N_aux = 5T (0.25mm wire)<br/>UF4004 Fast Diode + 47µF Cap"]:::priStyle
+            VCC_PRI["<b>+14.0V DC PRIMARY VCC RAIL</b><br/>Powers UC3843 PWM Controller (Pin 7)<br/>Sustained above 8.4V UVLO Threshold"]:::priStyle
+            TX_AUX --> VCC_PRI
+        end
+
+        subgraph SECONDARY_COLD_AUX ["SECONDARY TOUCH-SAFE AUXILIARY DOMAIN (GND_SEC)"]
+            BUS_24V["<b>+24.0V DC INTERMEDIATE RAIL</b><br/>72W Continuous Power Source<br/>Directly feeds LM5176 Controller VIN"]:::secBusStyle
+
+            BUCK_5V["<b>SECONDARY STEP-DOWN BUCK</b><br/>TI TPS54202 Synchronous Buck<br/>• Input: +24V DC<br/>• Output: +5.0V DC ± 1.5% @ 2.0A<br/>• High Efficiency (> 92%)"]:::buckStyle
+
+            LDO_3V3["<b>ULTRA-LOW-NOISE LOGIC LDO</b><br/>TI TPS7A25 LDO Regulator<br/>• Input: +5.0V DC<br/>• Output: +3.3V DC ± 1.0% @ 500mA<br/>• PSRR > 65 dB @ 100 kHz"]:::ldoStyle
+
+            REF_3V0["<b>PRECISION ANALOG REFERENCE</b><br/>TI REF3030 Precision Reference<br/>• Output: +3.000V DC ± 0.2%<br/>• Drift: 20 ppm/°C<br/>• Ultra-low noise for ADC & DAC"]:::refStyle
+
+            BUS_24V -->|Direct Rail| LM_VIN["TI LM5176 Internal Drivers<br/>Internal 7.5V LDO powers gates"]:::buckStyle
+            BUS_24V -->|+24V In| BUCK_5V
+            BUCK_5V -->|+5.0V Rail| OLED_PWR["1.3\" OLED Display VCC<br/>Current: ~40mA"]:::buckStyle
+            BUCK_5V -->|+5.0V Rail| AMC_PWR["TI AMC1311 Secondary VDD2<br/>Current: ~15mA"]:::buckStyle
+            BUCK_5V -->|+5.0V In| LDO_3V3
+            LDO_3V3 -->|+3.3V Rail| MCU_PWR["STM32G474RET6 MCU Core<br/>Current: ~80mA @ 170MHz"]:::ldoStyle
+            LDO_3V3 -->|+3.3V Rail| INA_PWR["TI INA226 Power Monitor VDD<br/>Current: ~1mA"]:::ldoStyle
+            LDO_3V3 -->|+3.3V In| REF_3V0
+            REF_3V0 -->|+3.000V VREF| VREF_MCU["STM32 VDDA / VREF+ Pins<br/>Calibrated ADC / DAC Reference"]:::refStyle
+        end
+    end

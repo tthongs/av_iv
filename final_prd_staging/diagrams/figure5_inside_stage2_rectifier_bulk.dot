@@ -1,0 +1,119 @@
+digraph Figure5Stage2Rectifier {
+    graph [
+        rankdir=LR,
+        bgcolor="#FFFFFF",
+        compound=true,
+        fontname="Helvetica, Arial, sans-serif",
+        fontsize=12,
+        nodesep=0.35,
+        ranksep=0.55,
+        pad="0.25,0.25",
+        splines=true
+    ];
+
+    node [
+        fontname="Helvetica, Arial, sans-serif",
+        fontsize=9,
+        shape=box,
+        style="filled,rounded",
+        margin="0.14,0.10",
+        penwidth=1.5
+    ];
+
+    edge [
+        fontname="Helvetica, Arial, sans-serif",
+        fontsize=8,
+        penwidth=1.8,
+        arrowsize=0.8
+    ];
+
+    subgraph cluster_rectifier {
+        label = "STAGE 2: BRIDGE RECTIFIER & HIGH-VOLTAGE BULK DC SUBSYSTEM (HOT DOMAIN)";
+        style = "filled,rounded";
+        fillcolor = "#FAFAFA";
+        color = "#E65100";
+        penwidth = 1.6;
+
+        in_ac [
+            label = <<table border="0" cellborder="0" cellspacing="2">
+                <tr><td><b>FILTERED AC INPUT</b></td></tr>
+                <tr><td><font color="#455A64">From Stage 1 EMI Filter</font></td></tr>
+                <hr/>
+                <tr><td align="left">• 85V – 265V AC RMS</td></tr>
+                <tr><td align="left">• 47Hz – 63Hz Sinusoidal</td></tr>
+            </table>>,
+            fillcolor = "#ECEFF1",
+            color = "#37474F"
+        ];
+
+        gbu [
+            label = <<table border="0" cellborder="0" cellspacing="2">
+                <tr><td><b>BRIDGE RECTIFIER</b></td></tr>
+                <tr><td><font color="#D84315">BR1: GBU606</font></td></tr>
+                <hr/>
+                <tr><td align="left">• 600V PIV, 6.0A DC</td></tr>
+                <tr><td align="left">• Glass Passivated</td></tr>
+                <tr><td align="left">• Unipolar 100/120Hz DC</td></tr>
+            </table>>,
+            fillcolor = "#FFF3E0",
+            color = "#E65100"
+        ];
+
+        bulk_cap [
+            label = <<table border="0" cellborder="0" cellspacing="2">
+                <tr><td><b>BULK CAPACITOR</b></td></tr>
+                <tr><td><font color="#0277BD">C_BULK: 100µF / 450V</font></td></tr>
+                <hr/>
+                <tr><td align="left">• Nichicon 105°C Long-Life</td></tr>
+                <tr><td align="left">• ESR &lt; 0.45Ω @ 100kHz</td></tr>
+                <tr><td align="left">• Holdup Time &gt; 10 ms</td></tr>
+            </table>>,
+            fillcolor = "#E1F5FE",
+            color = "#0277BD"
+        ];
+
+        hf_cap [
+            label = <<table border="0" cellborder="0" cellspacing="2">
+                <tr><td><b>HF DECOUPLING</b></td></tr>
+                <tr><td><font color="#0277BD">100nF / 630V X7R</font></td></tr>
+                <hr/>
+                <tr><td align="left">• Shunts 65kHz edges</td></tr>
+                <tr><td align="left">• Ultra-low ESL</td></tr>
+            </table>>,
+            fillcolor = "#E1F5FE",
+            color = "#0277BD"
+        ];
+
+        bleeder [
+            label = <<table border="0" cellborder="0" cellspacing="2">
+                <tr><td><b>SAFETY BLEEDER</b></td></tr>
+                <tr><td><font color="#B71C1C">3x 330kΩ Series (990kΩ)</font></td></tr>
+                <hr/>
+                <tr><td align="left">• Drains cap &lt; 50V in 60s</td></tr>
+                <tr><td align="left">• IEC 62368-1 Compliant</td></tr>
+                <tr><td align="left">• Total Power: 0.14W</td></tr>
+            </table>>,
+            fillcolor = "#FFEBEE",
+            color = "#C62828"
+        ];
+
+        hvdc_out [
+            label = <<table border="0" cellborder="0" cellspacing="2">
+                <tr><td><b>HIGH-VOLTAGE DC RAIL</b></td></tr>
+                <tr><td><font color="#1B5E20">+120V to +375V DC</font></td></tr>
+                <hr/>
+                <tr><td align="left">• Supplies Stage 3 Flyback</td></tr>
+                <tr><td align="left">• Ripple &lt; 20V pk-pk</td></tr>
+                <tr><td align="left">• 72W Peak Power Handling</td></tr>
+            </table>>,
+            fillcolor = "#E8F5E9",
+            color = "#2E7D32"
+        ];
+
+        in_ac -> gbu [label=" Filtered AC"];
+        gbu -> bulk_cap [label=" Rectified DC"];
+        bulk_cap -> hf_cap;
+        bulk_cap -> bleeder [label=" Parallel Bleed", style="dashed", color="#C62828"];
+        hf_cap -> hvdc_out [label=" +HVDC Bus", color="#D84315", penwidth=2.2];
+    }
+}

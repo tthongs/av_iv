@@ -1,0 +1,127 @@
+digraph Figure4Stage1Mains {
+    graph [
+        rankdir=LR,
+        bgcolor="#FFFFFF",
+        compound=true,
+        fontname="Helvetica, Arial, sans-serif",
+        fontsize=12,
+        nodesep=0.35,
+        ranksep=0.55,
+        pad="0.25,0.25",
+        splines=true
+    ];
+
+    node [
+        fontname="Helvetica, Arial, sans-serif",
+        fontsize=9,
+        shape=box,
+        style="filled,rounded",
+        margin="0.14,0.10",
+        penwidth=1.5
+    ];
+
+    edge [
+        fontname="Helvetica, Arial, sans-serif",
+        fontsize=8,
+        penwidth=1.8,
+        arrowsize=0.8
+    ];
+
+    subgraph cluster_mains {
+        label = "STAGE 1: AC MAINS SUPPLY & INPUT PROTECTION SUBSYSTEM (HOT DOMAIN)";
+        style = "filled,rounded";
+        fillcolor = "#FAFAFA";
+        color = "#37474F";
+        penwidth = 1.6;
+
+        inlet [
+            label = <<table border="0" cellborder="0" cellspacing="2">
+                <tr><td><b>AC INLET</b></td></tr>
+                <tr><td><font color="#455A64">IEC 320-C14</font></td></tr>
+                <hr/>
+                <tr><td align="left">• 85V – 265V AC RMS</td></tr>
+                <tr><td align="left">• 47Hz – 63Hz Grid</td></tr>
+                <tr><td align="left">• Line, Neutral, Earth</td></tr>
+            </table>>,
+            fillcolor = "#ECEFF1",
+            color = "#37474F"
+        ];
+
+        fuse [
+            label = <<table border="0" cellborder="0" cellspacing="2">
+                <tr><td><b>OVERCURRENT</b></td></tr>
+                <tr><td><font color="#D32F2F">F1: 2.0A / 250V AC</font></td></tr>
+                <hr/>
+                <tr><td align="left">• Time-Lag Ceramic</td></tr>
+                <tr><td align="left">• 5x20mm Cartridge</td></tr>
+                <tr><td align="left">• I²t ≥ 18 A²s Surge</td></tr>
+            </table>>,
+            fillcolor = "#FFEBEE",
+            color = "#C62828"
+        ];
+
+        ntc [
+            label = <<table border="0" cellborder="0" cellspacing="2">
+                <tr><td><b>INRUSH LIMITER</b></td></tr>
+                <tr><td><font color="#E65100">NTC1: 10Ω Cold</font></td></tr>
+                <hr/>
+                <tr><td align="left">• TDK B57236S</td></tr>
+                <tr><td align="left">• Restricts I_inrush &lt; 25A</td></tr>
+                <tr><td align="left">• Drops to &lt; 0.4Ω hot</td></tr>
+            </table>>,
+            fillcolor = "#FFF3E0",
+            color = "#EF6C00"
+        ];
+
+        mov [
+            label = <<table border="0" cellborder="0" cellspacing="2">
+                <tr><td><b>SURGE CLAMP</b></td></tr>
+                <tr><td><font color="#B71C1C">MOV1: 14D471K</font></td></tr>
+                <hr/>
+                <tr><td align="left">• 300V RMS Clamping</td></tr>
+                <tr><td align="left">• 4.5kA (8/20µs) Peak</td></tr>
+                <tr><td align="left">• IEC 61000-4-5 Level 3</td></tr>
+            </table>>,
+            fillcolor = "#FFCDD2",
+            color = "#B71C1C"
+        ];
+
+        subgraph cluster_emi {
+            label = "2-STAGE EMI FILTER (CISPR 32 CLASS B)";
+            style = "filled,rounded";
+            fillcolor = "#FFFFFF";
+            color = "#283593";
+            penwidth = 1.4;
+
+            x1 [label="X2 Cap 1\n220nF / 305V", fillcolor="#E8EAF6", color="#283593"];
+            cmc1 [label="CM Choke 1\nL_CM1: 15mH", fillcolor="#C5CAE9", color="#1A237E"];
+            x2 [label="X2 Cap 2\n100nF / 305V", fillcolor="#E8EAF6", color="#283593"];
+            cmc2 [label="CM Choke 2\nL_CM2: 4.7mH", fillcolor="#C5CAE9", color="#1A237E"];
+            ycaps [label="Y2 Safety Caps\n2x 2.2nF / 400V", fillcolor="#E8EAF6", color="#283593"];
+
+            x1 -> cmc1 [label=" DM Atten"];
+            cmc1 -> x2;
+            x2 -> cmc2 [label=" Stage 2"];
+            cmc2 -> ycaps [label=" CM to Earth"];
+        }
+
+        out_ac [
+            label = <<table border="0" cellborder="0" cellspacing="2">
+                <tr><td><b>FILTERED AC BUS</b></td></tr>
+                <tr><td><font color="#1B5E20">To Stage 2 Rectifier</font></td></tr>
+                <hr/>
+                <tr><td align="left">• Clean AC Mains</td></tr>
+                <tr><td align="left">• Low Conducted Noise</td></tr>
+                <tr><td align="left">• CISPR 32 Class B Pass</td></tr>
+            </table>>,
+            fillcolor = "#E8F5E9",
+            color = "#2E7D32"
+        ];
+
+        inlet -> fuse [label=" L, N, PE"];
+        fuse -> ntc [label=" Fused Line"];
+        ntc -> mov [label=" Inrush Clamped"];
+        mov -> x1 [label=" Protected AC"];
+        ycaps -> out_ac [label=" Filtered AC Output"];
+    }
+}

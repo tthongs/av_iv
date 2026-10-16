@@ -1,0 +1,48 @@
+flowchart LR
+    classDef inStyle fill:#A5D6A7,stroke:#1B5E20,stroke-width:2px,color:#1B5E20
+    classDef ctrlStyle fill:#E0F7FA,stroke:#00838F,stroke-width:2px,color:#004D40
+    classDef bridgeStyle fill:#B2EBF2,stroke:#00695C,stroke-width:2px,color:#004D40
+    classDef dacStyle fill:#F3E5F5,stroke:#6A1B9A,stroke-width:2px,color:#4A148C
+    classDef outStyle fill:#C8E6C9,stroke:#2E7D32,stroke-width:2px,color:#1B5E20
+
+    subgraph STAGE4_BUCKBOOST ["STAGE 4: 4-SWITCH SYNCHRONOUS BUCK-BOOST POST-REGULATOR SUBSYSTEM"]
+        BUS_IN["<b>+24.0V DC BUS IN</b><br/>From Stage 3 Flyback Rail<br/>Stable 72W DC Power Source"]:::inStyle
+
+        subgraph CONTROLLER_CELL ["CONTROLLER & GATE DRIVE ENGINE"]
+            LM5176["<b>TI LM5176 CONTROLLER</b><br/>• 300 kHz Synchronous PWM<br/>• Integrated 4x Gate Drivers<br/>• Pure Buck Mode (5V - 18V)<br/>• Buck-Boost Mode (18V - 20V)<br/>• Built-in CSP/CSN Current Limit"]:::ctrlStyle
+            COMP_NET["<b>TYPE-II COMPENSATION</b><br/>C_comp = 2.2nF, R_comp = 10kΩ<br/>Maintains 55° Phase Margin"]:::ctrlStyle
+        end
+
+        subgraph SWITCHING_H_BRIDGE ["SYNCHRONOUS 4-SWITCH H-BRIDGE & INDUCTOR"]
+            QA_QB["<b>BUCK LEG (SW1)</b><br/>• QA: High-Side Buck FET<br/>• QB: Low-Side Buck Sync FET<br/>Infineon BSC034N04LS (40V, 3.4mΩ)"]:::bridgeStyle
+            L_IND["<b>POWER INDUCTOR</b><br/>Wurth 7443321000 (WE-HCC)<br/>• 10.0 µH, 8.5A RMS, 11.5A Sat<br/>• Flat-Wire Low-Loss Core<br/>• DCR = 11.8 mΩ"]:::bridgeStyle
+            QC_QD["<b>BOOST LEG (SW2)</b><br/>• QC: Low-Side Boost Sync FET<br/>• QD: High-Side Boost FET<br/>Infineon BSC034N04LS (40V, 3.4mΩ)"]:::bridgeStyle
+        end
+
+        subgraph OUTPUT_BANK ["OUTPUT FILTERING & HARDWARE PROTECTION"]
+            OUT_CAPS["<b>OUTPUT CAPACITOR BANK</b><br/>• 4x 22µF / 25V X7R MLCCs<br/>• 1x 100µF / 25V OS-CON Poly<br/>• ESR &lt; 2.5 mΩ (Sub-25mV Ripple)"]:::outStyle
+            SHUNT["<b>10mΩ KELVIN SENSE SHUNT</b><br/>Bourns CSS2H-2512R-L010F<br/>• 3W Metal Element, 0.1% Tol<br/>• Directly feeds LM5176 CSP/CSN<br/>• Cycle-by-cycle limit at 3.5A"]:::outStyle
+        end
+
+        subgraph DAC_STEERING ["PRECISION DAC VOLTAGE STEERING NETWORK"]
+            DAC_IN["<b>12-BIT DAC VOLTAGE (V_DAC)</b><br/>From STM32G474 Internal DAC<br/>Linear 0.00V to 3.30V Range"]:::dacStyle
+            RES_SUM["<b>RESISTIVE SUMMING JUNCTION</b><br/>• R_top = 49.9 kΩ (0.1%)<br/>• R_bot = 3.65 kΩ (0.1%)<br/>• R_DAC = 11.0 kΩ (0.1%)<br/>• Biases LM5176 FB Pin to 1.20V<br/>• 10 mV Setpoint Resolution"]:::dacStyle
+        end
+
+        OUT_POSTS["<b>PROGRAMMABLE DC OUTPUT</b><br/>• 5.0V to 20.0V DC Programmable<br/>• 0.0A to 3.0A Continuous (60W)<br/>• Gold 4mm Binding Posts<br/>• Ripple: &lt; 25mV pk-pk @ 20MHz"]:::outStyle
+
+        BUS_IN --> QA_QB
+        LM5176 -->|Gate Drives SW1| QA_QB
+        QA_QB --> L_IND
+        L_IND --> QC_QD
+        LM5176 -->|Gate Drives SW2| QC_QD
+        QC_QD --> OUT_CAPS
+        OUT_CAPS --> SHUNT
+        SHUNT --> OUT_POSTS
+
+        SHUNT -.->|CSP / CSN Kelvin Sense| LM5176
+        OUT_POSTS -.->|V_OUT Sense| RES_SUM
+        DAC_IN --> RES_SUM
+        RES_SUM -->|V_FB = 1.20V| LM5176
+        COMP_NET --- LM5176
+    end

@@ -1,0 +1,32 @@
+flowchart LR
+    classDef acStyle fill:#ECEFF1,stroke:#37474F,stroke-width:2px,color:#263238
+    classDef protStyle fill:#FFEBEE,stroke:#C62828,stroke-width:2px,color:#B71C1C
+    classDef ntcStyle fill:#FFF3E0,stroke:#E65100,stroke-width:2px,color:#BF360C
+    classDef emiStyle fill:#E8EAF6,stroke:#283593,stroke-width:2px,color:#1A237E
+
+    subgraph STAGE1_MAINS ["STAGE 1: AC MAINS SUPPLY & INPUT PROTECTION SUBSYSTEM"]
+        INLET["<b>AC INLET</b><br/>IEC 320-C14<br/>• 85V - 265V AC RMS<br/>• 47Hz - 63Hz Grid<br/>• Line, Neutral, Earth"]:::acStyle
+        FUSE["<b>OVERCURRENT FUSE</b><br/>F1: 2.0A / 250V AC<br/>• Time-Lag Ceramic Cartridge<br/>• 5x20mm Standard Holder<br/>• I²t ≥ 18 A²s Surge Rating"]:::protStyle
+        NTC["<b>INRUSH LIMITER</b><br/>NTC1: 10Ω Cold Resistance<br/>• TDK Epcos B57236S<br/>• Limits Inrush &lt; 25A Peak<br/>• Drops to &lt; 0.4Ω Running"]:::ntcStyle
+        MOV["<b>SURGE CLAMP</b><br/>MOV1: 14D471K Varistor<br/>• 300V RMS Clamping Level<br/>• 4.5kA (8/20µs) Peak Surge<br/>• IEC 61000-4-5 Level 3"]:::protStyle
+        
+        subgraph EMI_FILTER ["2-STAGE COMMON-MODE & DIFFERENTIAL EMI FILTER"]
+            X1["<b>X2 FILM CAP 1</b><br/>220nF / 305V AC<br/>Differential DM Filter"]:::emiStyle
+            CMC1["<b>COMMON-MODE CHOKE 1</b><br/>L_CM1: 15.0 mH Toroidal<br/>Suppresses 150kHz-2MHz"]:::emiStyle
+            X2["<b>X2 FILM CAP 2</b><br/>100nF / 305V AC<br/>High-Freq DM Filter"]:::emiStyle
+            CMC2["<b>COMMON-MODE CHOKE 2</b><br/>L_CM2: 4.7 mH High-Band<br/>Suppresses 2MHz-30MHz"]:::emiStyle
+            YCAPS["<b>Y2 SAFETY CAPS</b><br/>2x 2.2nF / 400V AC<br/>Line/Neutral to Earth"]:::emiStyle
+        end
+
+        OUT_AC["<b>FILTERED AC OUTPUT</b><br/>Clean 85V - 265V AC<br/>Feeds Stage 2 Bridge Rectifier<br/>Meets CISPR 32 Class B"]:::acStyle
+
+        INLET -->|L, N, PE| FUSE
+        FUSE -->|Fused Line| NTC
+        NTC -->|Inrush Clamped| MOV
+        MOV -->|Protected AC| X1
+        X1 --> CMC1
+        CMC1 --> X2
+        X2 --> CMC2
+        CMC2 --> YCAPS
+        YCAPS --> OUT_AC
+    end

@@ -1,0 +1,68 @@
+digraph Figure9AuxPower {
+    graph [
+        rankdir=TB,
+        bgcolor="#FFFFFF",
+        compound=true,
+        fontname="Helvetica, Arial, sans-serif",
+        fontsize=12,
+        nodesep=0.35,
+        ranksep=0.45,
+        pad="0.25,0.25"
+    ];
+
+    node [
+        fontname="Helvetica, Arial, sans-serif",
+        fontsize=9,
+        shape=box,
+        style="filled,rounded",
+        margin="0.14,0.10",
+        penwidth=1.5
+    ];
+
+    edge [
+        fontname="Helvetica, Arial, sans-serif",
+        fontsize=8,
+        penwidth=1.8,
+        arrowsize=0.8
+    ];
+
+    subgraph cluster_pri_aux {
+        label = "PRIMARY AUXILIARY DOMAIN (GND_PRI)";
+        style = "filled,rounded";
+        fillcolor = "#FAFAFA";
+        color = "#E65100";
+        penwidth = 1.6;
+
+        aux_wind [label="Transformer Aux Winding\nN_aux = 5T (0.25mm) + UF4004", fillcolor="#FFE0B2", color="#E65100"];
+        vcc_pri [label="+14.0V DC Primary VCC Rail\nPowers UC3843 PWM Controller", fillcolor="#FFE0B2", color="#E65100"];
+        aux_wind -> vcc_pri;
+    }
+
+    subgraph cluster_sec_aux {
+        label = "SECONDARY TOUCH-SAFE AUXILIARY DOMAIN (GND_SEC)";
+        style = "filled,rounded";
+        fillcolor = "#FAFAFA";
+        color = "#2E7D32";
+        penwidth = 1.6;
+
+        bus_24v [label="+24.0V DC Intermediate Rail (72W)\nDirectly powers LM5176 VIN", fillcolor="#A5D6A7", color="#1B5E20", penwidth=2.0];
+        buck_5v [label="TI TPS54202 Synchronous Buck\n+24V -> +5.0V DC / 2.0A (> 92% eff)", fillcolor="#E0F7FA", color="#00838F"];
+        ldo_3v3 [label="TI TPS7A25 Low-Noise LDO\n+5.0V -> +3.3V DC / 500mA (PSRR > 65dB)", fillcolor="#E1F5FE", color="#0277BD"];
+        ref_3v0 [label="TI REF3030 Precision Reference\n+3.000V DC ± 0.2% (20 ppm/°C)", fillcolor="#F3E5F5", color="#6A1B9A"];
+
+        oled [label="1.3\" OLED Display VCC (+5V, 40mA)", fillcolor="#ECEFF1", color="#37474F"];
+        amc [label="AMC1311 Secondary VDD2 (+5V, 15mA)", fillcolor="#ECEFF1", color="#37474F"];
+        mcu [label="STM32G474RET6 MCU Core (+3.3V, 80mA)", fillcolor="#ECEFF1", color="#37474F"];
+        ina [label="TI INA226 Power Monitor (+3.3V, 1mA)", fillcolor="#ECEFF1", color="#37474F"];
+        vref_mcu [label="MCU VDDA / VREF+ Pins (+3.000V Calibrated)", fillcolor="#ECEFF1", color="#37474F"];
+
+        bus_24v -> buck_5v [label=" +24V Bus"];
+        buck_5v -> oled [label=" +5.0V"];
+        buck_5v -> amc [label=" +5.0V"];
+        buck_5v -> ldo_3v3 [label=" +5.0V"];
+        ldo_3v3 -> mcu [label=" +3.3V"];
+        ldo_3v3 -> ina [label=" +3.3V"];
+        ldo_3v3 -> ref_3v0 [label=" +3.3V"];
+        ref_3v0 -> vref_mcu [label=" +3.000V VREF"];
+    }
+}

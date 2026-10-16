@@ -1,0 +1,26 @@
+flowchart LR
+    %% Domain Styles
+    classDef acStyle fill:#ECEFF1,stroke:#37474F,stroke-width:2px,color:#263238
+    classDef rectStyle fill:#FFF3E0,stroke:#E65100,stroke-width:2px,color:#BF360C
+    classDef isoStyle fill:#C8E6C9,stroke:#2E7D32,stroke-width:2px,color:#1B5E20
+    classDef bbStyle fill:#B2EBF2,stroke:#00838F,stroke-width:2px,color:#004D40
+    classDef dutStyle fill:#E1BEE7,stroke:#6A1B9A,stroke-width:2px,color:#4A148C
+
+    subgraph HOT_DOMAIN ["PRIMARY HOT DOMAIN (High Voltage)"]
+        S1["<b>Stage 1: MAINS SUPPLY & EMI</b><br/>• 85V - 265V AC RMS, 47-63Hz<br/>• 2A Fuse, 10Ω NTC, 300V MOV<br/>• 2-Stage Common-Mode Filter"]:::acStyle
+        S2["<b>Stage 2: RECTIFIER & BULK DC</b><br/>• GBU606 Bridge (600V, 6A)<br/>• 100µF / 450V Bulk Cap<br/>• +120V to +375V DC Bus"]:::rectStyle
+        S1 -->|"Filtered AC"| S2
+    end
+
+    subgraph COLD_DOMAIN ["SECONDARY COLD DOMAIN (Touch-Safe SELV)"]
+        S3["<b>Stage 3: CONVERTER DC-DC</b><br/>• Uniform-Freq Flyback (UC3843 @ 65kHz)<br/>• PQ26/20 Core (Lp = 220µH, 6:1 turns)<br/>• MBR10100 Schottky Diode + Heatsink<br/>• +24.0V DC Intermediate Rail (72W)"]:::isoStyle
+        S4["<b>Stage 4: POST-REGULATOR</b><br/>• 4-Switch Buck-Boost (TI LM5176 @ 300kHz)<br/>• 4x 40V Low-Rds MOSFETs + 10µH Inductor<br/>• Analog DAC Steering (10mV Resolution)<br/>• Built-in CSP/CSN Peak Current Limit<br/>• 5.0V - 20.0V DC / 3.0A (60W)"]:::bbStyle
+        S3 -->|"+24.0V DC Rail"| S4
+    end
+
+    subgraph LOAD_DOMAIN ["APPLICATION / LOAD"]
+        S5["<b>5. TARGET DEVICE (DUT)</b><br/>• 4mm Gold Binding Posts<br/>• Clean DC: Ripple < 25mV pk-pk<br/>• Touch-Safe SELV Compliant"]:::dutStyle
+    end
+
+    S2 ==>|"⚡ 3000V RMS Galvanic Barrier<br/>(IEC 62368-1 Reinforced, 6.4mm Creepage)"| S3
+    S4 -->|"Regulated DC Power"| S5

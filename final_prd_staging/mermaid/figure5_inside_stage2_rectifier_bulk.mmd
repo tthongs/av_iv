@@ -1,0 +1,21 @@
+flowchart LR
+    classDef acStyle fill:#ECEFF1,stroke:#37474F,stroke-width:2px,color:#263238
+    classDef brStyle fill:#FFF3E0,stroke:#E65100,stroke-width:2px,color:#BF360C
+    classDef capStyle fill:#E1F5FE,stroke:#0277BD,stroke-width:2px,color:#01579B
+    classDef bleederStyle fill:#FFEBEE,stroke:#C62828,stroke-width:2px,color:#B71C1C
+    classDef outStyle fill:#E8F5E9,stroke:#2E7D32,stroke-width:2px,color:#1B5E20
+
+    subgraph STAGE2_RECTIFIER ["STAGE 2: BRIDGE RECTIFIER & HIGH-VOLTAGE BULK DC SUBSYSTEM"]
+        IN_AC["<b>FILTERED AC INPUT</b><br/>From Stage 1 EMI Filter<br/>85V - 265V AC RMS"]:::acStyle
+        GBU["<b>PASSIVE BRIDGE RECTIFIER</b><br/>BR1: Diodes Inc. GBU606<br/>• 600V PIV, 6.0A Rating<br/>• Full-Wave 100Hz/120Hz<br/>• Forward Drop: 2x 0.95V"]:::brStyle
+        BULK_CAP["<b>BULK CAPACITOR BANK</b><br/>C_BULK: Nichicon 100µF / 450V<br/>• 105°C Long-Life Electrolytic<br/>• ESR &lt; 0.45Ω @ 100kHz<br/>• Holdup Time: &gt; 10 ms (Dropouts)"]:::capStyle
+        HF_CAP["<b>HF CERAMIC BYPASS</b><br/>C_HF: 100nF / 630V X7R<br/>• Damps 65kHz Commutation Spikes<br/>• Low ESL / Ultra-Low ESR"]:::capStyle
+        BLEEDER["<b>SAFETY BLEEDER STRING</b><br/>R_BLEED: 3x 330kΩ (1206) in Series<br/>• Total: 990 kΩ / 0.75W<br/>• Drains bulk cap to &lt; 50V SELV<br/>in &lt; 60s per IEC 62368-1"]:::bleederStyle
+        HVDC_RAIL["<b>HIGH-VOLTAGE DC BUS</b><br/>+120V to +375V DC Bulk Rail<br/>Feeds Stage 3 Flyback Primary<br/>Ripple: &lt; 20V pk-pk @ full 72W"]:::outStyle
+
+        IN_AC -->|Sinusoidal AC| GBU
+        GBU -->|Rectified DC Pulses| BULK_CAP
+        BULK_CAP --> HF_CAP
+        BULK_CAP -.->|Parallel Discharge| BLEEDER
+        HF_CAP --> HVDC_RAIL
+    end

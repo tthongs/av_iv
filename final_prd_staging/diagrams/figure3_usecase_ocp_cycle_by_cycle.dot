@@ -1,0 +1,47 @@
+digraph Figure3UseCaseOCP {
+    graph [
+        rankdir=TB,
+        bgcolor="#FFFFFF",
+        compound=true,
+        fontname="Helvetica, Arial, sans-serif",
+        fontsize=12,
+        nodesep=0.40,
+        ranksep=0.45,
+        pad="0.25,0.25"
+    ];
+
+    node [
+        fontname="Helvetica, Arial, sans-serif",
+        fontsize=9.5,
+        shape=box,
+        style="filled,rounded",
+        margin="0.14,0.10",
+        penwidth=1.5
+    ];
+
+    edge [
+        fontname="Helvetica, Arial, sans-serif",
+        fontsize=8.5,
+        penwidth=1.8,
+        arrowsize=0.8
+    ];
+
+    norm [label="NORMAL OPERATION\n• Output: 5.0V - 20.0V DC\n• Load Current: ≤ 3.0A\n• CV Mode (Green LED)", fillcolor="#E8F5E9", color="#2E7D32"];
+    overload [label="OVERLOAD / SHORT CIRCUIT EVENT\n• Sudden heavy load step or terminal short\n• Current surges above 3.5A trip threshold", fillcolor="#FFF3E0", color="#E65100"];
+    sense [label="LM5176 CSP/CSN COMPARATOR\n• 10mΩ Kelvin shunt senses peak current\n• V_sense exceeds internal current limit threshold", fillcolor="#FFEBEE", color="#C62828"];
+    clamp [label="AUTONOMOUS HARDWARE CLAMP\n• Truncates current PWM pulse within cycle\n• Clamps peak inductor current (< 5µs response)\n• V_OUT drops proportionally to maintain limit", fillcolor="#FFCDD2", color="#B71C1C", penwidth=2.0];
+    eval [label="MCU SUPERVISORY EVALUATION\n• INA226 samples continuous overload\n• Telemetry timer runs for 500 ms window", fillcolor="#E1F5FE", color="#0277BD"];
+    recov [label="TRANSIENT RECOVERY\n• Short circuit cleared within 500 ms\n• LM5176 resumes full PWM duty\n• Output voltage restores smoothly to setpoint", fillcolor="#C8E6C9", color="#1B5E20"];
+    shutdown [label="PERSISTENT FAULT SUPERVISORY SHUTDOWN\n• Overload persists > 500 ms\n• MCU pulls LM5176 ENABLE pin LOW\n• Synchronous switches disabled, Red Fault LED lit", fillcolor="#FFCDD2", color="#B71C1C"];
+    manual_reset [label="SAFE RESTART & BRING-UP\n• Operator removes overload / presses Enable\n• MCU executes soft-start ramp to programmed setpoint", fillcolor="#ECEFF1", color="#37474F"];
+
+    norm -> overload [label=" Overload Applied"];
+    overload -> sense [label=" I_peak > 3.5A"];
+    sense -> clamp [label=" Hardware Trip (< 5µs)"];
+    clamp -> eval [label=" Cycle-by-cycle Limiting"];
+    eval -> recov [label=" Overload Removed (< 500ms)", color="#2E7D32"];
+    recov -> norm [label=" Normal CV Mode", color="#2E7D32"];
+    eval -> shutdown [label=" Overload Persists (> 500ms)", color="#C62828"];
+    shutdown -> manual_reset [label=" Push Button Reset / Clear Short"];
+    manual_reset -> norm [label=" Soft-Start Ramp", color="#2E7D32"];
+}

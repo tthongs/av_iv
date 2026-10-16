@@ -1,0 +1,49 @@
+flowchart LR
+    classDef hvdcStyle fill:#FFF3E0,stroke:#E65100,stroke-width:2px,color:#BF360C
+    classDef ctrlStyle fill:#E1F5FE,stroke:#0277BD,stroke-width:2px,color:#01579B
+    classDef fetStyle fill:#FFE0B2,stroke:#F57C00,stroke-width:2px,color:#E65100
+    classDef isoStyle fill:#FFEBEE,stroke:#C62828,stroke-width:2px,stroke-dasharray: 5 5,color:#B71C1C
+    classDef secStyle fill:#E8F5E9,stroke:#2E7D32,stroke-width:2px,color:#1B5E20
+    classDef railStyle fill:#A5D6A7,stroke:#1B5E20,stroke-width:2px,color:#1B5E20
+
+    subgraph STAGE3_FLYBACK ["STAGE 3: CONVERTER DC-DC (UNIFORM-FREQUENCY ISOLATED FLYBACK) SUBSYSTEM"]
+        HVDC_IN["<b>+HVDC BUS IN</b><br/>+120V to +375V DC<br/>From Stage 2 Bulk Cap"]:::hvdcStyle
+        
+        subgraph PRIMARY_CIRCUIT ["PRIMARY CONTROL & SWITCHING CELL (GND_PRI)"]
+            UC3843["<b>PWM CONTROLLER</b><br/>TI UC3843 / UCC28C43<br/>• Uniform 65 kHz Clock<br/>• RT=10kΩ, CT=2.2nF<br/>• Totem-Pole Gate Out<br/>• Cycle-by-Cycle ISENSE"]:::ctrlStyle
+            Q1["<b>PRIMARY MOSFET</b><br/>STP10NK80Z / IPB80R290P7<br/>• 800V Superjunction N-FET<br/>• R_DS(on) = 0.29Ω<br/>• V_DS,peak = 599V (< 75% derated)"]:::fetStyle
+            SNUBBER["<b>RCD CLAMP SNUBBER</b><br/>US1M (1kV, 75ns) +<br/>22.6kΩ (3W) + 1nF / 1kV<br/>• Clamps Leakage Spike &lt; 650V"]:::fetStyle
+            R_SENSE["<b>PRIMARY CURRENT SHUNT</b><br/>R_CS: 0.25Ω / 2W Non-Inductive<br/>• Monitored at ISENSE Pin<br/>• Limits Peak Current to 2.96A"]:::fetStyle
+            AUX_WIND["<b>AUXILIARY BIAS WINDING</b><br/>N_aux = 5T (0.25mm) + UF4004<br/>• Generates +14.0V DC Rail<br/>• Powers UC3843 VCC Pin"]:::ctrlStyle
+        end
+
+        subgraph TRANSFORMER_BARRIER ["⚡ REINFORCED ISOLATION BARRIER (IEC 62368-1)"]
+            TX_PRI["<b>PRIMARY WINDING</b><br/>PQ26/20 Core (3C95 Ferrite)<br/>Np = 36T, Lp = 220µH ±10%<br/>B_max = 0.148T (B_sat=0.38T)"]:::isoStyle
+            TX_SEC["<b>SECONDARY WINDING</b><br/>Ns = 6T (Furukawa TEX-E TIW)<br/>Turns Ratio Np:Ns = 6:1<br/>Certified 3000V RMS Withstand"]:::isoStyle
+            OPTO["<b>FEEDBACK OPTOCOUPLER</b><br/>PC817 / EL817 Optocoupler<br/>5000V RMS Isolation Barrier"]:::isoStyle
+        end
+
+        subgraph SECONDARY_RECT ["SECONDARY RECTIFICATION & REGULATION (GND_SEC)"]
+            SCHOTTKY["<b>SCHOTTKY RECTIFIER</b><br/>MBR10100 / MBR20100CT<br/>• 100V, 10A Barrier Diode<br/>• V_F = 0.60V @ 3A<br/>• Robust Passive Heatsink"]:::secStyle
+            LC_FILT["<b>OUTPUT LC FILTER</b><br/>• 470µF / 35V Low-ESR Poly<br/>• 2.2µH Shielded Inductor<br/>• 22µF X7R MLCC Bypass<br/>• Ripple: &lt; 40mV pk-pk"]:::secStyle
+            TL431["<b>CLOSED-LOOP REGULATION</b><br/>TI TL431 Precision Reference<br/>• 2.495V Internal Bandgap<br/>• Type-II Compensation Loop<br/>• Holds Bus within ±1.0%"]:::secStyle
+        end
+
+        BUS_24V["<b>+24.0V DC INTERMEDIATE BUS</b><br/>• +24.0V DC ± 1.0% Regulated<br/>• 72W Continuous Power (3.0A)<br/>• Supplies Stage 4 Buck-Boost"]:::railStyle
+
+        HVDC_IN --> TX_PRI
+        TX_PRI -->|Drain| Q1
+        Q1 -.->|Leakage Clamp| SNUBBER
+        Q1 -->|Source| R_SENSE
+        R_SENSE -.->|ISENSE Pin| UC3843
+        UC3843 -->|65kHz PWM Gate| Q1
+        AUX_WIND -->|+14V VCC| UC3843
+
+        TX_PRI ==>|Magnetic Coupling| TX_SEC
+        TX_SEC -->|Switched AC Pulses| SCHOTTKY
+        SCHOTTKY -->|Rectified DC| LC_FILT
+        LC_FILT --> BUS_24V
+        BUS_24V -->|Voltage Sense| TL431
+        TL431 -->|Opto LED Drive| OPTO
+        OPTO -.->|COMP Pin Pull-Down| UC3843
+    end
