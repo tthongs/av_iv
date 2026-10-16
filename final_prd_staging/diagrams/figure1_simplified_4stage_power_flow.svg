@@ -82,7 +82,7 @@
 <text xml:space="preserve" text-anchor="start" x="1028.01" y="-113.75" font-family="Helvetica, Arial, sans-serif" font-size="9.50" fill="#00838f">Synchronous 4&#45;Switch Buck&#45;Boost</text>
 <text xml:space="preserve" text-anchor="start" x="1023.14" y="-97.25" font-family="Helvetica, Arial, sans-serif" font-size="9.50">• TI LM5176 Controller @ 300 kHz</text>
 <text xml:space="preserve" text-anchor="start" x="1023.14" y="-80.75" font-family="Helvetica, Arial, sans-serif" font-size="9.50">• 4x 40V MOSFETs + 10µH Inductor</text>
-<text xml:space="preserve" text-anchor="start" x="1023.14" y="-64.25" font-family="Helvetica, Arial, sans-serif" font-size="9.50">• Precision 12&#45;Bit DAC Steering</text>
+<text xml:space="preserve" text-anchor="start" x="1023.14" y="-64.25" font-family="Helvetica, Arial, sans-serif" font-size="9.50">• Direct PWM Duty Cycle Control</text>
 <text xml:space="preserve" text-anchor="start" x="1023.14" y="-47.75" font-family="Helvetica, Arial, sans-serif" font-size="9.50">• Cycle&#45;by&#45;Cycle CSP/CSN Clamp</text>
 <text xml:space="preserve" text-anchor="start" x="1023.14" y="-31.25" font-family="Helvetica, Arial, sans-serif" font-size="9.50">• Output: 5.0V – 20.0V DC / 3.0A</text>
 </g>

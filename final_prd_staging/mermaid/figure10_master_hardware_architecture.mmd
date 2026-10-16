@@ -64,10 +64,10 @@ flowchart LR
         OUT_STAGE -.->|CSP / CSN OCP| LM5176
     end
 
-    subgraph DAC_SUM ["DAC VOLTAGE STEERING"]
-        RES_DIV["Summing Network<br/>R_top: 49.9k, R_DAC: 11k, R_bot: 3.65k"]:::ctrlStyle
+    subgraph VOLT_SENSE ["PASSIVE VOLTAGE SENSING"]
+        RES_DIV["Passive Attenuator<br/>R1: 49.9k, R2: 3.65k<br/>Direct to MCU ADC"]:::ctrlStyle
         DC_OUT -.-> RES_DIV
-        RES_DIV --> LM5176
+        RES_DIV --> STM32
     end
 
     subgraph MCU_CORE ["CENTRAL EMBEDDED CONTROLLER"]
@@ -78,7 +78,7 @@ flowchart LR
         ISO_CT --> STM32
         OUT_STAGE -.-> INA226
         INA226 ==> STM32
-        STM32 -->|12-Bit DAC| RES_DIV
+        STM32 -->|Direct PWM (D)| LM5176
         STM32 -->|ENABLE Pin| LM5176
     end
 

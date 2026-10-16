@@ -138,7 +138,7 @@ digraph Figure7Stage4BuckBoost {
     }
 
     subgraph cluster_dac_sum {
-        label = "DAC VOLTAGE STEERING";
+        label = "DIRECT PWM DUTY CYCLE CONTROL";
         style = "filled,rounded";
         fillcolor = "#FAFAFA";
         color = "#6A1B9A";
@@ -146,12 +146,13 @@ digraph Figure7Stage4BuckBoost {
 
         dac_sum [
             label = <<table border="0" cellborder="0" cellspacing="2">
-                <tr><td><b>SUMMING JUNCTION</b></td></tr>
-                <tr><td><font color="#6A1B9A">R_top: 49.9k, R_DAC: 11k, R_bot: 3.65k</font></td></tr>
+                <tr><td><b>DIRECT PWM VOLTAGE CONTROL</b></td></tr>
+                <tr><td><font color="#6A1B9A">D = V_OUT / 24.0V (Duty Cycle)</font></td></tr>
                 <hr/>
-                <tr><td align="left">• V_DAC: 0.0V to 3.3V</td></tr>
-                <tr><td align="left">• 10 mV Step Resolution</td></tr>
-                <tr><td align="left">• V_FB kept at 1.20V Ref</td></tr>
+                <tr><td align="left">• 5.0V: D = 20.8%</td></tr>
+                <tr><td align="left">• 12.0V: D = 50.0%</td></tr>
+                <tr><td align="left">• 20.0V: D = 83.3%</td></tr>
+                <tr><td align="left">• Passive divider R1/R2 to ADC</td></tr>
             </table>>,
             fillcolor = "#F3E5F5",
             color = "#6A1B9A"

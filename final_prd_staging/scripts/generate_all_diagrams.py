@@ -38,7 +38,7 @@ fig1_mmd = r"""flowchart LR
 
     subgraph COLD_DOMAIN ["SECONDARY COLD DOMAIN (Touch-Safe SELV)"]
         S3["<b>Stage 3: CONVERTER DC-DC</b><br/>• Uniform-Freq Flyback (UC3843 @ 65kHz)<br/>• PQ26/20 Core (Lp = 220µH, 6:1 turns)<br/>• MBR10100 Schottky Diode + Heatsink<br/>• +24.0V DC Intermediate Rail (72W)"]:::isoStyle
-        S4["<b>Stage 4: POST-REGULATOR</b><br/>• 4-Switch Buck-Boost (TI LM5176 @ 300kHz)<br/>• 4x 40V Low-Rds MOSFETs + 10µH Inductor<br/>• Analog DAC Steering (10mV Resolution)<br/>• Built-in CSP/CSN Peak Current Limit<br/>• 5.0V - 20.0V DC / 3.0A (60W)"]:::bbStyle
+        S4["<b>Stage 4: POST-REGULATOR</b><br/>• 4-Switch Buck-Boost (TI LM5176 @ 300kHz)<br/>• 4x 40V Low-Rds MOSFETs + 10µH Inductor<br/>• Direct PWM Duty Cycle Control (D = 20.8% - 83.3%)<br/>• Built-in CSP/CSN Peak Current Limit<br/>• 5.0V - 20.0V DC / 3.0A (60W)"]:::bbStyle
         S3 -->|"+24.0V DC Rail"| S4
     end
 
@@ -148,7 +148,7 @@ fig1_dot = r"""digraph Figure1PowerFlow {
                 <hr/>
                 <tr><td align="left">• TI LM5176 Controller @ 300 kHz</td></tr>
                 <tr><td align="left">• 4x 40V MOSFETs + 10µH Inductor</td></tr>
-                <tr><td align="left">• Precision 12-Bit DAC Steering</td></tr>
+                <tr><td align="left">• Direct PWM Duty Cycle Control</td></tr>
                 <tr><td align="left">• Cycle-by-Cycle CSP/CSN Clamp</td></tr>
                 <tr><td align="left">• Output: 5.0V – 20.0V DC / 3.0A</td></tr>
             </table>>,
@@ -185,7 +185,7 @@ fig1_dot = r"""digraph Figure1PowerFlow {
 """
 
 # ==============================================================================
-# 2. FIGURE 2: USE CASE 1 - CV REGULATION & DYNAMIC SETPOINT STEERING
+# 2. FIGURE 2: USE CASE 1 - CV REGULATION & PWM DUTY CYCLE MODULATION
 # ==============================================================================
 fig2_mmd = r"""sequenceDiagram
     autonumber
@@ -200,10 +200,9 @@ fig2_mmd = r"""sequenceDiagram
 
     User->>UI: Select Setpoint (e.g. 12.00 V, 3.00 A)
     UI->>MCU: Forward Target via Encoder / SCPI
-    MCU->>DAC: Write V_DAC Setpoint (12-bit Monotonic)
-    DAC->>Sum: Inject Steering Current into FB Node
-    Sum->>LM: Bias LM5176 FB Pin (Maintains 1.20V Ref)
-    LM->>LM: Modulate 4-Switch H-Bridge Duty Cycle (300 kHz)
+    MCU->>MCU: Compute PWM Duty Cycle: D = V_target / 24.0V
+    MCU->>LM: Output 300 kHz High-Resolution PWM (D = 20.8% to 83.3%)
+    LM->>LM: Modulate 4-Switch Synchronous H-Bridge
     LM->>Out: Slew Output Rail (dV/dt Controlled Soft Step)
     Out-->>INA: Sensed V_OUT, I_LOAD across 10mΩ Shunt
     INA->>MCU: Stream 16-Bit Voltage & Current via I2C (10 Hz)
@@ -249,14 +248,14 @@ fig2_dot = r"""digraph Figure2UseCaseCV {
     telemetry [label="Dual Telemetry Verification\n• INA226 16-Bit I2C Power Monitor\n• 1.3\" OLED Dashboard Live Metering", fillcolor="#FFFDE7", color="#F57F17"];
 
     user -> mcu [label=" Setpoint Target"];
-    mcu -> dac [label=" 12-Bit Word"];
-    dac -> sum [label=" V_DAC Steering Bias"];
-    sum -> lm5176 [label=" V_FB (1.20V Summed)"];
+    mcu -> pwm_gen [label=" Duty Cycle Command"];
+    pwm_gen -> lm5176 [label=" 300 kHz PWM Drive"];
     lm5176 -> power_stage [label=" 4x Gate Drives"];
     power_stage -> out_rail [label=" Regulated DC"];
     out_rail -> telemetry [label=" Kelvin Sensing"];
     telemetry -> mcu [label=" 10 Hz Telemetry Loop"];
-    out_rail -> sum [label=" V_OUT Sense Feedback", style="dashed", color="#6A1B9A"];
+    out_rail -> v_sense [label=" V_OUT Attenuation", style="dashed", color="#6A1B9A"];
+    v_sense -> mcu [label=" ADC V_SENSE"];
 }
 """
 
@@ -938,9 +937,9 @@ fig7_mmd = r"""flowchart LR
             SHUNT["<b>10mΩ KELVIN SENSE SHUNT</b><br/>Bourns CSS2H-2512R-L010F<br/>• 3W Metal Element, 0.1% Tol<br/>• Directly feeds LM5176 CSP/CSN<br/>• Cycle-by-cycle limit at 3.5A"]:::outStyle
         end
 
-        subgraph DAC_STEERING ["PRECISION DAC VOLTAGE STEERING NETWORK"]
-            DAC_IN["<b>12-BIT DAC VOLTAGE (V_DAC)</b><br/>From STM32G474 Internal DAC<br/>Linear 0.00V to 3.30V Range"]:::dacStyle
-            RES_SUM["<b>RESISTIVE SUMMING JUNCTION</b><br/>• R_top = 49.9 kΩ (0.1%)<br/>• R_bot = 3.65 kΩ (0.1%)<br/>• R_DAC = 11.0 kΩ (0.1%)<br/>• Biases LM5176 FB Pin to 1.20V<br/>• 10 mV Setpoint Resolution"]:::dacStyle
+        subgraph PWM_VOLTAGE_CONTROL ["DIRECT PWM DUTY CYCLE VOLTAGE CONTROL"]
+            PWM_IN["<b>DIRECT PWM MODULATION (D)</b><br/>STM32G474 HRTIM Engine<br/>Duty Cycle: D = V_OUT / 24V<br/>20.8% (5V) to 83.3% (20V)"]:::dacStyle
+            RES_SUM["<b>PASSIVE VOLTAGE ATTENUATOR</b><br/>• R_FB1 = 49.9 kΩ (0.1%)<br/>• R_FB2 = 3.65 kΩ (0.1%)<br/>• Direct to MCU 12-Bit ADC<br/>• NO Voltage Steering / NO DAC Injection"]:::dacStyle
         end
 
         OUT_POSTS["<b>PROGRAMMABLE DC OUTPUT</b><br/>• 5.0V to 20.0V DC Programmable<br/>• 0.0A to 3.0A Continuous (60W)<br/>• Gold 4mm Binding Posts<br/>• Ripple: &lt; 25mV pk-pk @ 20MHz"]:::outStyle
@@ -956,8 +955,8 @@ fig7_mmd = r"""flowchart LR
 
         SHUNT -.->|CSP / CSN Kelvin Sense| LM5176
         OUT_POSTS -.->|V_OUT Sense| RES_SUM
-        DAC_IN --> RES_SUM
-        RES_SUM -->|V_FB = 1.20V| LM5176
+        PWM_IN --> LM5176
+        RES_SUM -->|V_SENSE to ADC| PWM_IN
         COMP_NET --- LM5176
     end
 """
@@ -1102,7 +1101,7 @@ fig7_dot = r"""digraph Figure7Stage4BuckBoost {
     }
 
     subgraph cluster_dac_sum {
-        label = "DAC VOLTAGE STEERING";
+        label = "DIRECT PWM DUTY CYCLE CONTROL";
         style = "filled,rounded";
         fillcolor = "#FAFAFA";
         color = "#6A1B9A";
@@ -1110,12 +1109,13 @@ fig7_dot = r"""digraph Figure7Stage4BuckBoost {
 
         dac_sum [
             label = <<table border="0" cellborder="0" cellspacing="2">
-                <tr><td><b>SUMMING JUNCTION</b></td></tr>
-                <tr><td><font color="#6A1B9A">R_top: 49.9k, R_DAC: 11k, R_bot: 3.65k</font></td></tr>
+                <tr><td><b>DIRECT PWM VOLTAGE CONTROL</b></td></tr>
+                <tr><td><font color="#6A1B9A">D = V_OUT / 24.0V (Duty Cycle)</font></td></tr>
                 <hr/>
-                <tr><td align="left">• V_DAC: 0.0V to 3.3V</td></tr>
-                <tr><td align="left">• 10 mV Step Resolution</td></tr>
-                <tr><td align="left">• V_FB kept at 1.20V Ref</td></tr>
+                <tr><td align="left">• 5.0V: D = 20.8%</td></tr>
+                <tr><td align="left">• 12.0V: D = 50.0%</td></tr>
+                <tr><td align="left">• 20.0V: D = 83.3%</td></tr>
+                <tr><td align="left">• Passive divider R1/R2 to ADC</td></tr>
             </table>>,
             fillcolor = "#F3E5F5",
             color = "#6A1B9A"
@@ -1479,10 +1479,10 @@ fig10_mmd = r"""flowchart LR
         OUT_STAGE -.->|CSP / CSN OCP| LM5176
     end
 
-    subgraph DAC_SUM ["DAC VOLTAGE STEERING"]
-        RES_DIV["Summing Network<br/>R_top: 49.9k, R_DAC: 11k, R_bot: 3.65k"]:::ctrlStyle
+    subgraph VOLT_SENSE ["PASSIVE VOLTAGE SENSING"]
+        RES_DIV["Passive Attenuator<br/>R1: 49.9k, R2: 3.65k<br/>Direct to MCU ADC"]:::ctrlStyle
         DC_OUT -.-> RES_DIV
-        RES_DIV --> LM5176
+        RES_DIV --> STM32
     end
 
     subgraph MCU_CORE ["CENTRAL EMBEDDED CONTROLLER"]
@@ -1493,7 +1493,7 @@ fig10_mmd = r"""flowchart LR
         ISO_CT --> STM32
         OUT_STAGE -.-> INA226
         INA226 ==> STM32
-        STM32 -->|12-Bit DAC| RES_DIV
+        STM32 -->|Direct PWM (D)| LM5176
         STM32 -->|ENABLE Pin| LM5176
     end
 

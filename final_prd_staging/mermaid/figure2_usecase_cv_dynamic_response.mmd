@@ -11,10 +11,9 @@ sequenceDiagram
 
     User->>UI: Select Setpoint (e.g. 12.00 V, 3.00 A)
     UI->>MCU: Forward Target via Encoder / SCPI
-    MCU->>DAC: Write V_DAC Setpoint (12-bit Monotonic)
-    DAC->>Sum: Inject Steering Current into FB Node
-    Sum->>LM: Bias LM5176 FB Pin (Maintains 1.20V Ref)
-    LM->>LM: Modulate 4-Switch H-Bridge Duty Cycle (300 kHz)
+    MCU->>MCU: Compute PWM Duty Cycle: D = V_target / 24.0V
+    MCU->>LM: Output 300 kHz High-Resolution PWM (D = 20.8% to 83.3%)
+    LM->>LM: Modulate 4-Switch Synchronous H-Bridge
     LM->>Out: Slew Output Rail (dV/dt Controlled Soft Step)
     Out-->>INA: Sensed V_OUT, I_LOAD across 10mΩ Shunt
     INA->>MCU: Stream 16-Bit Voltage & Current via I2C (10 Hz)

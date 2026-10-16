@@ -319,21 +319,59 @@ def generate_v2_simplified_prd():
     t10 = doc.tables[10]
     apply_table_geometry(t10, [Inches(1.2), Inches(0.9), Inches(3.17), Inches(1.2)])
 
-    # 12. TEXT REPLACEMENTS: QR -> UNIFORM FREQUENCY FLYBACK
-    print("Replacing QR Flyback references and simplifying narratives...")
+    # 12. TEXT REPLACEMENTS: QR -> UNIFORM FREQUENCY FLYBACK & TRASH VOLTAGE STEERING
+    print("Replacing QR Flyback references and trashing voltage steering...")
     for p in doc.paragraphs:
-        txt = p.text.strip()
-        if "universal mains (QR) Flyback converter" in txt:
-            p.text = txt.replace("(QR) Flyback converter", "uniform-frequency (65 kHz) Flyback converter")
-        elif "Flyback converter generates a stable +24.0V DC bus (72W) with > 90% peak efficiency" in txt:
-            p.text = txt.replace("Flyback converter generates a stable +24.0V DC bus (72W) with > 90% peak efficiency",
+        if "universal mains (QR) Flyback converter" in p.text:
+            p.text = p.text.replace("(QR) Flyback converter", "uniform-frequency (65 kHz) Flyback converter")
+        if "Flyback converter generates a stable +24.0V DC bus (72W) with > 90% peak efficiency" in p.text:
+            p.text = p.text.replace("Flyback converter generates a stable +24.0V DC bus (72W) with > 90% peak efficiency",
                                  "Uniform-frequency Flyback converter generates a stable +24.0V DC bus (72W) with > 88% full-load efficiency at 65 kHz")
-        elif "Component sourcing and lead times for TI LM5176, UCC28740" in txt:
-            p.text = txt.replace("UCC28740", "UC3843 / UCC28C43")
-        elif "fast 80kHz primary switching edge ringing" in txt:
-            p.text = txt.replace("80kHz", "65kHz")
-        elif "Inside Stage 3: Converter DC-DC (Isolated Flyback) Subsystem" in txt:
-            p.text = "Inside Stage 3: Converter DC-DC (Uniform-Frequency Isolated Flyback) Subsystem"
+        if "Component sourcing and lead times for TI LM5176, UCC28740" in p.text:
+            p.text = p.text.replace("UCC28740", "UC3843 / UCC28C43")
+        if "fast 80kHz primary switching edge ringing" in p.text:
+            p.text = p.text.replace("80kHz", "65kHz")
+        if "Inside Stage 3: Converter DC-DC (Isolated Flyback) Subsystem" in p.text:
+            p.text = p.text.replace("Inside Stage 3: Converter DC-DC (Isolated Flyback) Subsystem", "Inside Stage 3: Converter DC-DC (Uniform-Frequency Isolated Flyback) Subsystem")
+        if "driving the precision 12-bit DAC voltage steering network" in p.text:
+            p.text = p.text.replace("driving the precision 12-bit DAC voltage steering network", "executing direct 300 kHz PWM duty cycle voltage control")
+        if "High-Resolution DAC Voltage Steering" in p.text:
+            p.text = p.text.replace("High-Resolution DAC Voltage Steering: 12-bit DAC network achieves 10mV monotonic setpoint resolution.", "High-Resolution Direct PWM Voltage Control: STM32G474 high-resolution PWM timer directly commands Buck-Boost duty cycle (D = 20.8% to 83.3%).")
+        if "Analog DAC Steering & Built-in Hardware Protections" in p.text:
+            p.text = p.text.replace("Analog DAC Steering & Built-in Hardware Protections", "Direct PWM Duty Cycle Control & Built-in Hardware Protections")
+        if "closed-loop DAC voltage steering" in p.text:
+            p.text = p.text.replace("closed-loop DAC voltage steering", "closed-loop digital PWM duty cycle voltage control")
+        if "Analog Closed-Loop Control, DAC Steering Network" in p.text:
+            p.text = p.text.replace("Analog Closed-Loop Control, DAC Steering Network, and Autonomous Hardware CC Protection Subsystem.", "Closed-Loop Control, Direct PWM Voltage Control, and Autonomous Hardware CC Protection Subsystem.")
+        if "Table 4.5: Analog Closed-Loop Control, DAC Steering" in p.text:
+            p.text = p.text.replace("Table 4.5: Analog Closed-Loop Control, DAC Steering & Hardware Protection Specifications", "Table 4.5: Closed-Loop Control, Direct PWM Voltage Control & Hardware Protection Specifications")
+        if "closed-loop feedback and DAC steering design" in p.text:
+            p.text = p.text.replace("closed-loop feedback and DAC steering design", "closed-loop feedback and digital PWM control design")
+        if re.search(r'voltage steering|DAC steering|steering network', p.text, re.IGNORECASE):
+            p.text = re.sub(r'DAC voltage steering network|voltage steering network|DAC voltage steering|voltage steering|DAC steering', 'direct PWM duty cycle voltage control', p.text, flags=re.IGNORECASE)
+
+    # Table cell replacements to trash voltage steering entirely
+    for t in doc.tables:
+        for row in t.rows:
+            for cell in row.cells:
+                if "DAC Voltage Steering Network" in cell.text:
+                    cell.text = cell.text.replace("DAC Voltage Steering Network", "Direct PWM Duty Cycle Voltage Control")
+                if "Resistor summing into LM5176 FB node [MUST]" in cell.text:
+                    cell.text = cell.text.replace("Resistor summing into LM5176 FB node [MUST]", "Direct PWM duty cycle modulation from MCU HRTIM [MUST]")
+                if "R_top=49.9kΩ, R_DAC=11kΩ, R_bot=3.65kΩ" in cell.text:
+                    cell.text = cell.text.replace("R_top=49.9kΩ, R_DAC=11kΩ, R_bot=3.65kΩ", "D = 20.8% (5V) to 83.3% (20V)")
+                if "Resistor summing network (R_top=49.9kΩ, R_bot=3.65kΩ, R_DAC=11kΩ) steers output from 5V to 20V in 10mV steps." in cell.text:
+                    cell.text = cell.text.replace("Resistor summing network (R_top=49.9kΩ, R_bot=3.65kΩ, R_DAC=11kΩ) steers output from 5V to 20V in 10mV steps.", "MCU modulates 300 kHz PWM duty cycle (D = 20.8% for 5V to 83.3% for 20V) to directly command output voltage.")
+                if "Precision DAC Steering" in cell.text:
+                    cell.text = cell.text.replace("Precision DAC Steering", "Direct PWM Duty Cycle Voltage Control")
+                if "High-precision 10 mV digital voltage steering via 12-bit DAC summing network" in cell.text:
+                    cell.text = cell.text.replace("High-precision 10 mV digital voltage steering via 12-bit DAC summing network", "High-precision digital voltage regulation via direct PWM duty cycle control")
+                if "Voltage Steering" in cell.text:
+                    cell.text = cell.text.replace("Voltage Steering", "Direct PWM Control")
+                if "Injects steering current into summing node to set Vout between 5.0V and 20.0V" in cell.text:
+                    cell.text = cell.text.replace("Injects steering current into summing node to set Vout between 5.0V and 20.0V", "Directly modulates 300 kHz PWM duty cycle (D = 20.8% to 83.3%) to set Vout from 5.0V to 20.0V")
+                if "Internal 12-Bit DAC1" in cell.text:
+                    cell.text = cell.text.replace("Internal 12-Bit DAC1", "HRTIM PWM Timer")
 
     # 13. TABLE 11 (FLYBACK REQUIREMENTS): Update to Uniform 65 kHz
     t11 = doc.tables[11]
@@ -706,7 +744,7 @@ def generate_v2_simplified_prd():
         ("33", "C_POLY", "Solid Aluminum Polymer Cap, 100µF, 25V, 12mΩ ESR", "1", "Radial SMD 8x10mm", "Panasonic", "25SVPF100M"),
         ("34", "R_TOP", "Feedback Upper Divider Resistor, 49.9 kΩ, 0.1%", "1", "SMD 0805", "Vishay Dale", "TNPW080549K9BEEA"),
         ("35", "R_BOT", "Feedback Lower Divider Resistor, 3.65 kΩ, 0.1%", "1", "SMD 0805", "Vishay Dale", "TNPW08053K65BEEA"),
-        ("36", "R_DAC", "DAC Steering Summing Resistor, 11.0 kΩ, 0.1%", "1", "SMD 0805", "Vishay Dale", "TNPW080511K0BEEA"),
+        ("36", "R_FB_DIV", "Voltage Feedback Attenuator Resistors, 49.9kΩ / 3.65kΩ, 0.1%", "2", "SMD 0805", "Vishay Dale", "TNPW080549K9BEEA"),
         ("37", "C_COMP", "Type-II Compensation Capacitor, 2.2 nF, 50V C0G", "1", "SMD 0603", "Murata", "GRM1885C1H222JA01D"),
         ("38", "R_COMP", "Type-II Compensation Resistor, 10.0 kΩ, 1%", "1", "SMD 0603", "Vishay Dale", "CRCW060310K0FKEA"),
         ("39", "U4", "32-bit ARM Cortex-M4F MCU @ 170 MHz", "1", "LQFP-64", "STMicroelectronics", "STM32G474RET6"),
@@ -791,7 +829,7 @@ def generate_v2_simplified_prd():
         "Table 4.2: 4-Switch Synchronous Buck-Boost Post-Regulator Requirements\t15",
         "Table 4.3: Real-Time Dual-Domain Telemetry & Monitoring Requirements\t16",
         "Table 4.4: Protection, Safety, EMC & Environmental Requirements\t16",
-        "Table 4.5: Analog Closed-Loop Control, DAC Steering & Hardware Protection Specifications\t17",
+        "Table 4.5: Closed-Loop Control, Direct PWM Voltage Control & Hardware Protection Specifications\t17",
         "Table 4.6A: STAGE 1: Mains Supply & Input Protection Sequence\t17",
         "Table 4.6B: STAGE 2: Bridge Rectifier & Bulk Filter Sequence\t18",
         "Table 4.6C: STAGE 3: Uniform-Frequency Flyback DC-DC Converter Sequence\t18",
@@ -864,8 +902,8 @@ def generate_v2_simplified_prd():
         ("Q5: How does the 4-switch Buck-Boost operate seamlessly between 5V and 20V?",
          "The TI LM5176 controls four N-MOSFETs (QA, QB, QC, QD) in an H-bridge configuration around a single 10µH flat-wire inductor. When V_OUT is significantly below 24V (e.g. 5V or 12V), QC is held continuously ON and QD is OFF, so the circuit functions purely as a synchronous Buck converter with switches QA and QB. As V_OUT approaches 20V under heavy load, the controller smoothly enters 4-switch Buck-Boost mode, modulating both legs to maintain exact regulation with zero deadband or output glitching."),
 
-        ("Q6: How does the DAC steer the output voltage without destabilizing the loop?",
-         "The LM5176 regulates by maintaining its feedback pin (FB) at an internal 1.20V reference. Instead of modifying the internal reference, we use a resistive summing junction: R_top (49.9kΩ) connects to V_OUT, R_bot (3.65kΩ) connects to ground, and R_DAC (11.0kΩ) connects to our 12-bit DAC. By injecting current into the FB node from the DAC, when V_DAC = 3.3V, V_OUT is steered to 5.0V. When V_DAC = 0V, V_OUT is steered to 20.0V. Because the loop's AC Type-II compensation network is connected between COMP and ground, DC setpoint steering has zero impact on high-frequency phase margin and stability."),
+        ("Q6: How does the Buck-Boost stage set and regulate output voltage based on PWM duty cycle?",
+         "The post-regulator operates on the physical principle of switching duty cycle modulation: from the +24.0V intermediate bus, the buck-boost H-bridge switch timing determines the transfer function. For 5.0V to 18.0V, the stage operates in pure synchronous buck mode where V_OUT = D * V_IN (e.g. D = 20.8% for 5.0V, D = 50.0% for 12.0V, D = 62.5% for 15.0V). For 18.0V to 20.0V, the controller smoothly modulates buck and boost legs. The MCU directly calculates and commands the PWM duty cycle with high resolution, eliminating analog resistor summing networks or DAC injection circuits. Output voltage feedback is sampled cleanly by the 12-bit ADC through a standard passive attenuator divider for closed-loop software PID regulation and overvoltage clamping."),
 
         ("Q7: How does the power supply protect against overcurrent and short circuits?",
          "We use standard, proven industry protections built directly into the hardware controllers: 1) LM5176 Built-in Cycle-by-Cycle Current Limiting: The LM5176 continuously monitors inductor/output current through a 10mΩ precision sense resistor connected to its dedicated CSP and CSN pins. If current exceeds the programmed threshold, the controller immediately truncates the current PWM pulse, capping peak current on every 300 kHz switching cycle. 2) MCU Supervisory Disable: The MCU continuously reads output current via the INA226 power monitor over I2C. If a sustained overload or short-circuit is detected (> 500 ms), the MCU pulls the LM5176 ENABLE pin low to safely disable power delivery. 3) Primary AC Fuse: A 2.0A ceramic time-lag fuse on the AC mains provides fail-safe isolation against internal catastrophic short circuits."),

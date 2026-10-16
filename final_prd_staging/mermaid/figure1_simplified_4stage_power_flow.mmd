@@ -14,7 +14,7 @@ flowchart LR
 
     subgraph COLD_DOMAIN ["SECONDARY COLD DOMAIN (Touch-Safe SELV)"]
         S3["<b>Stage 3: CONVERTER DC-DC</b><br/>• Uniform-Freq Flyback (UC3843 @ 65kHz)<br/>• PQ26/20 Core (Lp = 220µH, 6:1 turns)<br/>• MBR10100 Schottky Diode + Heatsink<br/>• +24.0V DC Intermediate Rail (72W)"]:::isoStyle
-        S4["<b>Stage 4: POST-REGULATOR</b><br/>• 4-Switch Buck-Boost (TI LM5176 @ 300kHz)<br/>• 4x 40V Low-Rds MOSFETs + 10µH Inductor<br/>• Analog DAC Steering (10mV Resolution)<br/>• Built-in CSP/CSN Peak Current Limit<br/>• 5.0V - 20.0V DC / 3.0A (60W)"]:::bbStyle
+        S4["<b>Stage 4: POST-REGULATOR</b><br/>• 4-Switch Buck-Boost (TI LM5176 @ 300kHz)<br/>• 4x 40V Low-Rds MOSFETs + 10µH Inductor<br/>• Direct PWM Duty Cycle Control (D = 20.8% - 83.3%)<br/>• Built-in CSP/CSN Peak Current Limit<br/>• 5.0V - 20.0V DC / 3.0A (60W)"]:::bbStyle
         S3 -->|"+24.0V DC Rail"| S4
     end
 

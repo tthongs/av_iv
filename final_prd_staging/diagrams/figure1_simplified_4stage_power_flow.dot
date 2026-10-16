@@ -96,7 +96,7 @@ digraph Figure1PowerFlow {
                 <hr/>
                 <tr><td align="left">• TI LM5176 Controller @ 300 kHz</td></tr>
                 <tr><td align="left">• 4x 40V MOSFETs + 10µH Inductor</td></tr>
-                <tr><td align="left">• Precision 12-Bit DAC Steering</td></tr>
+                <tr><td align="left">• Direct PWM Duty Cycle Control</td></tr>
                 <tr><td align="left">• Cycle-by-Cycle CSP/CSN Clamp</td></tr>
                 <tr><td align="left">• Output: 5.0V – 20.0V DC / 3.0A</td></tr>
             </table>>,

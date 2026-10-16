@@ -5,7 +5,7 @@ flowchart TD
     classDef isoBarrier fill:#FFEBEE,stroke:#C62828,stroke-width:2px,stroke-dasharray: 5 5,color:#B71C1C
     classDef secPwr fill:#E8F5E9,stroke:#2E7D32,stroke-width:2px,color:#1B5E20
     classDef bbPwr fill:#E0F7FA,stroke:#00838F,stroke-width:2px,color:#004D40
-    classDef steerStyle fill:#EDE7F6,stroke:#512DA8,stroke-width:2px,color:#311B92
+    classDef fbStyle fill:#EDE7F6,stroke:#512DA8,stroke-width:2px,color:#311B92
     classDef auxStyle fill:#FFF8E1,stroke:#FFA000,stroke-width:2px,color:#FF6F00
     classDef tlmStyle fill:#F3E5F5,stroke:#7B1FA2,stroke-width:2px,color:#4A148C
     classDef mcuStyle fill:#E1F5FE,stroke:#0277BD,stroke-width:2px,color:#01579B
@@ -66,7 +66,7 @@ flowchart TD
 
     subgraph ISOLATION_BARRIER ["⚡ REINFORCED ISOLATION BARRIER (IEC 62368-1 / 3000V RMS / 6.4mm Creepage)"]
         ISO_TX1["TX1 Secondary Winding<br/>Furukawa TEX-E TIW (Ns=6T)<br/>3000V RMS Dielectric Barrier"]:::isoBarrier
-        ISO_OPTO["Optocoupler OPTO1<br/>PC817 (5000V RMS)<br/>Collector/Emitter to COMP/GND_PRI"]:::isoBarrier
+        ISO_OPTO["Optocoupler OPTO1<br/>PC817 (5000V RMS)<br/>Voltage Loop Feedback"]:::isoBarrier
         ISO_AMC["Isolated Modulator U5<br/>TI AMC1311 (5000V RMS)<br/>VINP/N (Pri) to VOUTP/N (Sec)"]:::isoBarrier
         ISO_CT1["Current Transformer CT1<br/>Talema AC1005 (1000:1)<br/>Isolated AC Line Current"]:::isoBarrier
         ISO_DC_DC["Isolated DC-DC U9<br/>Mornsun B0505S-1WR3<br/>+5V System -> +5V_ISO (Pri)"]:::isoBarrier
@@ -88,39 +88,34 @@ flowchart TD
         ISO_OPTO -->|"Phototransistor"| U1_PWM
     end
 
-    subgraph STAGE4_BUCK_BOOST ["STAGE 4: 4-SWITCH SYNCHRONOUS BUCK-BOOST (TI LM5176)"]
-        U3_LM5176["Buck-Boost Controller U3<br/>TI LM5176 (300 kHz)<br/>• VIN: +24V Intermediate<br/>• EN/UVLO: From MCU GPIO<br/>• FB: Summing Node (1.20V)<br/>• COMP: Type-II RC Loop<br/>• CSP / CSN: Kelvin Current<br/>• Gate Drives: QA, QB, QC, QD"]:::bbPwr
+    subgraph STAGE4_BUCK_BOOST ["STAGE 4: 4-SWITCH SYNCHRONOUS BUCK-BOOST (DIRECT PWM CONTROL)"]
+        GATE_DRV["Dual Synchronous Gate Drivers<br/>TI UCC27211A / LM5106 (120V, 4A)<br/>• High/Low Side Drivers<br/>• Hardware Dead-Time Generation<br/>• Bootstrap Diodes & Caps"]:::bbPwr
         H_BRIDGE["4-Switch H-Bridge MOSFETs<br/>Infineon BSC034N04LS (40V, 3.4mΩ)<br/>• QA (Buck High) / QB (Buck Low)<br/>• QC (Boost High) / QD (Boost Low)"]:::bbPwr
         L1_IND["Power Inductor L1<br/>Wurth 7443321000 (10.0µH)<br/>Flat-Wire 8.5A RMS / 11.5A Sat"]:::bbPwr
         R_SHUNT["Kelvin Shunt R_SHUNT<br/>Bourns 10.0mΩ, 0.1%, 3W<br/>2512 4-Terminal Metal Strip"]:::bbPwr
         C_OUT["Output Filter Caps<br/>• 4x 22µF / 25V X7R MLCC<br/>• 1x 220µF / 25V Polymer Cap"]:::bbPwr
 
-        BUS_24V -->|"VIN Rail"| U3_LM5176
-        BUS_24V -->|"Power In"| H_BRIDGE
-        U3_LM5176 -->|"HDRV1, LDRV1, HDRV2, LDRV2"| H_BRIDGE
+        BUS_24V -->|"Power In (+24V)"| H_BRIDGE
+        GATE_DRV -->|"Gate Drive Lines (QA..QD)"| H_BRIDGE
         H_BRIDGE -->|"SW1, SW2 Nodes"| L1_IND
         H_BRIDGE -->|"Regulated Output"| R_SHUNT
-        R_SHUNT -->|"CSP, CSN Kelvin"| U3_LM5176
         R_SHUNT --> C_OUT
     end
 
-    subgraph STEERING_JUNCTION ["ANALOG VOLTAGE STEERING & SENSING JUNCTION"]
-        R_TOP["R_TOP: 49.9kΩ (1%)<br/>VOUT to FB Pin"]:::steerStyle
-        R_BOT["R_BOT: 3.65kΩ (1%)<br/>FB Pin to GND_SEC"]:::steerStyle
-        R_DAC["R_DAC: 11.0kΩ (1%)<br/>MCU DAC to FB Pin"]:::steerStyle
-        FB_NODE["Summing Node FB<br/>Regulates to 1.20V<br/>VOUT = 5V to 20V"]:::steerStyle
+    subgraph VOLTAGE_FEEDBACK ["PASSIVE VOLTAGE SENSING ATTENUATOR"]
+        R_FB1["R_FB1: 49.9kΩ (0.1%)<br/>VOUT Tap Resistor"]:::fbStyle
+        R_FB2["R_FB2: 3.65kΩ (0.1%)<br/>Ground Sense Resistor"]:::fbStyle
+        ADC_VOUT_NODE["V_SENSE Node (0 - 1.36V)<br/>Direct Attenuation to MCU ADC<br/>NO Voltage Steering / NO DAC Injection"]:::fbStyle
 
-        C_OUT -->|"VOUT+" | R_TOP
-        R_TOP --> FB_NODE
-        R_BOT -->|"GND_SEC"| FB_NODE
-        R_DAC --> FB_NODE
-        FB_NODE -->|"Pin FB"| U3_LM5176
+        C_OUT -->|"VOUT+ (5V - 20V)"| R_FB1
+        R_FB1 --> ADC_VOUT_NODE
+        R_FB2 -->|"GND_SEC"| ADC_VOUT_NODE
     end
 
     subgraph TELEMETRY_FRONTEND ["DUAL-DOMAIN SENSING & TELEMETRY FRONTEND"]
-        U4_INA226["DC Power Monitor U4<br/>TI INA226 (I2C @ 0x40)<br/>• IN+ / IN- across R_SHUNT<br/>• VBUS connected to VOUT+<br/>• ALERT: EXTI Overcurrent Pin"]:::tlmStyle
+        U4_INA226["DC Power Monitor U4<br/>TI INA226 (I2C @ 0x40)<br/>• IN+ / IN- across R_SHUNT<br/>• VBUS connected to VOUT+<br/>• ALERT: Fast OCP Interrupt"]:::tlmStyle
         U5_AMC1311["AC Voltage Sensing U5<br/>TI AMC1311 (Reinforced)<br/>• VINP/N from 1MΩ Divider<br/>• VOUTP/N Diff to MCU ADC"]:::tlmStyle
-        CT1_BURDEN["AC Current Sensing CT1<br/>Talema AC1005 (1000:1)<br/>• Burden R: 100Ω + Diodes<br/>• Output to MCU ADC"]:::tlmStyle
+        CT1_BURDEN["AC Current Sensing CT1<br/>Talema AC1005 (1000:1)<br/>• 100Ω Burden Resistor<br/>• Clamping Diodes to ADC"]:::tlmStyle
 
         R_SHUNT -->|"Kelvin V_SENSE"| U4_INA226
         C_OUT -->|"VBUS"| U4_INA226
@@ -142,18 +137,20 @@ flowchart TD
         ISO_DC_DC -->|"VDD1_ISO"| U5_AMC1311
     end
 
-    subgraph HOST_MCU ["HOST MCU & USER INTERFACE CONTROLLER"]
-        U6_MCU["Host Controller U6<br/>STM32G474 / Controller<br/>• 12-Bit DAC1_OUT1 -> R_DAC<br/>• GPIO_EN -> LM5176 EN<br/>• EXTI_ALERT <- INA226 ALERT<br/>• I2C1 (SCL/SDA) Bus<br/>• ADC1 (VAC_P/N, IAC) Channels<br/>• VDD / VREF: +3.3V Quiet Rail"]:::mcuStyle
+    subgraph HOST_MCU ["HOST MCU & DIGITAL PWM CONTROLLER"]
+        U6_MCU["Host Controller U6<br/>STM32G474 Mixed-Signal MCU<br/>• HRTIM: Direct PWM Duty Cycle (D)<br/>  - D = 20.8% (5V) to 83.3% (20V)<br/>• ADC1_IN4 <- V_SENSE (Direct Voltage)<br/>• COMP1 <- R_SHUNT (<30ns Hardware Trip)<br/>• I2C1 (SCL/SDA) Bus<br/>• ADC1 (VAC_P/N, IAC) Line Channels<br/>• VDD / VREF: +3.3V Quiet Rail"]:::mcuStyle
         DISP_OLED["1.3 inch OLED Display<br/>SSD1306 (128x64 I2C @ 0x3C)<br/>Telemetry & Status (10Hz)"]:::mcuStyle
         ROT_ENC["Rotary Encoder EC11<br/>Dual-Phase Quadrature<br/>+ Push-Button (Vset / Ilimit)"]:::mcuStyle
-        BTN_ONOFF["Output Enable Button<br/>Illuminated Front-Panel Switch"]:::mcuStyle
+        BTN_ONOFF["Output Enable Button<br/>Front-Panel Illuminated Switch"]:::mcuStyle
         STATUS_LEDS["Status LEDs<br/>• Green: Standby / Power<br/>• Blue: Output Active<br/>• Red: Fault / Trip"]:::mcuStyle
         USB_UART["USB-C / UART Bridge<br/>CP2102 / CH340G<br/>PC Telemetry & SCPI Control"]:::mcuStyle
 
         U8_LDO -->|"+3.3V Quiet Rail"| U6_MCU
         U7_BUCK -->|"+5.0V Display Rail"| DISP_OLED
-        U6_MCU -->|"DAC Voltage (0-3.3V)"| R_DAC
-        U6_MCU -->|"Enable Signal"| U3_LM5176
+        U7_BUCK -->|"+5.0V Driver Bias"| GATE_DRV
+        U6_MCU -->|"Direct PWM (D=20.8%-83.3%)"| GATE_DRV
+        ADC_VOUT_NODE -->|"V_SENSE Analog In"| U6_MCU
+        R_SHUNT -.->|"Fast Shunt Tap (<30ns)"| U6_MCU
         U4_INA226 -->|"I2C Bus + ALERT"| U6_MCU
         U5_AMC1311 -->|"Diff Analog VAC"| U6_MCU
         CT1_BURDEN -->|"Analog IAC"| U6_MCU
@@ -169,6 +166,6 @@ flowchart TD
         LOAD_DUT["Device Under Test (DUT)<br/>Max Continuous: 60W (3.0A)<br/>Peak Ripple < 25mV pk-pk"]:::outStyle
 
         C_OUT -->|"Power Out+" | J2_OUT
-        R_BOT -->|"GND_SEC"| J2_OUT
+        R_FB2 -->|"GND_SEC"| J2_OUT
         J2_OUT -->|"DC Power Cable"| LOAD_DUT
     end
