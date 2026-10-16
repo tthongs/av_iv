@@ -1,6 +1,6 @@
 # Mermaid Architectural Diagram Catalog
 
-This directory contains the standalone Mermaid (`.mmd`) source files for all 11 architectural diagrams referenced in the Smart Programmable Power Supply (VVDN_SPPS_2026) PRD.
+This directory contains the standalone Mermaid (`.mmd`) source files for all 12 architectural diagrams referenced in the Smart Programmable Power Supply (VVDN_SPPS_2026) PRD.
 
 | Diagram File | Description | Rendered Image Link |
 | :--- | :--- | :--- |
@@ -15,3 +15,4 @@ This directory contains the standalone Mermaid (`.mmd`) source files for all 11 
 | [figure9_aux_power_distribution.mmd](file:///home/tthhongs/build_tthongs/av_iv/final_prd_staging/mermaid/figure9_aux_power_distribution.mmd) | Figure9 Aux Power Distribution | [PNG](file:///home/tthhongs/build_tthongs/av_iv/final_prd_staging/diagrams/figure9_aux_power_distribution.png) / [SVG](file:///home/tthhongs/build_tthongs/av_iv/final_prd_staging/diagrams/figure9_aux_power_distribution.svg) |
 | [figure10_master_hardware_architecture.mmd](file:///home/tthhongs/build_tthongs/av_iv/final_prd_staging/mermaid/figure10_master_hardware_architecture.mmd) | Figure10 Master Hardware Architecture | [PNG](file:///home/tthhongs/build_tthongs/av_iv/final_prd_staging/diagrams/figure10_master_hardware_architecture.png) / [SVG](file:///home/tthhongs/build_tthongs/av_iv/final_prd_staging/diagrams/figure10_master_hardware_architecture.svg) |
 | [figure11_mcu_system_interaction_monitoring.mmd](file:///home/tthhongs/build_tthongs/av_iv/final_prd_staging/mermaid/figure11_mcu_system_interaction_monitoring.mmd) | Figure11 Mcu System Interaction Monitoring | [PNG](file:///home/tthhongs/build_tthongs/av_iv/final_prd_staging/diagrams/figure11_mcu_system_interaction_monitoring.png) / [SVG](file:///home/tthhongs/build_tthongs/av_iv/final_prd_staging/diagrams/figure11_mcu_system_interaction_monitoring.svg) |
+| [figure12_detailed_component_connections_block_diagram.mmd](file:///home/tthhongs/build_tthongs/av_iv/final_prd_staging/mermaid/figure12_detailed_component_connections_block_diagram.mmd) | Figure12 Detailed Component Connections Block Diagram | [PNG](file:///home/tthhongs/build_tthongs/av_iv/final_prd_staging/diagrams/figure12_detailed_component_connections_block_diagram.png) / [SVG](file:///home/tthhongs/build_tthongs/av_iv/final_prd_staging/diagrams/figure12_detailed_component_connections_block_diagram.svg) |

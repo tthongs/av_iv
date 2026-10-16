@@ -1,0 +1,174 @@
+flowchart TD
+    %% Domain Styles
+    classDef acStyle fill:#ECEFF1,stroke:#37474F,stroke-width:2px,color:#263238
+    classDef priPwr fill:#FFF3E0,stroke:#E65100,stroke-width:2px,color:#BF360C
+    classDef isoBarrier fill:#FFEBEE,stroke:#C62828,stroke-width:2px,stroke-dasharray: 5 5,color:#B71C1C
+    classDef secPwr fill:#E8F5E9,stroke:#2E7D32,stroke-width:2px,color:#1B5E20
+    classDef bbPwr fill:#E0F7FA,stroke:#00838F,stroke-width:2px,color:#004D40
+    classDef steerStyle fill:#EDE7F6,stroke:#512DA8,stroke-width:2px,color:#311B92
+    classDef auxStyle fill:#FFF8E1,stroke:#FFA000,stroke-width:2px,color:#FF6F00
+    classDef tlmStyle fill:#F3E5F5,stroke:#7B1FA2,stroke-width:2px,color:#4A148C
+    classDef mcuStyle fill:#E1F5FE,stroke:#0277BD,stroke-width:2px,color:#01579B
+    classDef outStyle fill:#E8EAF6,stroke:#283593,stroke-width:2px,color:#1A237E
+
+    subgraph STAGE1 ["STAGE 1: MAINS AC INPUT & EMI FILTERING (HOT DOMAIN)"]
+        J1["AC Mains Inlet J1<br/>IEC 320-C14<br/>• Pin L (Line 85-265V)<br/>• Pin N (Neutral)<br/>• Pin PE (Earth)"]:::acStyle
+        F1["Fuse F1<br/>2.0A / 250V AC<br/>Time-Lag 5x20mm"]:::acStyle
+        NTC1["Inrush NTC1<br/>10Ω Cold, 3.2A<br/>Disc 13mm"]:::acStyle
+        MOV1["Surge MOV1<br/>14D471K (300V RMS)<br/>4.5kA Clamp"]:::acStyle
+        CX1["X2 Cap CX1<br/>0.22µF / 275V AC<br/>+ Bleeder R_DIS1"]:::acStyle
+        L_CM1["CM Choke L_CM1<br/>15.0mH, 1.1A RMS<br/>Toroidal Through-Hole"]:::acStyle
+        CY1_2["Y2 Caps CY1/CY2<br/>2x 2.2nF / 300V AC<br/>L/N to Earth PE"]:::acStyle
+        CX2["X2 Cap CX2<br/>0.22µF / 275V AC<br/>+ Bleeder R_DIS2"]:::acStyle
+        L_CM2["CM Choke L_CM2<br/>4.7mH, 1.6A RMS<br/>High-Freq Choke"]:::acStyle
+        CY3_4["Y2 Caps CY3/CY4<br/>2x 2.2nF / 300V AC<br/>L/N to Earth PE"]:::acStyle
+
+        J1 -->|"Line (L)"| F1
+        F1 --> NTC1
+        J1 -->|"Neutral (N)"| CX1
+        NTC1 --> MOV1
+        MOV1 --> CX1
+        CX1 --> L_CM1
+        L_CM1 --> CY1_2
+        CY1_2 --> CX2
+        CX2 --> L_CM2
+        L_CM2 --> CY3_4
+    end
+
+    subgraph STAGE2 ["STAGE 2: BRIDGE RECTIFIER & BULK DC BUS (HOT DOMAIN)"]
+        BR1["Bridge Rectifier BR1<br/>GBU606 (600V, 6A)<br/>Pins: AC1, AC2, +, -"]:::priPwr
+        C_BULK["Bulk Cap C_BULK<br/>100µF / 450V Elect.<br/>+ C_HF 0.1µF Film"]:::priPwr
+        R_BLEED["Bleeder Resistor<br/>R_BLEED 330kΩ, 2W<br/>Safety Discharge"]:::priPwr
+
+        CY3_4 -->|"AC1, AC2"| BR1
+        BR1 -->|"(+) DC Bus"| C_BULK
+        BR1 -->|"(-) GND_PRI"| C_BULK
+        C_BULK --- R_BLEED
+    end
+
+    subgraph STAGE3_PRIMARY ["STAGE 3: 65 kHz FLYBACK PRIMARY & CONTROLLER (GND_PRI)"]
+        TX1_PRI["Flyback Trans TX1 Pri<br/>PQ26/20 (3C95 Ferrite)<br/>Pin 1 (+HVDC) -> Pin 3<br/>Lp=220µH, Np=36T"]:::priPwr
+        Q1_FET["Primary MOSFET Q1<br/>STP10NK80Z (800V, 17A)<br/>Pins: Drain, Gate, Source"]:::priPwr
+        RCD_CLAMP["RCD Snubber Clamp<br/>• US1M Diode (1000V, 1A)<br/>• C_SNUB 1nF / 1kV<br/>• R_SNUB 22.6kΩ (3x 68k)"]:::priPwr
+        R_CS["CS Shunt Resistor R_CS<br/>0.25Ω / 1%, 2W Metal<br/>Pin: ISENSE to GND_PRI"]:::priPwr
+        U1_PWM["PWM Controller U1<br/>TI UC3843 / UCC28C43<br/>• Pin 7: VCC (+14V Aux)<br/>• Pin 8: VREF (5.0V)<br/>• Pin 4: RT/CT (65kHz)<br/>• Pin 3: ISENSE (1.0V OCP)<br/>• Pin 6: OUT (Gate Drive)<br/>• Pin 1: COMP / Pin 2: FB<br/>• Pin 5: GND_PRI"]:::priPwr
+        TX1_AUX["TX1 Aux Winding<br/>Pins 4, 5 (Naux=5T)<br/>+ UF4004 & 47µF Cap"]:::priPwr
+
+        C_BULK -->|"+HVDC (+120V to +375V)"| TX1_PRI
+        TX1_PRI -->|"Pin 3 (Drain)"| Q1_FET
+        TX1_PRI -.->|"Snubber Loop"| RCD_CLAMP
+        Q1_FET -->|"Pin Source"| R_CS
+        R_CS -->|"GND_PRI"| BR1
+        U1_PWM -->|"Pin 6 (OUT) via 10Ω"| Q1_FET
+        R_CS -->|"Filtered ISENSE"| U1_PWM
+        TX1_AUX -->|"VCC Rail (+14V)"| U1_PWM
+    end
+
+    subgraph ISOLATION_BARRIER ["⚡ REINFORCED ISOLATION BARRIER (IEC 62368-1 / 3000V RMS / 6.4mm Creepage)"]
+        ISO_TX1["TX1 Secondary Winding<br/>Furukawa TEX-E TIW (Ns=6T)<br/>3000V RMS Dielectric Barrier"]:::isoBarrier
+        ISO_OPTO["Optocoupler OPTO1<br/>PC817 (5000V RMS)<br/>Collector/Emitter to COMP/GND_PRI"]:::isoBarrier
+        ISO_AMC["Isolated Modulator U5<br/>TI AMC1311 (5000V RMS)<br/>VINP/N (Pri) to VOUTP/N (Sec)"]:::isoBarrier
+        ISO_CT1["Current Transformer CT1<br/>Talema AC1005 (1000:1)<br/>Isolated AC Line Current"]:::isoBarrier
+        ISO_DC_DC["Isolated DC-DC U9<br/>Mornsun B0505S-1WR3<br/>+5V System -> +5V_ISO (Pri)"]:::isoBarrier
+    end
+
+    subgraph STAGE3_SECONDARY ["STAGE 3: SCHOTTKY RECTIFICATION & +24V BUS (SELV DOMAIN)"]
+        D_SEC["Schottky Diode D_SEC<br/>ON Semi MBR10100 (100V, 10A)<br/>Pins: Anode -> Cathode<br/>TO-220 with Stamped Heatsink"]:::secPwr
+        C_SEC["Secondary LC Filter<br/>• C_SEC1: 470µF / 35V Low-ESR<br/>• L_SEC: 2.2µH Choke<br/>• C_SEC2: 22µF Ceramic MLCC"]:::secPwr
+        BUS_24V["Intermediate Rail<br/>+24.0V DC Bus (72W)<br/>Ripple < 40mV pk-pk"]:::secPwr
+        U2_TL431["Shunt Regulator U2<br/>TI TL431 (2.495V Ref)<br/>+ Divider 21.5kΩ / 2.49kΩ"]:::secPwr
+
+        TX1_PRI -.->|"Magnetic Coupling"| ISO_TX1
+        ISO_TX1 -->|"Pin 7 (Anode)"| D_SEC
+        ISO_TX1 -->|"Pin 9 (GND_SEC)"| C_SEC
+        D_SEC -->|"Cathode"| C_SEC
+        C_SEC --> BUS_24V
+        BUS_24V -->|"Feedback Divider"| U2_TL431
+        U2_TL431 -->|"Drives Photodiode"| ISO_OPTO
+        ISO_OPTO -->|"Phototransistor"| U1_PWM
+    end
+
+    subgraph STAGE4_BUCK_BOOST ["STAGE 4: 4-SWITCH SYNCHRONOUS BUCK-BOOST (TI LM5176)"]
+        U3_LM5176["Buck-Boost Controller U3<br/>TI LM5176 (300 kHz)<br/>• VIN: +24V Intermediate<br/>• EN/UVLO: From MCU GPIO<br/>• FB: Summing Node (1.20V)<br/>• COMP: Type-II RC Loop<br/>• CSP / CSN: Kelvin Current<br/>• Gate Drives: QA, QB, QC, QD"]:::bbPwr
+        H_BRIDGE["4-Switch H-Bridge MOSFETs<br/>Infineon BSC034N04LS (40V, 3.4mΩ)<br/>• QA (Buck High) / QB (Buck Low)<br/>• QC (Boost High) / QD (Boost Low)"]:::bbPwr
+        L1_IND["Power Inductor L1<br/>Wurth 7443321000 (10.0µH)<br/>Flat-Wire 8.5A RMS / 11.5A Sat"]:::bbPwr
+        R_SHUNT["Kelvin Shunt R_SHUNT<br/>Bourns 10.0mΩ, 0.1%, 3W<br/>2512 4-Terminal Metal Strip"]:::bbPwr
+        C_OUT["Output Filter Caps<br/>• 4x 22µF / 25V X7R MLCC<br/>• 1x 220µF / 25V Polymer Cap"]:::bbPwr
+
+        BUS_24V -->|"VIN Rail"| U3_LM5176
+        BUS_24V -->|"Power In"| H_BRIDGE
+        U3_LM5176 -->|"HDRV1, LDRV1, HDRV2, LDRV2"| H_BRIDGE
+        H_BRIDGE -->|"SW1, SW2 Nodes"| L1_IND
+        H_BRIDGE -->|"Regulated Output"| R_SHUNT
+        R_SHUNT -->|"CSP, CSN Kelvin"| U3_LM5176
+        R_SHUNT --> C_OUT
+    end
+
+    subgraph STEERING_JUNCTION ["ANALOG VOLTAGE STEERING & SENSING JUNCTION"]
+        R_TOP["R_TOP: 49.9kΩ (1%)<br/>VOUT to FB Pin"]:::steerStyle
+        R_BOT["R_BOT: 3.65kΩ (1%)<br/>FB Pin to GND_SEC"]:::steerStyle
+        R_DAC["R_DAC: 11.0kΩ (1%)<br/>MCU DAC to FB Pin"]:::steerStyle
+        FB_NODE["Summing Node FB<br/>Regulates to 1.20V<br/>VOUT = 5V to 20V"]:::steerStyle
+
+        C_OUT -->|"VOUT+" | R_TOP
+        R_TOP --> FB_NODE
+        R_BOT -->|"GND_SEC"| FB_NODE
+        R_DAC --> FB_NODE
+        FB_NODE -->|"Pin FB"| U3_LM5176
+    end
+
+    subgraph TELEMETRY_FRONTEND ["DUAL-DOMAIN SENSING & TELEMETRY FRONTEND"]
+        U4_INA226["DC Power Monitor U4<br/>TI INA226 (I2C @ 0x40)<br/>• IN+ / IN- across R_SHUNT<br/>• VBUS connected to VOUT+<br/>• ALERT: EXTI Overcurrent Pin"]:::tlmStyle
+        U5_AMC1311["AC Voltage Sensing U5<br/>TI AMC1311 (Reinforced)<br/>• VINP/N from 1MΩ Divider<br/>• VOUTP/N Diff to MCU ADC"]:::tlmStyle
+        CT1_BURDEN["AC Current Sensing CT1<br/>Talema AC1005 (1000:1)<br/>• Burden R: 100Ω + Diodes<br/>• Output to MCU ADC"]:::tlmStyle
+
+        R_SHUNT -->|"Kelvin V_SENSE"| U4_INA226
+        C_OUT -->|"VBUS"| U4_INA226
+        STAGE1 -.->|"AC Line Voltage"| U5_AMC1311
+        STAGE1 -.->|"Line Wire Passage"| CT1_BURDEN
+        U5_AMC1311 --- ISO_AMC
+        CT1_BURDEN --- ISO_CT1
+    end
+
+    subgraph AUX_SUPPLY ["AUXILIARY BIAS POWER RAIL NETWORK"]
+        U7_BUCK["Aux Buck Converter U7<br/>TI LMR33630 (36V -> 5.0V)<br/>Output: +5.0V DC System Rail"]:::auxStyle
+        U8_LDO["Ultra-Low-Noise LDO U8<br/>TI TPS7A4700 (5.0V -> 3.3V)<br/>Output: +3.3V DC Quiet Rail"]:::auxStyle
+        U9_ISODC["Isolated DC-DC U9<br/>Mornsun B0505S-1WR3<br/>Output: +5V_ISO (Hot Domain)"]:::auxStyle
+
+        BUS_24V -->|"+24V Input"| U7_BUCK
+        U7_BUCK -->|"+5.0V System Rail"| U8_LDO
+        U7_BUCK -->|"+5.0V Supply"| U9_ISODC
+        U9_ISODC -->|"+5V_ISO"| ISO_DC_DC
+        ISO_DC_DC -->|"VDD1_ISO"| U5_AMC1311
+    end
+
+    subgraph HOST_MCU ["HOST MCU & USER INTERFACE CONTROLLER"]
+        U6_MCU["Host Controller U6<br/>STM32G474 / Controller<br/>• 12-Bit DAC1_OUT1 -> R_DAC<br/>• GPIO_EN -> LM5176 EN<br/>• EXTI_ALERT <- INA226 ALERT<br/>• I2C1 (SCL/SDA) Bus<br/>• ADC1 (VAC_P/N, IAC) Channels<br/>• VDD / VREF: +3.3V Quiet Rail"]:::mcuStyle
+        DISP_OLED["1.3 inch OLED Display<br/>SSD1306 (128x64 I2C @ 0x3C)<br/>Telemetry & Status (10Hz)"]:::mcuStyle
+        ROT_ENC["Rotary Encoder EC11<br/>Dual-Phase Quadrature<br/>+ Push-Button (Vset / Ilimit)"]:::mcuStyle
+        BTN_ONOFF["Output Enable Button<br/>Illuminated Front-Panel Switch"]:::mcuStyle
+        STATUS_LEDS["Status LEDs<br/>• Green: Standby / Power<br/>• Blue: Output Active<br/>• Red: Fault / Trip"]:::mcuStyle
+        USB_UART["USB-C / UART Bridge<br/>CP2102 / CH340G<br/>PC Telemetry & SCPI Control"]:::mcuStyle
+
+        U8_LDO -->|"+3.3V Quiet Rail"| U6_MCU
+        U7_BUCK -->|"+5.0V Display Rail"| DISP_OLED
+        U6_MCU -->|"DAC Voltage (0-3.3V)"| R_DAC
+        U6_MCU -->|"Enable Signal"| U3_LM5176
+        U4_INA226 -->|"I2C Bus + ALERT"| U6_MCU
+        U5_AMC1311 -->|"Diff Analog VAC"| U6_MCU
+        CT1_BURDEN -->|"Analog IAC"| U6_MCU
+        U6_MCU <-->|"I2C Bus"| DISP_OLED
+        ROT_ENC -->|"Pins A, B, SW"| U6_MCU
+        BTN_ONOFF -->|"Active Low"| U6_MCU
+        U6_MCU -->|"GPIO Drives"| STATUS_LEDS
+        U6_MCU <-->|"UART TX / RX"| USB_UART
+    end
+
+    subgraph OUTPUT_STAGE ["OUTPUT POWER TERMINALS & LOAD (TOUCH-SAFE SELV)"]
+        J2_OUT["Output Terminals J2<br/>Heavy-Duty 4mm Binding Posts<br/>• Red: VOUT+ (5.0V to 20.0V DC)<br/>• Black: VOUT- (GND_SEC Return)<br/>• Green: Chassis Earth PE"]:::outStyle
+        LOAD_DUT["Device Under Test (DUT)<br/>Max Continuous: 60W (3.0A)<br/>Peak Ripple < 25mV pk-pk"]:::outStyle
+
+        C_OUT -->|"Power Out+" | J2_OUT
+        R_BOT -->|"GND_SEC"| J2_OUT
+        J2_OUT -->|"DC Power Cable"| LOAD_DUT
+    end

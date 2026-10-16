@@ -641,6 +641,18 @@ def generate_v2_simplified_prd():
         cap11 = doc.add_paragraph("Figure 11: MCU System Interaction, State Machine & Monitoring Architecture")
         format_caption(cap11)
 
+        # 8.6 System Interconnect: Detailed Component Connections Block Diagram
+        p_arch6 = doc.add_paragraph("8.6 System Interconnect: Detailed Component Connections Block Diagram")
+        p_arch6.style = "Heading 2"
+        p_pic12 = doc.add_paragraph()
+        p_pic12.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        diag12_path = "final_prd_staging/diagrams/figure12_detailed_component_connections_block_diagram.png"
+        if os.path.exists(diag12_path):
+            r12 = p_pic12.add_run()
+            r12.add_picture(diag12_path, width=Inches(6.47))
+        cap12 = doc.add_paragraph("Figure 12: Detailed Component Connections Block Diagram")
+        format_caption(cap12)
+
         p_arch3._p.addnext(p_pic9._p)
         p_pic9._p.addnext(cap9._p)
         cap9._p.addnext(p_arch4._p)
@@ -649,6 +661,9 @@ def generate_v2_simplified_prd():
         cap10._p.addnext(p_arch5._p)
         p_arch5._p.addnext(p_pic11._p)
         p_pic11._p.addnext(cap11._p)
+        cap11._p.addnext(p_arch6._p)
+        p_arch6._p.addnext(p_pic12._p)
+        p_pic12._p.addnext(cap12._p)
 
     # 18. POPULATE COMPLETE BILL OF MATERIALS (Table 19 & Table 20)
     print("Populating complete Class A Bill of Materials...")
@@ -797,7 +812,8 @@ def generate_v2_simplified_prd():
         "Figure 8: Dual-Domain Power Telemetry & Sensing Frontend Architecture\t20",
         "Figure 9: Auxiliary Bias Power Rail Distribution Subsystem Architecture\t20",
         "Figure 10: Master System Hardware Architecture Block Diagram\t21",
-        "Figure 11: MCU System Interaction, State Machine & Monitoring Architecture\t21"
+        "Figure 11: MCU System Interaction, State Machine & Monitoring Architecture\t21",
+        "Figure 12: Detailed Component Connections Block Diagram\t22"
     ]
 
     p_lot = None

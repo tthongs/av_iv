@@ -138,6 +138,7 @@
 * **Figure 9**: Auxiliary Bias Power Rail Distribution Subsystem Architecture
 * **Figure 10**: Master System Hardware Architecture Block Diagram
 * **Figure 11**: MCU System Interaction, State Machine & Monitoring Architecture
+* **Figure 12**: Detailed Component Connections Block Diagram
 
 ---
 
@@ -631,6 +632,27 @@ The power supply hardware architecture consists of two galvanically isolated pow
 
 > [!NOTE]
 > This is the proposed architecture and it might get changed during the design stage. Ensure the license compliance for usage of open source tools.
+
+---
+
+## 8.6 System Interconnect: Detailed Component Connections Block Diagram
+
+### Figure 12: Detailed Component Connections Block Diagram
+![Figure 12: Detailed Component Connections Block Diagram](diagrams/figure12_detailed_component_connections_block_diagram.png)
+*(Standalone Mermaid Source: [figure12_detailed_component_connections_block_diagram.mmd](mermaid/figure12_detailed_component_connections_block_diagram.mmd))*
+
+The detailed component connections block diagram illustrates the complete, physical net-level and pin-to-pin wiring interconnect across all 51 components in the smart programmable power supply:
+* **Stage 1 (AC Input & EMI Filter)**: Complete wiring from IEC C14 inlet `J1` through 2A cartridge fuse `F1`, 10Ω NTC thermistor `NTC1`, 300V MOV `MOV1`, dual-stage common-mode chokes `L_CM1` (15mH) & `L_CM2` (4.7mH), X2 film capacitors `CX1`/`CX2`, and Y2 safety capacitors `CY1`–`CY4` to chassis earth ground `PE`.
+* **Stage 2 (Rectifier & High-Voltage Bulk DC)**: Direct AC connections from Stage 1 into `BR1` (GBU606 bridge rectifier), feeding high-voltage electrolytic bulk capacitor `C_BULK` (100µF/450V), `C_HF` high-frequency bypass, and `R_BLEED` safety bleeder into the unregulated +120V to +375V DC rail.
+* **Stage 3 (Uniform-Frequency Isolated Flyback)**: Pinout connections for `TX1` (Ferroxcube PQ26/20 transformer), primary superjunction switch `Q1` (STP10NK80Z), RCD clamp snubber (`D_SNUB`, `R_SNUB`, `C_SNUB`), current sense shunt `R_CS` (0.25Ω/2W), and `U1` (TI UC3843 / UCC28C43 PWM controller) with its uniform 65 kHz $R_T/C_T$ timing network ($10\,\text{k}\Omega / 2.2\,\text{nF}$), auxiliary winding bias feed (`TX1_AUX`, UF4004 diode, 47µF cap), and optocoupled feedback network (`OPTO1` PC817 + `U2` TL431).
+* **Reinforced Galvanic Isolation Barrier**: Physical 3000V RMS dielectric barrier crossing via Furukawa TEX-E triple-insulated wire on `TX1`, `OPTO1` phototransistor, `U5` AMC1311 isolated delta-sigma modulator, `CT1` AC current transformer (1000:1), and `U9` Mornsun B0505S-1WR3 isolated DC-DC converter.
+* **Stage 3 Secondary & +24V Intermediate Rail**: High-speed passive secondary rectification via `D_SEC` (ON Semi MBR10100 100V/10A Schottky barrier diode with heatsink) feeding low-ESR LC filter `C_SEC` (470µF/35V + 2.2µH choke) to form the clean +24.0V DC intermediate bus (72W).
+* **Stage 4 (4-Switch Synchronous Buck-Boost Post-Regulator)**: Comprehensive pinout interconnect for `U3` (TI LM5176 300 kHz controller), gate drives (`HDRV1`, `LDRV1`, `HDRV2`, `LDRV2`, `BOOT1`, `BOOT2`) controlling 4x Infineon BSC034N04LS MOSFETs (`QA`..`QD`), flat-wire power inductor `L1` (10µH), 10mΩ Kelvin shunt `R_SHUNT` connected to `CSP`/`CSN` pins, and output ceramic/polymer capacitor bank `C_OUT`.
+* **Analog Voltage Steering Summing Junction**: 3-resistor precision summing node at LM5176 `FB` pin formed by $R_{\text{TOP}} = 49.9\,\text{k}\Omega$ to $V_{\text{OUT+}}$, $R_{\text{BOT}} = 3.65\,\text{k}\Omega$ to $\text{GND\_SEC}$, and $R_{\text{DAC}} = 11.0\,\text{k}\Omega$ to MCU 12-bit DAC output ($0.0\text{V} - 3.3\text{V}$), enabling seamless voltage adjustment from 5.0V to 20.0V DC without affecting AC loop stability.
+* **Dual-Domain Sensing & Telemetry Frontend**: Interconnections for `U4` (TI INA226) across `R_SHUNT` and $V_{\text{OUT+}}$ with I2C bus and EXTI `ALERT` overcurrent interrupt; `U5` (TI AMC1311) differential output to MCU ADC channels; and `CT1` (Talema AC1005) burden resistor network feeding MCU AC current ADC channel.
+* **Auxiliary Bias Power Rail Network**: +24V bus stepping down through `U7` (TI LMR33630 buck converter) to generate the +5.0V System Rail, followed by `U8` (TI TPS7A4700 ultra-low-noise LDO) generating the clean +3.3V Quiet Rail ($<4.2\,\mu\text{V}_{\text{RMS}}$), and `U9` (B0505S-1WR3) generating isolated +5V_ISO for hot-domain sensing.
+* **Host MCU & User Interface**: Pin assignments for `U6` (STM32G474 / controller) interfacing with DAC steering, LM5176 enable, INA226 telemetry, SSD1306 1.3" OLED display over I2C, Bourns EC11 rotary encoder, front-panel output toggle button, status LEDs (Power, Run, Fault), and USB-C / UART bridge (`CP2102` / `CH340G`) for PC logging and automated SCPI test routines.
+* **Output Power Terminals & Load**: Heavy-duty 4mm binding posts `J2` connecting $V_{\text{OUT+}}$, $V_{\text{OUT-}}$, and chassis earth `PE` to the device under test (DUT).
 
 ---
 
