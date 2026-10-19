@@ -12,7 +12,7 @@ An intelligent, digitally controlled bench and industrial power supply module en
 $$\text{Mains Supply } (85\text{--}265\,\text{V AC}) \longrightarrow \text{Rectifier } (+120\text{--}375\,\text{V DC}) \longrightarrow \text{Converter DC-DC (Flyback } +24\,\text{V}) \longrightarrow \text{Final Stage (Buck-Boost } 5\text{--}20\,\text{V}) \longrightarrow \text{Device (DUT)}$$
 
 <p align="center">
-  <img src="smart_programmable_power_supply/diagram_simple_power_flow.png" alt="Simplified 4-Stage Power Flow Block Diagram" width="100%"/>
+  <img src="smart_programmable_power_supply/PRD_task/diagram_simple_power_flow.png" alt="Simplified 4-Stage Power Flow Block Diagram" width="100%"/>
 </p>
 
 ```mermaid
@@ -48,13 +48,15 @@ flowchart LR
 
 | Stage | Subsystem Architecture Diagram | Key Circuitry & Hardware Specifications |
 | :---: | :--- | :--- |
-| **Stage 1: Mains Supply** | <img src="smart_programmable_power_supply/diagram_inside_stage1_mains.png" width="450"/> | 85V–265V AC In, 2A Fuse, 10Ω NTC, 14D471K MOV, 2-Stage CM Chokes (15mH, 4.7mH), X2/Y1 filter. |
-| **Stage 2: Rectifier & Bulk** | <img src="smart_programmable_power_supply/diagram_inside_stage2_rectifier.png" width="450"/> | GBU606 bridge (600V, 6A), 100µF/450V bulk cap (>10ms holdup), 100nF/630V HF cap, 3x 330kΩ bleeder. |
-| **Stage 3: Converter DC-DC** | <img src="smart_programmable_power_supply/diagram_inside_stage3_flyback.png" width="450"/> | UC3843 / UCC28C43 Uniform 65 kHz Flyback, 800V CoolMOS, PQ26/20 core, 3000V RMS barrier, MBR10100 Schottky -> +24V DC (72W). |
-| **Stage 4: Final Stage** | <img src="smart_programmable_power_supply/diagram_inside_stage4_final_stage.png" width="450"/> | TI LM5176 4-switch Buck-Boost, 10µH inductor, 10mV DAC steering (5V–20V), built-in CSP/CSN current limit, 4mm binding posts. |
+| **Stage 1: Mains Supply** | <img src="smart_programmable_power_supply/PRD_task/diagram_inside_stage1_mains.png" width="450"/> | 85V–265V AC In, 2A Fuse, 10Ω NTC, 14D471K MOV, 2-Stage CM Chokes (15mH, 4.7mH), X2/Y1 filter. |
+| **Stage 2: Rectifier & Bulk** | <img src="smart_programmable_power_supply/PRD_task/diagram_inside_stage2_rectifier.png" width="450"/> | GBU606 bridge (600V, 6A), 100µF/450V bulk cap (>10ms holdup), 100nF/630V HF cap, 3x 330kΩ bleeder. |
+| **Stage 3: Converter DC-DC** | <img src="smart_programmable_power_supply/PRD_task/diagram_inside_stage3_flyback.png" width="450"/> | UC3843 / UCC28C43 Uniform 65 kHz Flyback, 800V CoolMOS, PQ26/20 core, 3000V RMS barrier, MBR10100 Schottky -> +24V DC (72W). |
+| **Stage 4: Final Stage** | <img src="smart_programmable_power_supply/PRD_task/diagram_inside_stage4_final_stage.png" width="450"/> | TI LM5176 4-switch Buck-Boost, 10µH inductor, 10mV DAC steering (5V–20V), built-in CSP/CSN current limit, 4mm binding posts. |
 
-- 📄 **Hardware PRD (High-Level Requirements)**: [PRODUCT_REQUIREMENT_DOCUMENT_PRD.md](smart_programmable_power_supply/PRODUCT_REQUIREMENT_DOCUMENT_PRD.md)
+- 📄 **Hardware PRD (High-Level Requirements)**: [PRODUCT_REQUIREMENT_DOCUMENT_PRD.md](smart_programmable_power_supply/PRD_task/PRODUCT_REQUIREMENT_DOCUMENT_PRD.md)
 - 📐 **Hardware Design Document (HDD) Deep Technical Reference**: [HARDWARE_DESIGN_TECHNICAL_DETAILS_FOR_HDD.md](smart_programmable_power_supply/HARDWARE_DESIGN_TECHNICAL_DETAILS_FOR_HDD.md)
+- 📂 **PRD Task Workspace**: [smart_programmable_power_supply/PRD_task/](smart_programmable_power_supply/PRD_task/)
+- 📂 **HDD Task Workspace**: [smart_programmable_power_supply/HDD_task/](smart_programmable_power_supply/HDD_task/)
 - 📂 **Full Hardware Architecture Dossiers**: [smart_programmable_power_supply/](smart_programmable_power_supply/)
 
 ---

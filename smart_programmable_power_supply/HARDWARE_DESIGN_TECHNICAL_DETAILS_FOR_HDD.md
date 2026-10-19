@@ -9,7 +9,7 @@
 * **Domain**: Embedded Hardware & Power Electronics Engineering
 * **Document Version**: `Rev 1.0 (HDD Deep Technical Reference)`
 * **Author / Design Owner**: Power Electronics Engineer Trainee (GET - Hardware Engineering)
-* **Parent Document**: [PRODUCT_REQUIREMENT_DOCUMENT_PRD.md](file:///home/tthhongs/build_tthongs/av_iv/smart_programmable_power_supply/PRODUCT_REQUIREMENT_DOCUMENT_PRD.md)
+* **Parent Document**: [PRODUCT_REQUIREMENT_DOCUMENT_PRD.md](PRD_task/PRODUCT_REQUIREMENT_DOCUMENT_PRD.md)
 * **Date**: `12 Oct 2026`
 
 ---

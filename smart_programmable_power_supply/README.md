@@ -34,9 +34,11 @@ The **Smart Programmable Power Supply Module** is an intelligent, digitally cont
 ```
 
 ### Primary Engineering Documentation
-* 📄 **Product Requirement Document (High-Level PRD)**: [`PRODUCT_REQUIREMENT_DOCUMENT_PRD.md`](PRODUCT_REQUIREMENT_DOCUMENT_PRD.md)
+* 📄 **Product Requirement Document (High-Level PRD)**: [`PRD_task/PRODUCT_REQUIREMENT_DOCUMENT_PRD.md`](PRD_task/PRODUCT_REQUIREMENT_DOCUMENT_PRD.md)
 * 📐 **Hardware Design Document (HDD) Deep Technical Reference**: [`HARDWARE_DESIGN_TECHNICAL_DETAILS_FOR_HDD.md`](HARDWARE_DESIGN_TECHNICAL_DETAILS_FOR_HDD.md)
-* 📊 **Mermaid Architectural Flowcharts & MCU Interaction Hub**: [`mermaid/`](mermaid/) (with [`mcu_system_interaction_and_monitoring.md`](mermaid/mcu_system_interaction_and_monitoring.md))
+* 📁 **PRD Task Workspace**: [`PRD_task/`](PRD_task/)
+* 📁 **HDD Task Workspace**: [`HDD_task/`](HDD_task/)
+* 📊 **Mermaid Architectural Flowcharts & MCU Interaction Hub**: [`PRD_task/mermaid/`](PRD_task/mermaid/) (with [`mcu_system_interaction_and_monitoring.md`](PRD_task/mermaid/mcu_system_interaction_and_monitoring.md))
 
 ---
 
@@ -50,7 +52,7 @@ $$\text{Mains Supply } (85\text{--}265\,\text{V AC}) \longrightarrow \text{Recti
 The primary block diagram for mentor reviews and cross-mentor technical defense:
 
 <p align="center">
-  <img src="diagram_simple_power_flow.png" alt="Figure 1: Simplified Power Flow Block Diagram" width="100%"/>
+  <img src="PRD_task/diagram_simple_power_flow.png" alt="Figure 1: Simplified Power Flow Block Diagram" width="100%"/>
 </p>
 
 ```mermaid
@@ -88,7 +90,7 @@ flowchart LR
 The complete embedded hardware schematic-level architecture showing gate drivers, auxiliary supplies, analog feedback loops, and dual-domain power sensing:
 
 <p align="center">
-  <img src="smart_programmable_power_supply_system_block_diagram.png" alt="Figure 2: Master Embedded Hardware Architecture Block Diagram" width="100%"/>
+  <img src="PRD_task/smart_programmable_power_supply_system_block_diagram.png" alt="Figure 2: Master Embedded Hardware Architecture Block Diagram" width="100%"/>
 </p>
 
 ---
@@ -98,25 +100,25 @@ The complete embedded hardware schematic-level architecture showing gate drivers
 #### Stage 1: Mains Supply & Input Protection Subsystem
 Takes raw AC mains (85V–265V AC RMS), provides inrush current limiting (10Ω NTC), lightning surge suppression (14D471K MOV), and conducted EMI suppression (2-Stage Common Mode Chokes + X2/Y1 filter caps).
 <p align="center">
-  <img src="diagram_inside_stage1_mains.png" alt="Inside Stage 1: Mains Supply Subsystem" width="100%"/>
+  <img src="PRD_task/diagram_inside_stage1_mains.png" alt="Inside Stage 1: Mains Supply Subsystem" width="100%"/>
 </p>
 
 #### Stage 2: Bridge Rectifier & High-Voltage Bulk Filter Subsystem
 Full-wave rectification via GBU606 bridge (600V, 6A) and energy smoothing via 100µF/450V 105°C electrolytic bulk capacitor, generating a high-voltage DC bus (+120V to +375V DC) with > 10ms holdup.
 <p align="center">
-  <img src="diagram_inside_stage2_rectifier.png" alt="Inside Stage 2: Rectifier & Bulk Subsystem" width="100%"/>
+  <img src="PRD_task/diagram_inside_stage2_rectifier.png" alt="Inside Stage 2: Rectifier & Bulk Subsystem" width="100%"/>
 </p>
 
 #### Stage 3: Converter DC-DC (Isolated Uniform-Frequency Flyback Subsystem)
 Standard current-mode PWM controller (UC3843 / UCC28C43 @ 65 kHz fixed clock), 800V CoolMOS IPB80R290P7, custom PQ26/20 transformer with certified 3000V RMS reinforced safety isolation, and a robust MBR10100 Schottky diode generating a stable +24.0V DC intermediate rail (72W).
 <p align="center">
-  <img src="diagram_inside_stage3_flyback.png" alt="Inside Stage 3: Converter DC-DC Flyback Subsystem" width="100%"/>
+  <img src="PRD_task/diagram_inside_stage3_flyback.png" alt="Inside Stage 3: Converter DC-DC Flyback Subsystem" width="100%"/>
 </p>
 
 #### Stage 4: Final Stage (Synchronous 4-Switch Buck-Boost Post-Regulator Subsystem)
 TI LM5176 modulating four 40V MOSFETs (BSC034N04LS) through a 10µH flat-wire power inductor. Features 10mV DAC voltage steering (5V–20V DC), sub-25mV ripple, and built-in cycle-by-cycle CSP/CSN current limiting feeding 4mm gold binding posts.
 <p align="center">
-  <img src="diagram_inside_stage4_final_stage.png" alt="Inside Stage 4: 4-Switch Buck-Boost Post-Regulator Subsystem" width="100%"/>
+  <img src="PRD_task/diagram_inside_stage4_final_stage.png" alt="Inside Stage 4: 4-Switch Buck-Boost Post-Regulator Subsystem" width="100%"/>
 </p>
 
 ---
