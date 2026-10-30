@@ -1,0 +1,833 @@
+=== SECTIONS (2) ===
+Section 0:
+  Header: Hardware Design Document	Rev. Axx
+  Footer: Template Rev V1.1	CONFIDENTIAL	Page 10 of 42
+Section 1:
+  Header: Hardware Design Document	Rev. Axx
+  Footer: Template Rev V1.1	CONFIDENTIAL	Page 10 of 42
+
+=== PARAGRAPHS (608) ===
+[  0] [Normal] 
+[  1] [Subtitle] 
+[  2] [Normal] 
+[  3] [Normal] 
+[  4] [Normal] 
+[  5] [Subtitle] Hardware Design Document Template (TP013)
+[  6] [Subtitle] Rev:	V1.1
+[  7] [Subtitle] 28-MAY-2020
+[  8] [Normal] 
+[  9] [Normal] 
+[ 10] [Normal] 
+[ 11] [Normal] 
+[ 12] [Normal] Amendment History
+[ 13] [Normal] 
+[ 14] [Normal] 
+[ 15] [Normal] 
+[ 16] [Subtitle] 
+[ 17] [Normal] 
+[ 18] [Normal] 
+[ 19] [Normal] 
+[ 20] [Normal] 
+[ 21] [Normal] 
+[ 22] [Normal] 
+[ 23] [Normal] 
+[ 24] [Normal] 
+[ 25] [Normal] 
+[ 26] [Normal] 
+[ 27] [Normal] 
+[ 28] [Normal] 
+[ 29] [Subtitle] Hardware Design Document (HDD)
+[ 30] [Normal] 
+[ 31] [Normal] 
+[ 32] [Normal] 
+[ 33] [Normal] 
+[ 34] [Normal] 
+[ 35] [Normal] 
+[ 36] [Normal] Revision History
+[ 37] [Normal] 
+[ 38] [Normal] 
+[ 39] [Normal] 
+[ 40] [Normal] 
+[ 41] [Normal] 
+[ 42] [Normal] 
+[ 43] [Normal] 
+[ 44] [Normal] 
+[ 45] [Normal] 
+[ 46] [Normal] 
+[ 47] [Normal] 
+[ 48] [Normal] 
+[ 49] [Normal] 
+[ 50] [Normal] 
+[ 51] [Normal] 
+[ 52] [Normal] 
+[ 53] [Normal] 
+[ 54] [Normal] 
+[ 55] [Normal] 
+[ 56] [TOC Heading1] 
+[ 57] [Normal] 
+[ 58] [Normal] Customer Sign Off
+[ 59] [Normal] 
+[ 60] [Normal] 
+[ 61] [Normal] 
+[ 62] [Normal] Internal Sign Off 
+[ 63] [Normal] 
+[ 64] [TOC Heading1] Table of Contents
+[ 65] [toc 1] 1	Introduction	10
+[ 66] [toc 2] 1.1	Purpose	10
+[ 67] [toc 2] 1.2	Document Conventions	10
+[ 68] [toc 2] 1.3	Intended Audience and Reading Suggestions	10
+[ 69] [toc 2] 1.4	Abbreviation	10
+[ 70] [toc 2] 1.5	References	11
+[ 71] [toc 1] 2	Product – Technical Overview	12
+[ 72] [toc 1] 3	System1 Implementation Plan	12
+[ 73] [toc 1] 4	System1 Hardware Architecture	12
+[ 74] [toc 2] 4.1	System1 Architecture	12
+[ 75] [toc 2] 4.2	SubSystem1 Architecture	12
+[ 76] [toc 2] 4.3	SubSystem2 Architecture	13
+[ 77] [toc 1] 5	Digital Interface Design	13
+[ 78] [toc 2] 5.1	Subsystem1 [Main Board]	13
+[ 79] [toc 3] 5.1.1	Module1 [Major Component like Application Processor, FPGA, CPLD, DSP etc]	14
+[ 80] [toc 3] 5.1.2	Module2 [Major Component like DSP]	14
+[ 81] [toc 2] 5.2	Subsystem2 [Daughter Board]	14
+[ 82] [toc 1] 6	RF Design	15
+[ 83] [toc 2] 6.1	Subsystem1 [Main Board]	15
+[ 84] [toc 3] 6.1.1	WiFi	15
+[ 85] [toc 3] 6.1.2	Zigbee	16
+[ 86] [toc 2] 6.2	Subsystem2 [Daughter Board]	16
+[ 87] [toc 1] 7	Analog Design	16
+[ 88] [toc 2] 7.1	Subsystem1 [Main Board]	16
+[ 89] [toc 3] 7.1.1	Component/Module1 [Photodiode]	16
+[ 90] [toc 3] 7.1.2	Component/Module2 [PWM based Analog Signal]	17
+[ 91] [toc 3] 7.1.3	Component/Module3 [RTD based temperature sensor]	17
+[ 92] [toc 2] 7.2	Subsystem2 [Daughter Board]	17
+[ 93] [toc 1] 8	Power Design	17
+[ 94] [toc 2] 8.1	Subsystem1 Power Architecture	17
+[ 95] [toc 3] 8.1.1	Power Sequencing	18
+[ 96] [toc 3] <This section shall capture the power up and down sequencing requriements of all ICs that has multiple power supply inputs in a table and shall clearly explain how the required sequencing is achieved for both power up (using enable/PG etc) and power down (using discharge circuit etc).>	18
+[ 97] [toc 3] 8.1.2	Power Consumption	18
+[ 98] [toc 3] 8.1.3	Power Dissipation	19
+[ 99] [toc 2] 8.2	Subsystem2 Power Architecture	20
+[100] [toc 2] 8.3	Power Input Protection	20
+[101] [toc 2] 8.4	System Power Source	20
+[102] [toc 1] 9	Battery Powered Design	20
+[103] [toc 3] 9.1.1	Battery Capacity Calculation	21
+[104] [toc 3] 9.1.2	Battery Selection and its Certification	21
+[105] [toc 3] 9.1.3	Power Mode & Use Cases	21
+[106] [toc 1] 10	Clock Scheme	22
+[107] [toc 1] 11	Reset Scheme	22
+[108] [toc 1] 12	Hardware Configurations	23
+[109] [toc 2] 12.1	Subsystem1 HW Configurations	23
+[110] [toc 3] 12.1.1	Board Type/Assembly Variant	23
+[111] [toc 3] 12.1.2	Board Revision	24
+[112] [toc 3] 12.1.3	Jumper Configuration	25
+[113] [toc 2] 12.2	Subsystem2 HW Configurations	25
+[114] [toc 1] 13	Design Analysis – Subsysem1	25
+[115] [toc 2] 13.1	DC Analysis	25
+[116] [toc 3] 13.1.1	Module1 – Module2 Interface (Ex: Processor – Flash SPI Interface)	25
+[117] [toc 3] 13.1.2	Module1 – Module3 Interface (Ex: Processor – Microcontroller Interface)	26
+[118] [toc 2] 13.2	Timing Analysis	26
+[119] [toc 2] 13.3	PCB Layer Stack-up Analysis	27
+[120] [toc 2] 13.4	Pre-Layout SI Analysis	27
+[121] [toc 3] 13.4.1	Interface1 (Ex: DDR)	27
+[122] [toc 3] 13.4.2	Interface2 (Ex: RGMII)	27
+[123] [toc 2] 13.5	PCB Floor Plan Analysis	27
+[124] [toc 2] 13.6	Thermal Analysis	28
+[125] [toc 1] 14	Connectors & Cable Assembly	28
+[126] [toc 2] 14.1	Subsystem1 Connectors	28
+[127] [toc 3] 14.1.1	Internal Connectors	28
+[128] [toc 3] 14.1.2	External Connectors	30
+[129] [toc 2] 14.2	Subsystem2 Connectors	30
+[130] [toc 3] 14.2.1	Internal Connectors	30
+[131] [toc 3] 14.2.2	External Connectors	30
+[132] [toc 2] 14.3	Inter Subsystem Connectors	30
+[133] [toc 3] 14.3.1	Subsystem1 – Subsystem2 Connectors	30
+[134] [toc 3] 14.3.2	Subsystem2 – Subsystem3 Connectors	31
+[135] [toc 1] 15	GPIO Mapping	32
+[136] [toc 2] 15.1	Subsystem1 GPIOs	32
+[137] [toc 2] 15.2	Subsystem2 GPIOs	32
+[138] [toc 1] 16	Interrupt Mapping	33
+[139] [toc 2] 16.1	Subsystem1 Interrupts	33
+[140] [toc 2] 16.2	Subsystem2 Interrupts	33
+[141] [toc 1] 17	Programmable ROM Devices	34
+[142] [toc 1] 18	Bill of Material	35
+[143] [toc 1] 19	Design Limitations	35
+[144] [toc 1] 20	Requirement-Design Mapping	35
+[145] [Normal] 	
+[146] [Normal] List of Tables
+[147] [table of figures] Table 1: Abbreviation	11
+[148] [table of figures] Table 2 References	11
+[149] [table of figures] Table 3: Implementation	12
+[150] [table of figures] Table 4: Boot Strapping Pin table	14
+[151] [table of figures] Table 5 Subsystem1 RF – WiFi Radiated Performance	15
+[152] [table of figures] Table 6 Power Sequencing	18
+[153] [table of figures] Table 7 Subsystem1 – Power Consumption	19
+[154] [table of figures] Table 8 Subsystem1 – Power Dissipation	20
+[155] [table of figures] Table 9 Battery Capacity Calculation	21
+[156] [table of figures] Table 10 Power Modes	21
+[157] [table of figures] Table 11 Subsystem1 Assembly Variants	24
+[158] [table of figures] Table 12 Subsystem1 Board Revisions	24
+[159] [table of figures] Table 13 DC Analysis – Module1-Module2 Interface	26
+[160] [table of figures] Table 14 Subsystem1 - UART Header	29
+[161] [table of figures] Table 15 Subsystem1 - UART Header Mating	29
+[162] [table of figures] Table 16 Subsystem1 - UART Header Cable	29
+[163] [table of figures] Table 17 Subsystem1 – Subsystem2 - UART Header	31
+[164] [table of figures] Table 18 Subsystem1 – Subsystem2 - UART Header Cable	31
+[165] [table of figures] Table 19 Module1 GPIOs	32
+[166] [table of figures] Table 20 Module1 Interrupts	33
+[167] [table of figures] Table 21 Programmable ROM	34
+[168] [table of figures] Table 22 Class A BOM	35
+[169] [table of figures] Table 23 Requirement – Design Mapping	36
+[170] [Normal] 
+[171] [Normal] List of Figures
+[172] [table of figures] Figure 1: Boundary Diagram	12
+[173] [table of figures] Figure 2: System1 - Block Diagram [Zigbee Gateway – Block Diagram]	12
+[174] [table of figures] Figure 3: Subsystem1 - Block Diagram [Main Board – Block Diagram]	13
+[175] [table of figures] Figure 4: Subsystem2 - Block Diagram [Connector Board – Block Diagram]	13
+[176] [table of figures] Figure 5: Subsystem1 – Memory Interface	14
+[177] [table of figures] Figure 6: Subsytem1 RF – WiFi Interface	15
+[178] [table of figures] Figure 7: Subsytem1 RF – WiFi Conducted Performance	15
+[179] [table of figures] Figure 8: Subsytem1 Analog – ADC Interface	16
+[180] [table of figures] Figure 9: Subsytem1 – Power Architecture	17
+[181] [table of figures] Figure 10: Clock Scheme	22
+[182] [table of figures] Figure 11: Reset Scheme	23
+[183] [table of figures] Figure 12: Subsystem1 – PCB Layer Stack-up	27
+[184] [table of figures] Figure 13: Pre-Layout SI  – DDR	27
+[185] [table of figures] Figure 14: Subsystem1 [LLxWW mm] - PCB Top Floor Plan	27
+[186] [table of figures] Figure 15: Subsystem1 [LLxWW mm] - PCB Bottom Floor Plan	27
+[187] [Normal] 
+[188] [Normal] 
+[189] [Heading 1] Introduction
+[190] [Heading 2] Purpose 
+[191] [Normal] <Briefly describe the purpose this document and what it contains. The purpose of this document is to capture hardware design details of “System1” which is part of the “product/solution” under project ID “CCCC_PPPP”. 
+[192] [Normal] This HDD will be treated as reference for the complete hardware implementation of “System1”.>
+[193] [Heading 2] Document Conventions
+[194] [Normal] <Describe any standards or typographical conventions that were followed when writing this HDD, such as fonts or highlighting that have special significance. 
+[195] [Normal] For example, any specific notes added for the attention of the specific readers can be highlighted as mentioned below.>
+[196] [List Paragraph] ME – Mechanical specific notes
+[197] [List Paragraph] BSP – BSP specific notes
+[198] [List Paragraph] SAP – System Application specific notes
+[199] [List Paragraph] MAP – Mobile Application specific notes
+[200] [List Paragraph] CAP – Cloud Application specific notes
+[201] [List Paragraph] PAP – PC Application specific notes
+[202] [List Paragraph] PCB – PCB Layout specific notes
+[203] [Heading 2]  Intended Audience and Reading Suggestions
+[204] [Normal] <Describe the different types of reader that the document is intended for, such as developers, project managers, marketing staff, users, testers, and documentation writers. Describe what the rest of this PRD contains and how it is organized. Suggest a sequence for reading the document, beginning with the Introductions sections and proceeding through the sections that are most pertinent to each reader type.>
+[205] [List Paragraph] Client Team
+[206] [List Paragraph] Architect Team
+[207] [List Paragraph] Hardware Design team 
+[208] [List Paragraph] Hardware Development Team
+[209] [List Paragraph] Quality Assurance Team
+[210] [List Paragraph] Documentation team
+[211] [List Paragraph] Deployment Team
+[212] [Heading 2]  Abbreviation
+[213] [Normal] <Define all the terms necessary to properly interpret the HDD, including acronyms and abbreviations. You may wish to build a separate glossary that spans multiple projects or the entire organization, but just include terms specific to a single project in each HDD.>
+[214] [Caption] Table 1: Abbreviation
+[215] [Heading 2] References
+[216] [Normal] <List any other documents or web addresses that this HDD refers. These may include datasheets, PRD, contracts, standards, use case documents, or a vision and scope document. Provide enough information so that the reader could access a copy of each reference, including title, author, version number, date, and source or location.> 
+[217] [Normal] Following references can be given 
+[218] [Normal] 
+[219] [Caption] Table 2 References
+[220] [Normal] 
+[221] [Normal] 
+[222] [Heading 1] Product – Technical Overview
+[223] [Normal] < Just copy this section from PRD. This is to give an overview of the product to the reader before he/she gets in to the details of the hardware design>
+[224] [Normal] 
+[225] [Caption] Figure 1: Boundary Diagram
+[226] [Normal] <Add a note here that this HDD is only capturing the hardware design details of the “System1” shown in the above diagram>
+[227] [Heading 1]  
+[228] [Normal] 
+[229] [Heading 1] System1 Implementation Plan
+[230] [Normal] <Embed an xls here which shall list all the customer requirements and HW specific requirements along with their implementation plan. This xls is nothing but the detailed System1 Requirements xls captured in PRD, but updated with implementation plan for each HW requirements. Remove other domains (BSP, MobileApp etc) from the xls & include only the relevant requirement sheet  (pertaining this design document)  in the xls before embedding here>
+[231] [Caption] 	
+[232] [Caption]     Table 3: Implementation
+[233] [Normal] 
+[234] [Normal] 
+[235] [Heading 1] System1 Hardware Architecture
+[236] [Heading 2] System1 Architecture
+[237] [Normal] <Insert the overall System1 block diagram showing all subsystems (mainly boards), interfaces between them and external power sources/accessories etc. List down the major functionalities covered in each subsystem (board) along with clear justifications for why functionalities are split in different subsystems like this. The given architecture shall be explained from Technical, Manufacturing, cost (only at broader level) and Ease of maintenance perspective in detail.>
+[238] [Caption] 
+[239] [Caption] Figure 2: System1 - Block Diagram [Zigbee Gateway – Block Diagram]
+[240] [Normal] For example, System1 may have 2 subsystems – Main board and Connector board.>
+[241] [Heading 2] SubSystem1 Architecture
+[242] [Normal] <Insert the detailed block diagram of Subsystem1, say Main board. The block diagram shall have major modules/components included. Some of key points to be taken care while creating block diagram
+[243] [List Paragraph] All off the shelf components/accessories MUST be shown [say Antenna]
+[244] [List Paragraph] All module blocks shall have 3 details Function, Part No, Mfg [Ex: LTE Modem, WP7504, Sierra Wireless]
+[245] [List Paragraph] All signal directions shall be accurate [unidirectional/Bidirectional]
+[246] [List Paragraph] All buses shall have relatively thicker wires/lines
+[247] [List Paragraph] Power block should show all voltage rails
+[248] [List Paragraph] All external I/O components shall be shown with actual image [instead of showing as simple block]
+[249] [List Paragraph] Any glue logic is added at major interface level, it shall be correctly captures with proper logic images [say AND logic of reset]
+[250] [Normal] Note that there shall be no explanation required in this section. All required explanation shall be under System1 Architecture section. Here just insert the Subsystem architecture diagram alone>
+[251] [Normal (Web)] 
+[252] [Caption] Figure 3: Subsystem1 - Block Diagram [Main Board – Block Diagram]
+[253] [Heading 2] SubSystem2 Architecture
+[254] [Normal] <Same as above section and add as many as subsystem section as the system has.>
+[255] [Normal] 
+[256] [Caption] Figure 4: Subsystem2 - Block Diagram [Connector Board – Block Diagram]
+[257] [Normal] 
+[258] [Heading 1] Digital Interface Design
+[259] [Heading 2] Subsystem1 [Main Board]
+[260] [Normal] <All components and interfaces shown in the Subsytem1 block diagram shall be explained in detail here. Every section must have below information.
+[261] [List Paragraph] Interface diagram clearly showing all the signals and the glue logic components in the path with proper direction 
+[262] [List Paragraph] Component full part number and its datasheet/product page web link
+[263] [List Paragraph] Comparison Matrix table for major components [processor, controller, DSP, FPGA/CPLD etc]
+[264] [List Paragraph] Capture the features of the part that directly satisfies customer/HW requirements [WiFi module support 2x2 MIMO]
+[265] [List Paragraph] Explain design that takes care of other requirements that are not directly supported by part specification [say, how design takes care of 6m cable length support for USB]
+[266] [List Paragraph] Specific notes to software team about the software configurations required on both end [processor & peripheral] for this particular interface [speed mode/frequency for I2C, Auto/Manual mode to be set for IMU and drive strength to be set for RGMII etc]
+[267] [List Paragraph] Calculate/prove that entire path [between processor & peripheral including the glue logic] supports the voltage & frequency of operation
+[268] [List Paragraph] Specific notes to layout team for any special layout guidelines
+[269] [List Paragraph] Specific notes to Mechanical [EMI gasket required for proper contact between connector & enclosure to pass RE tests/ESD protection etc]
+[270] [Normal] Below shall be avoided completely
+[271] [List Paragraph] Internal architecture of the component
+[272] [List Paragraph] Complete feature list of the component
+[273] [List Paragraph] Datasheet contents
+[274] [Normal] 
+[275] [Heading 3]  Module1 [Major Component like Application Processor, FPGA, CPLD, DSP etc]
+[276] [Normal] <Briefly mention what is the purpose of this component in this design.>
+[277] [Heading 4] Boot Strapping  
+[278] [Normal] <If the component has mode/boot strapping, capture the complete table which shows all options and highlight [bold & red] to show what is used in this design. If there are options to change it, mention it clearly>
+[279] [Normal] 
+[280] [Caption] Table 4: Boot Strapping Pin table
+[281] [Heading 4] Memory Interface
+[282] [Normal] <How memory size is sufficient, bandwidth is sufficient, what are the replacement options and higher/lower memory density options are provided etc, shall be explained here.>
+[283] [Caption] 
+[284] [Caption] Figure 5: Subsystem1 – Memory Interface
+[285] [Heading 4] Programming Interface
+[286] [Normal] <All programming interfaces (JTAG, USB, UART etc) shall be captured in this section with clear explanation of how to get in to that programming mode, say jumper setting / bootstrap changes etc>
+[287] [Heading 4] Peripheral Interface
+[288] [Normal] <All peripheral interfaces shall be captured with all possible design information both to address the requirements and to support cross domain developments properly>
+[289] [Heading 4] GPIO Interface
+[290] [Normal] <This is a must section incase if there are any GPIOs directly/through glue logic connected between two programmable components where VVDN/third party software is running on. Say between board management controller (MSP430) and System processor (MPC8360). The thorough details of what software has to do with these GPIOs shall be clearly explained>
+[291] [Heading 3] Module2 [Major Component like DSP]
+[292] [Normal] <Same as above section and add as many as modules section as the Subsystem has.>
+[293] [Heading 2] Subsystem2 [Daughter Board]
+[294] [Normal] <Same as above section and add as many as subsystem section as the system has.>
+[295] [Normal] 
+[296] [Heading 1] RF Design
+[297] [Heading 2] Subsystem1 [Main Board]
+[298] [Normal] <All RF interfaces (WiFi, BT, BLE, Zigbee, LTE, GPS etc] present in Susbsytem1 shall be captured in the following sections.> 
+[299] [Heading 3] WiFi
+[300] [Normal] <List down all the operating modes of this wireless interface, say 2.4G, 5G, MIMO etc. The subsequent sections shall mention these modes wherever applicable>
+[301] [Heading 4] Interface
+[302] [Normal] <This section shall cover all details as mentioned in Digital interface section [3.1], but only the RF portion of the circuit shall be included here. For ex, if the design has WiFi module over SDIO interface of processor, digital interface section shall cover the SDIO interface between Processor and WiFi module and this section shall cover the RF interface (mainly RF front end circuit between RF baseband and Antenna] along with diagrams, component selections etc.>
+[303] [Normal] 
+[304] [Caption] Figure 6: Subsytem1 RF – WiFi Interface
+[305] [Heading 4] RF Conducted Performance
+[306] [Normal] <Capture the RF performance required for the overall system along with parameters of all the on board components and derive the expected conducted performance (TX power and RX sensitivity). RF performance requirement may come from certification requirements say PTCRB/TMO/Verizon or from use case (range required).
+[307] [Normal] Insert an image with RF path circuit with TX power & RX sensitivity & insertion loss marked at each stage.>
+[308] [Caption] Figure 7: Subsytem1 RF – WiFi Conducted Performance
+[309] [Heading 4] RF Radiated Performance
+[310] [Normal] <Capture the RF performance (TRP,TIS) required for the overall system along with calculated conducted parameters (from previous section) in a table for each band & the mode supported in this RF interface and then calculate the required antenna performance (gain). This section shall arrive at minimum specification for the antenna selection. >
+[311] [Normal] 
+[312] [Caption] Table 5 Subsystem1 RF – WiFi Radiated Performance 
+[313] [Heading 4] RF Shielding
+[314] [Normal] <This section shall cover the shielding requirements. The details like type of shielding (2pcs/1pc, SMT/TH, Solid/Slotted etc) and components/circuits to be covered within shield, material etc shall be captured here.>
+[315] [Heading 4] RF Simulation/Analysis
+[316] [Normal] <This section shall capture the expected efficiency of the antenna in the given environment (PCB & mechanical assembly). This expected numbers may be arrived from simulation (if there is a need) or from experience, but it need to be captured to set the requirements of the antenna in case of custom design.> 
+[317] [Normal] 
+[318] [Heading 3] Zigbee
+[319] [Normal] <Same as above>
+[320] [Heading 2] Subsystem2 [Daughter Board]
+[321] [Normal] <Same as above>
+[322] [Normal] 
+[323] [Normal] 
+[324] [Heading 1] Analog Design
+[325] [Heading 2] Subsystem1 [Main Board]
+[326] [Normal] <All analog components, interfaces, circuits shall be captured in detail in the following sections. Each section must have below information.
+[327] [List Paragraph] Interface diagram including complete analog path components like preamplifier, voltage divider, filters etc.
+[328] [List Paragraph] Each component/block to be explained
+[329] [List Paragraph] Analog voltage value at each node shall be mentioned in the interface diagram. The related gain/loss calculations shall be mentioned in texts
+[330] [List Paragraph] A to D or D to A conversion formula and related sensitivity & resolution details of the entire path 
+[331] [List Paragraph] Noise immunity of the entire path
+[332] [List Paragraph] Specific notes to software team for sampling rate, thresholds, offset, filtering, nonlinearity curve, etc
+[333] [Normal] >
+[334] [Heading 3] Component/Module1 [Photodiode]
+[335] [Normal] <explain here>
+[336] [Normal] 
+[337] [Caption] Figure 8: Subsytem1 Analog – ADC Interface
+[338] [Heading 4] Simulation Results
+[339] [Normal] <Include the analog simulation result here along with all simulation parameters, if the analog interface is complex/larger circuit. For a very simple circuit like that of voltage measurement etc, simulation can be avoided.>
+[340] [Normal] 
+[341] [Heading 3] Component/Module2 [PWM based Analog Signal]
+[342] [Normal] <explain here>
+[343] [Heading 3] Component/Module3 [RTD based temperature sensor]
+[344] [Normal] <explain here>
+[345] [Normal] 
+[346] [Heading 2] Subsystem2 [Daughter Board]
+[347] [Normal] <Same as above>
+[348] [Normal] 
+[349] [Heading 1] Power Design
+[350] [Normal] <In a system which has multiple boards/subsystems, power circuits may be spread across different boards or just kept in 1 board depending on system needs. So, the structure of this “power design” section is completely project dependent.
+[351] [Normal] It is recommended to keep different subsections for each board, if there are enough power circuitry within each, otherwise, keep a common section. But all these subsections are MUST.
+[352] [Heading 2] Subsystem1 Power Architecture
+[353] [Normal] <A detailed diagram with all below details shall be capture here.
+[354] [List Paragraph] All power circuitry components/blocks – switcher, LDO, module etc
+[355] [List Paragraph] If any IC (processor, eth phy) is generating the voltage internally or with external components (pass transistors), capture that also in the diagram
+[356] [List Paragraph] All block output wire shall have output voltage & current [peak, not consumed] marked
+[357] [List Paragraph] If there 2 or more regulators generating same voltage (say 1.8V), but for different loads, then add the load name also at the output
+[358] [List Paragraph] Power up & power down related circuits and signals must be added>
+[359] [Normal] 
+[360] [Caption] Figure 9: Subsytem1 – Power Architecture
+[361] [Heading 3] Power Sequencing
+[362] [Heading 3] <This section shall capture the power up and down sequencing requirements of all ICs that has multiple power supply inputs in a table and shall clearly explain how the required sequencing is achieved for both power up (using enable/PG etc) and power down (using discharge circuit etc).>
+[363] [Caption] Table 6 Power Sequencing
+[364] [Heading 4] Power Up Sequence
+[365] [Normal] Explain how power up sequencing is designed / controlled in design. The power architecture diagram itself covers this, so a separate diagram is optional to add here. But explanation is required.
+[366] [Heading 4] Power Down Sequence
+[367] [Normal] Explain how power down sequencing is designed / controlled in design. The power architecture diagram itself covers this, so a separate diagram is optional to add here. But explanation is required.
+[368] [Heading 3] Power Consumption
+[369] [Normal] <This section shall capture the peak power consumption of all load ICs from all different voltage rails to arrive the actual power consumption of this subsystem. All calculations should be done with peak current consumption of each IC independent of the use case. But additionally, capture the approximate/assumed use case power consumption also for reference [say NOR flash will consume very less current after booting, if no log storage in NOR flash].
+[370] [Normal] A table has to be prepared as shown below.
+[371] [Caption] Table 7 Subsystem1 – Power Consumption 
+[372] [Normal] 
+[373] [Normal] Explain about the use case if any.
+[374] [Heading 3] Power Dissipation
+[375] [Normal] <This section shall capture the details of power loss in all regulator/power circuitry to calculate the net power dissipation & overall consumption. This table shall provide the current/power consumption on all voltage rails that are input to this particular subsystem>
+[376] [Normal] A table has to be prepared as shown below.
+[377] [Caption] Table 8 Subsystem1 – Power Dissipation 
+[378] [Heading 2] Subsystem2 Power Architecture
+[379] [Normal] <Same as above>
+[380] [Normal] 
+[381] [Heading 2] Power Input Protection
+[382] [Normal] <List and explain all the protection circuits provided at the input power line including overcurrent, overvoltage, thermal, reverse polarity, inrush, transient protections etc with respective circuit details. The details must include the operating range, protection range, type of protection etc in detail.
+[383] [Normal] 
+[384] [Heading 2] System Power Source
+[385] [Normal] <This section shall capture the total power consumption of the system (including all board consumption & dissipation. Explain about the external power source (like AC/DC adaptor, DC/DC module, Vehicle battery etc) in this section. Mention the efficiency of that external power source (if supplied along with the product) and mention the total power consumption at the input of that power adaptor. Below shall be captured at minimum.
+[386] [List Paragraph] Input voltage range of the adaptor
+[387] [List Paragraph] Output max load current and calculated load current
+[388] [List Paragraph] Efficiency
+[389] [List Paragraph] Total input power
+[390] [List Paragraph] Certification details>
+[391] [Normal] 
+[392] [Heading 1] Battery Powered Design
+[393] [Normal] <This section is applicable only device is battery powered or there is backup battery available in the system>
+[394] [Heading 3] Battery Capacity Calculation
+[395] [Normal] <Peak power consumption is already calculated in the above sections. Battery powered product should meet minimum backup time for either full operation (peak power consumption) or for specific power mode. Calculate the minimum battery capacity (mAh) required to meet the back up duration.>
+[396] [Caption] Table 9 Battery Capacity Calculation 
+[397] [Normal] 
+[398] [Heading 3] Battery Selection and its Certification
+[399] [Normal] <This section shall detail the battery selection from different perspective – capacity, mechanical, temperature & other certification requirement including transportation certificate etc>
+[400] [Normal] 
+[401] [Heading 3] Power Mode & Use Cases
+[402] [Normal] List all required power state / modes here along with that mode specific power consumption table. The table may be as detailed in the above section or simple one depending on the no of power rails. This table shall derive the backup time designed for different power modes with the selected battery.
+[403] [Caption] Table 10 Power Modes 
+[404] [Normal] 
+[405] [Normal] Explain about different use case modes.
+[406] [Normal] 
+[407] [Heading 1] Clock Scheme
+[408] [Normal] <Clock modules are not going to be too much on each of the subsystem and clocks may travel across different subsystems. So, capture complete clock scheme in to one section, no need to divide the clock scheme in to multiple section in this HDD. But, single diagram shall clearly differentiate different subsystems/boards.
+[409] [Normal] Give an explanation about the scheme. This should include what is the clock requirement of each – frequency range, stability, load caps etc and the reason why we have chosen a specific clock source and its spec. 
+[410] [Normal] All glue logic (level translation/buffer) shall be captured & explained here. 
+[411] [Normal] Specific software configuration for clocks outputs generated by processor/similar, like frequency, slewrate/drive strength, spread spectrum etc shall be captured.
+[412] [Normal] Include all on board & external clock sources like Osc, Crystals, clock multipliers, clock dividers etc. No need to mention the interface clocks. Clocks that are not tied to interface shall be capture here. For ex, MCLK given to Sensor is not an interface clock, but is a base reference clock to sensor, so it should be captured here. Interface clocks are option to add if you want to>
+[413] [Normal] 
+[414] [Caption] Figure 10: Clock Scheme
+[415] [Normal] IC1: Clock1:
+[416] [Normal] Explain here
+[417] [Normal] IC1: Clock2:
+[418] [Normal] Explain here
+[419] [Normal] IC2:Clock1:
+[420] [Normal] Explain here
+[421] [Normal] 
+[422] [Normal] 
+[423] [Heading 1] Reset Scheme
+[424] [Normal] <Reset signals are not going to be too much on each of the subsystem and reset may travel across different subsystems. So, capture complete reset scheme in to one section, no need to divide the reset scheme in to multiple section in this HDD. But, single diagram shall clearly differentiate different subsystems/boards.
+[425] [Normal] Clearly mention all the reset sources [push button, power on reset, factory reset, GPIO based reset, JTAG reset, external resets etc]
+[426] [Normal] Mention reset active level, min pulse width, glue logic details – designed & the requirement by the chipsets
+[427] [Normal] Mention all HW controlled resets (RC, Voltage supervisor) and SW resets and how they have to be timed.
+[428] [Normal] All GPIO resets shall have clear instruction to software team about what all conditions these resets are to be activated/deactivated [say, during every boot / power up or only when required, based on certain other events, when chip is not software accessible etc]. 
+[429] [Normal] Expected reset sequencing diagram shall be added>
+[430] [Normal] 
+[431] [Normal] 
+[432] [Caption] Figure 11: Reset Scheme
+[433] [Normal] 
+[434] [Heading 1] Hardware Configurations
+[435] [Heading 2] Subsystem1 HW Configurations
+[436] [Heading 3] Board Type/Assembly Variant
+[437] [Normal] <This section shall capture all the board type & assembly variant that need to be detected by some software running on any component (say processor, DSP etc) of the board. It needs not to be only board type GPIOs of processor. 
+[438] [Normal] Note that, the content is not to capture the assembly changes required for different variant. But, about how this board type is informed to processor/other modules through GPIOs etc. 
+[439] [Caption] Table 11 Subsystem1 Assembly Variants 
+[440] [Normal] 
+[441] [Heading 3] Board Revision
+[442] [Normal] <This section should capture the planned/supported HW revision/detection in the design – say 4 revisions or 8 revisions. Again need not to be only the revision that should be known to Processor. Any software that have to behave in different way for different HW revision, shall be captured here.
+[443] [Caption] Table 12 Subsystem1 Board Revisions 
+[444] [Normal] 
+[445] [Heading 3] Jumper Configuration
+[446] [Normal] <These are pure HW configuration / design options that are planned in the design by doing some HW/assembly changes. For ex, 0E resistor option provided to route console UART of a Microcontroller which is on Daughter board, to either Main board through B2B or to 4 pin header option.
+[447] [Normal] These configurations may be 0E resistor, jumper/header, DIP switches, mounting/nomounting complete circuit. Capture all these in relevant subsections below.
+[448] [Heading 4] Processor UART path selection
+[449] [Normal] <Explain here.>
+[450] [Heading 4] SPI Flash programming path selection
+[451] [Normal] <Explain here.>
+[452] [Normal] 
+[453] [Heading 2] Subsystem2 HW Configurations
+[454] [Normal] <Same as above>
+[455] [Normal] 
+[456] [Heading 1] Design Analysis – Subsysem1
+[457] [Normal] <This section shall capture all analysis of subsystem1 (say, main board). For other subsystems, create new sections as required. DC, AC, Pre-layout SI analysis sections may have an interface that runs between two subsystems. In those cases, capture those interfaces in only one Design Analysis-Subsystem section, not in both.
+[458] [Heading 2] DC Analysis 
+[459] [Normal] <This section shall capture all interfaces (Standard i/f also) and additionally any signal that is directly connected between two major modules (say GPIO connected between processor and board management microcontroller).>
+[460] [Heading 3] Module1 – Module2 Interface (Ex: Processor – Flash SPI Interface)
+[461] [Normal] <Capture the table as shown in below format. 
+[462] [Normal] IC may have different Voh,Vol,Vih,Vil mentioned for different supply voltage and load current. Capture correct values as per the supply voltage used in design and appx load current (source/sink). 
+[463] [Normal] If noise margin is 0 or negative, highlight it in red and explain the design precautions taken to avoid any communication issues – like ensure lower load current, trace resistance etc>
+[464] [Normal] Logic High
+[465] [Normal] Logic Low
+[466] [Caption] Table 13 DC Analysis – Module1-Module2 Interface 
+[467] [Caption] 
+[468] [Heading 3] Module1 – Module3 Interface (Ex: Processor – Microcontroller Interface)
+[469] [Normal] <Same as above section. Add as many as sections as required> 
+[470] [Normal] 
+[471] [Heading 2] Timing Analysis 
+[472] [Normal] <This section shall capture input setup, input hold time of all receivers along with their respective driver’s output setup & output hold times to ensure that driver & receiver are compatible to each other. 
+[473] [Normal] In case the driver doesn’t state output setup/hold time explicitly, derive it from output delay and other parameters and mention in the table.
+[474] [Normal] If timing margin is less than +30pS (corresponding to appx 200mils trace length), then capture length matching constraints to be followed in layout design, like matching trace lengths tightly or loosely intentionally.
+[475] [Normal] As the same timing information would need to be validated, capture the analysis in an xls. Capture all required interfaces in different sheets of a single file and embed that file here>
+[476] [Normal] 								
+[477] [Heading 2] PCB Layer Stack-up Analysis
+[478] [Normal] <This section shall capture the planned layer stackup design for this board along with the justification for the same. Technical justification shall cover below details,
+[479] [List Paragraph] Appx component area & Net count
+[480] [List Paragraph] No of BGA along with their pitch & no of rows/cols
+[481] [List Paragraph] Single Ended & Differential Ended Impedances required
+[482] [List Paragraph] Total power dissipation
+[483] [List Paragraph] PCB size & shape
+[484] [List Paragraph] PCB mounting style>
+[485] [Caption] Figure 12: Subsystem1 – PCB Layer Stack-up
+[486] [Normal] 
+[487] [Heading 2] Pre-Layout SI Analysis
+[488] [Normal] <Capture the pre-layout SI simulation report here. Simulation is limited to scope of identifying following to maintain setup/hold time requirements & signal quality.,
+[489] [List Paragraph] Maximum allowable trace length
+[490] [List Paragraph] Length matching tolerances without affecting setup/hold time
+[491] [List Paragraph] Termination requirements
+[492] [Heading 3] Interface1 (Ex: DDR)
+[493] [Normal] <insert image here>
+[494] [Caption] Figure 13: Pre-Layout SI  – DDR
+[495] [Normal] Mention trace impedance and termination values.
+[496] [Heading 3] Interface2 (Ex: RGMII)
+[497] [Normal] 
+[498] [Heading 2] PCB Floor Plan Analysis
+[499] [Normal] <The board dimension and major component placement has to be close to final design. Major components can be shown as blocks, need not to be PCB footprints. Explain the engineering justifications (power/ease of routing/ DFA/ certification/ mechanical etc) for taking this placement approach>
+[500] [Normal] <insert image here>
+[501] [Caption] Figure 14: Subsystem1 [LLxWW mm] - PCB Top Floor Plan
+[502] [Normal] 
+[503] [Normal] <insert image here>
+[504] [Caption] Figure 15: Subsystem1 [LLxWW mm] - PCB Bottom Floor Plan
+[505] [Normal] 
+[506] [Heading 2] Thermal Analysis
+[507] [Normal] <This section is only a rough calculation done to identify the possible hot spots on the board, which can be used to design PCB layout, enclosure and thermal solution design accordingly. As the same information would be required for doing thermal simulation, capture the analysis in an xls in format given below. All high power consuming devices are to be captured in this xls.
+[508] [Normal] Mention the product operating ambient temperature range (ex, -20°C to 55°C) and the assumed temperature inside the enclosure (around PCBA. Ex, 60°C). >
+[509] [Normal] 								
+[510] [Normal]  “With Thermal Solution” column is not a mandatory section in the xls and it need not to be from simulation results. Rather, with an assumed thermal solution (say heatsink/fan), the new thermal resistance has to be mentioned and the corresponding Tj shall be calculated using formula so that thermal Engineering team would work on possible thermal solution to reduce thermal resistance to the required value.
+[511] [Normal] 
+[512] [Heading 1] Connectors & Cable Assembly
+[513] [Normal] <This section shall capture all connectors used in the system whether it is B2B or B2C. Connector pin out table has to be captured with all required information [SMD/TH, mating cycles, shielded/unshielded etc] and the corresponding cable assembly top level design [cable type – shielded/unshielded, cable diameter, length etc] shall be captured. Note off the shelf cable details are not to be captured here, only the designed cables shall be added.
+[514] [Normal] Note connector part number and component selection justification etc, shall be captured in the respective interface section only, not here>
+[515] [Heading 2] Subsystem1 Connectors
+[516] [Heading 3] Internal Connectors
+[517] [Normal] < All connectors that are within the board shall be captured in “Internal connectors” section of respective board/subsystem. Example, UART header, Expansion header>
+[518] [Heading 4] Connector 1 [UART Header]
+[519] [Normal] Connector MPN & Make
+[520] [Caption] Table 14 Subsystem1 - UART Header 
+[521] [Normal] 
+[522] [Normal] Matting Connector [Optional – If internal connector provision is given for future B2B connection, Say add-on board]
+[523] [Normal] Connector MPN & Make
+[524] [Caption] Table 15 Subsystem1 - UART Header Mating
+[525] [Normal] 
+[526] [Normal] Matting Cable [Optional – If internal connector provision is given for future B2C connection, Say add-on board]
+[527] [Caption] Table 16 Subsystem1 - UART Header Cable
+[528] [Normal] 
+[529] [Normal] Explain the other specs of the cable here with some diagram.
+[530] [Heading 4] Connector 1 [Expansion Header]
+[531] [Normal] Connector MPN & Make
+[532] [Heading 3] External Connectors
+[533] [Normal] <All connectors that are used for external communication of system, board shall be captured in “Externa connectors” section of respective board/subsystem. Example, RJ45 connector directly mounted on board, USB cable connector with cable assembly, connected to B2C mounted on board.>
+[534] [Normal] <Rest is same as internal connectors section>
+[535] [Heading 2] Subsystem2 Connectors
+[536] [Heading 3] Internal Connectors
+[537] [Normal] <Same as Subsystem1 section>
+[538] [Heading 3] External Connectors
+[539] [Normal] <Same as Subsystem1 section>
+[540] [Heading 2] Inter Subsystem Connectors
+[541] [Normal] <All connectors that are internal to system, but used for communication between two boards, shall be captured in “Inter Subsystem” section. Example, B2B connector between main board & camera sensor board and B2C connector between main board and Pushbutton board.>
+[542] [Heading 3] Subsystem1 – Subsystem2 Connectors
+[543] [Heading 4] Connector 1 [Camera Interface]
+[544] [Normal] 
+[545] [Caption] Table 17 Subsystem1 – Subsystem2 - UART Header 
+[546] [Normal] 
+[547] [Normal] Matting Cable [Optional – If internal connector provision is given for future B2C connection, Say add-on board]
+[548] [Caption] Table 18 Subsystem1 – Subsystem2 - UART Header Cable
+[549] [Normal] 
+[550] [Normal] Explain the other specs of the cable here with some diagram.
+[551] [Heading 4] Connector 2 [Daughter Board Interface]
+[552] [Normal] <Insert table as needed>
+[553] [Normal] 
+[554] [Heading 3] Subsystem2 – Subsystem3 Connectors
+[555] [Normal] <Same as above and insert as many as required>
+[556] [Normal] 
+[557] [Normal] 
+[558] [Heading 1] GPIO Mapping
+[559] [Normal] <This section shall capture GPIOs of all modules (say, processor, DSP, Microcontroller etc) where some piece of VVDN software is running. This section is to consolidate all GPIOs in one place for easy reference (mainly for software team). The detailed functionality of these GPIOs should be captured in the relevant sections above.
+[560] [Normal] Note that software-function column should be filled from module perspective (what need to be configured by software), not what is expected by the receiver IC as there may be other hardware logic (inverter) in between.
+[561] [Normal] >
+[562] [Heading 2] Subsystem1 GPIOs
+[563] [Heading 4] Module1 [Processor]
+[564] [Normal] <Insert table as needed>
+[565] [Caption] Table 19 Module1 GPIOs 
+[566] [Normal] 
+[567] [Heading 4] Module2 [MSP430]
+[568] [Normal] <Insert table as needed>
+[569] [Heading 2] Subsystem2 GPIOs
+[570] [Normal] <Same as above section>
+[571] [Heading 1] Interrupt Mapping
+[572] [Normal] <This section shall capture the interrupt inputs of all modules (say, processor, DSP, Microcontroller etc) where some piece of VVDN software is running. This section is to consolidate all interrupts in one place for easy reference (mainly for software team) and also the detailed flow of action to be taken (if there any custom actions) by software, shall be explained here..
+[573] [Normal] Note that active low, active high, positive edge, rising edge mentioned in the table should be from module/receiver perspective as there may be other hardware logic (inverter) in between.
+[574] [Normal] >
+[575] [Heading 2] Subsystem1 Interrupts
+[576] [Heading 4] Module1 [Processor]
+[577] [Normal] <Insert table as needed>
+[578] [Caption] Table 20 Module1 Interrupts 
+[579] [Normal] <Below this table, explain all interrupts provided for custom functions.
+[580] [Normal] PWR_OK
+[581] [Normal] When this interrupt is triggered, reboot the entire systems and stay in bootloader till this pin goes to high.
+[582] [Normal] 
+[583] [Heading 4] Module2 [MSP430]
+[584] [Normal] <Insert table as needed>
+[585] [Heading 2] Subsystem2 Interrupts
+[586] [Normal] <Same as above section>
+[587] [Normal] 
+[588] [Heading 1] Programmable ROM Devices
+[589] [Normal] <Capture the list of programmable ROM devices in a table along with additional programming information like how to fuse, erase and what type of data to store like FRU data etc.>
+[590] [Caption] Table 21 Programmable ROM
+[591] [Normal]  
+[592] [Heading 1] Bill of Material
+[593] [Normal] <Capture BOM for all individual subsystems in following sections separately. Do not combine the BOM in to single. Bare PCB, Mechanical parts, accessories shall not be included in this BOM. Also there is no need of putting the cost info here. The shown columns are standard. If a specific project calls for automotive component selection, then add another column. Similarly if life time etc whichever is project critical>
+[594] [Normal] 
+[595] [Caption] Table 22 Class A BOM 
+[596] [Normal] 
+[597] [Normal] 
+[598] [Heading 1] Design Limitations
+[599] [Normal] <Along with reasons, list down all the requirements that are not supported or partially supported in the design and also list the configurations/features of the component that are not supported etc.
+[600] [Normal] This section is mainly to give a clear notification to customer as well as cross domain teams>
+[601] [Normal] 
+[602] [Normal] 
+[603] [Heading 1] Requirement-Design Mapping
+[604] [Normal] <Insert a table which captures the all customer requirement ID, HW requirement ID and the HDD section where the implementation for this particular requirement, is present.>
+[605] [Normal] 
+[606] [Caption] Table 23 Requirement – Design Mapping
+[607] [Normal] 
+
+=== TABLES (26) ===
+
+--- Table 0 (3x4) ---
+  Row 0: ['Date', 'Rev No.', 'Description', 'By']
+  Row 1: ['29-AUG-19', 'V1.0', 'First Release', 'Perumal S, Sumit Ranjan, Vignesh Babu, Shekhar Saini, Abhishek Kumar Singh, Chetan Singh Rajput']
+  Row 2: ['28-MAY-20', 'V1.1', 'Removed CoE reference & Included SME Reference in Signoff Section', 'Somnath Shenoy']
+
+--- Table 1 (4x2) ---
+  Row 0: ['Project Code', '<CCCC_PPPP>']
+  Row 1: ['Project Name', '<Project Name>']
+  Row 2: ['Revision', '<Current Revision Number>']
+  Row 3: ['Date', '<Date of Release>']
+
+--- Table 2 (3x6) ---
+  Row 0: ['Date', 'Revision No.', 'Description', 'Prepared/Revised By', 'Reviewed By', 'Approved By']
+  Row 1: ['', '', '', '', '', '']
+  Row 2: ['', '', '', '', '', '']
+
+--- Table 3 (15x3) ---
+  Row 0: ['CUSTOMER SIGN-OFF FORM', 'CUSTOMER SIGN-OFF FORM', 'CUSTOMER SIGN-OFF FORM']
+  Row 1: ['Customer', 'Technical In-Charge', 'Program In-Charge']
+  Row 2: ['Name:', '', '']
+  Row 3: ['Designation:', '', '']
+  Row 4: ['Email ID:', '', '']
+  Row 5: ['Address:', '', '']
+  Row 6: ['Comments:', '', '']
+  Row 7: ['Signature & Date:', '', '']
+  Row 8: ['VVDN', 'Technical In-Charge', 'Program In-Charge']
+  Row 9: ['Name:', '', '']
+  Row 10: ['Designation:', 'Project Owner Engineering', 'BU Head']
+  Row 11: ['Email ID:', '', '']
+  Row 12: ['Address:', 'VVDN Technologies B-22, Infocity Sector-34,\xa0 Gurgaon-122001, Haryana, India Tel No: +91 124 4284250\xa0 Fax No: +91 124 4284251', 'VVDN Technologies B-22, Infocity Sector-34,\xa0 Gurgaon-122001, Haryana, India Tel No: +91 124 4284250\xa0 Fax No: +91 124 4284251']
+  Row 13: ['Comments:', '', '']
+  Row 14: ['Signature & Date:', '', '']
+
+--- Table 4 (9x2) ---
+  Row 0: ['INTERNAL SIGN-OFF', 'INTERNAL SIGN-OFF']
+  Row 1: ['Level 1', 'Project Lead / Peer / POE']
+  Row 2: ['Decision:', 'Approved / Not Approved']
+  Row 3: ['Comments:', '']
+  Row 4: ['Signature & Date:', '']
+  Row 5: ['Level 2', 'BU SME']
+  Row 6: ['Decision:', 'Approved / Not Approved']
+  Row 7: ['Comments:', '']
+  Row 8: ['Signature & Date:', '']
+
+--- Table 5 (6x2) ---
+  Row 0: ['Acronym', 'Definition']
+  Row 1: ['', '']
+  Row 2: ['', '']
+  Row 3: ['', '']
+  Row 4: ['', '']
+  Row 5: ['', '']
+
+--- Table 6 (8x2) ---
+  Row 0: ['Reference ID', 'Description']
+  Row 1: ['', 'Product Requirement Document']
+  Row 2: ['', 'Critical Component Datasheet']
+  Row 3: ['', 'HDD of others systems of the same product']
+  Row 4: ['', 'Test Reports [In case of HDD of revised design]']
+  Row 5: ['', 'Design document of any previous releases of the project']
+  Row 6: ['', 'Hyperlinks in the web']
+  Row 7: ['', 'Minutes of Meeting']
+
+--- Table 7 (7x4) ---
+  Row 0: ['S.No', 'IC', 'Power Up Sequencing', 'Power Down Sequencing']
+  Row 1: ['1', 'Processor', '1.2V->1.8V-3.3V', '3.3V->1.8V->1.2V']
+  Row 2: ['2', 'Ethernet Phy', '1.5V->1.8V->2.5V', 'Nil']
+  Row 3: ['3', 'CPLD', '1.8V->3.3', 'Nil']
+  Row 4: ['4', '', '', '']
+  Row 5: ['', '', '', '']
+  Row 6: ['', 'Designed Sequence', '1.2V->1.5V->1.8V->2.5V->3.3V', '3.3V->1.8V->1.2V']
+
+--- Table 8 (7x7) ---
+  Row 0: ['Sl No', 'Load ICs', 'Current Consumption in mA', 'Current Consumption in mA', 'Current Consumption in mA', 'Power Consumption in W', 'Power Consumption in W']
+  Row 1: ['', '', '@V1', '@V2', '@V3', 'Peak', 'Use Case [only for reference]']
+  Row 2: ['1', 'Processor', '1020', '560', '275', '', '']
+  Row 3: ['2', 'NOR Flash', '', '', '100', '', '']
+  Row 4: ['3', 'Eth Phy', '', '150', '75', '', '']
+  Row 5: ['4', '', '', '', '', '', '']
+  Row 6: ['', 'Total', '1020', '710', '450', '', '']
+
+--- Table 9 (9x8) ---
+  Row 0: ['Sl.No', 'Regulator', 'Input Voltage (V)', 'Output Voltage (V)', 'Load Current (A)', 'Efficiency (%)', 'Power Loss in Regulator (W)', 'Total Power at input (W)']
+  Row 1: ['Regulators powered from Voltage Rail (V1)', 'Regulators powered from Voltage Rail (V1)', 'Regulators powered from Voltage Rail (V1)', 'Regulators powered from Voltage Rail (V1)', 'Regulators powered from Voltage Rail (V1)', 'Regulators powered from Voltage Rail (V1)', 'Regulators powered from Voltage Rail (V1)', 'Regulators powered from Voltage Rail (V1)']
+  Row 2: ['1', 'DDR Switcher', '3.3', '1.8', '500', '85', '0.15', '1.05']
+  Row 3: ['2', 'Camera LDO', '3.3', '1.2', '100', '36.3', '0.21', '0.33']
+  Row 4: ['', 'Total', '', '', '', '', '0.36', '1.38']
+  Row 5: ['Regulators powered from Voltage Rail (V2)', 'Regulators powered from Voltage Rail (V2)', 'Regulators powered from Voltage Rail (V2)', 'Regulators powered from Voltage Rail (V2)', 'Regulators powered from Voltage Rail (V2)', 'Regulators powered from Voltage Rail (V2)', 'Regulators powered from Voltage Rail (V2)', 'Regulators powered from Voltage Rail (V2)']
+  Row 6: ['3', '3.3V Switcher', '5', '3.3', '418', '90', '0.153', '1.53']
+  Row 7: ['4', '', '', '', '', '', '', '']
+  Row 8: ['', 'Total', '', '', '', '', '', '']
+
+--- Table 10 (2x6) ---
+  Row 0: ['Sl.No', 'Power State/Mode', 'Total Power @ VSYS node', 'Battery to Load power path loss', 'Required Backup Time in hr', 'Battery Capacity @V']
+  Row 1: ['1', 'Full Function', '', '', '', '']
+
+--- Table 11 (5x6) ---
+  Row 0: ['Sl.No', 'Power State/Mode', 'Total Power @ VSYS node', 'Battery Capacity @V', 'Battery to Load power path loss', 'Required Backup Time in hr']
+  Row 1: ['1', 'Sleep Mode', '', '', '', '']
+  Row 2: ['2', 'Voice Calling', '', '', '', '']
+  Row 3: ['3', 'Video Calling', '', '', '', '']
+  Row 4: ['4', '', '', '', '', '']
+
+--- Table 12 (8x5) ---
+  Row 0: ['Sl. No', 'Detection by Module', 'GPIO/Pin No', 'Signal Name', 'Configurations']
+  Row 1: ['1', 'Processor', 'AA11', 'BRD_TYPE1', '0000: 2E1 75E Card 0001: 4E1 75E Card 0010: 8E1 75E Card 0011: 16E1 75E Card 0100: 2E1 120E Card 0101: 4E1 120E Card 0110: 8E1 120E Card 0111: 16E1 120E Card']
+  Row 2: ['2', 'Processor', 'AA12', 'BRD_TYPE2', '0000: 2E1 75E Card 0001: 4E1 75E Card 0010: 8E1 75E Card 0011: 16E1 75E Card 0100: 2E1 120E Card 0101: 4E1 120E Card 0110: 8E1 120E Card 0111: 16E1 120E Card']
+  Row 3: ['3', 'I2C GPIO Expander', 'GPIO1', 'BRD_TYPE3', '0000: 2E1 75E Card 0001: 4E1 75E Card 0010: 8E1 75E Card 0011: 16E1 75E Card 0100: 2E1 120E Card 0101: 4E1 120E Card 0110: 8E1 120E Card 0111: 16E1 120E Card']
+  Row 4: ['4', 'I2C GPIO Expander', 'GPIO2', 'BRD_TYPE4', '0000: 2E1 75E Card 0001: 4E1 75E Card 0010: 8E1 75E Card 0011: 16E1 75E Card 0100: 2E1 120E Card 0101: 4E1 120E Card 0110: 8E1 120E Card 0111: 16E1 120E Card']
+  Row 5: ['5', 'DSP', 'B11', 'DSP_CHANNEL0', '00: 2 audio analog input 01: 4 audio analog input 10: 2 audio digital input 11: 2 audio digital input']
+  Row 6: ['6', 'DSP', 'B12', 'DSP_CHANNEL1', '00: 2 audio analog input 01: 4 audio analog input 10: 2 audio digital input 11: 2 audio digital input']
+  Row 7: ['', '', '', '', '']
+
+--- Table 13 (6x5) ---
+  Row 0: ['Sl.No', 'Detection by Module', 'GPIO/Pin No', 'Signal Name', 'Configurations']
+  Row 1: ['1', 'Processor', 'AA11', 'BRD_REV1', '00: RevA1 01: RevB2 10: RevC1 11: RevC2']
+  Row 2: ['2', 'Processor', 'AA12', 'BRD_REV1', '00: RevA1 01: RevB2 10: RevC1 11: RevC2']
+  Row 3: ['3', 'DSP', 'B11', 'DSP_REV0', '00: RevA1 01: RevB1 10: RevC1 11: RevD1']
+  Row 4: ['4', 'DSP', 'B12', 'DSP_REV1', '00: RevA1 01: RevB1 10: RevC1 11: RevD1']
+  Row 5: ['', '', '', '', '']
+
+--- Table 14 (3x8) ---
+  Row 0: ['S.No.', 'Driver', 'VOH(min) (V)', 'IOH (mA)', 'Receiver', 'VIH(min)(V)', 'IIH (uA)', 'Margin']
+  Row 1: ['1', 'LPC1833', '2.9', '6', 'S25FL21', '2.31', '2', '+0.59']
+  Row 2: ['2', 'S25FL21', '3.1', '0.1', 'LPC1833', '2.31', '0.003', '+0.79']
+
+--- Table 15 (3x8) ---
+  Row 0: ['S.No.', 'Driver', 'VOL(max) (V)', 'IOL (mA)', 'Receiver', 'VIL(max)(V)', 'IIL (uA)', 'Margin']
+  Row 1: ['1', 'LPC1833', '0.4', '6', 'S25FL21', '0.35', '2', '-0.05']
+  Row 2: ['2', 'S25FL21', '0.4', '1.6', 'LPC1833', '0.99', '0.003', '+0.59']
+
+--- Table 16 (6x5) ---
+  Row 0: ['Pin No', 'Net Name', 'Signal/Power', 'Frequency / Current (Designed)', 'Frequency / Current (Connector Spec)']
+  Row 1: ['1', 'VCC_3V3', 'Power', '0.1A', '1A']
+  Row 2: ['2', 'UART_TX', 'Signal', '150KHz', '5MHz']
+  Row 3: ['3', 'UART_RX', 'Power', '150KHz', '5MHz']
+  Row 4: ['4', 'GND', 'Power', '0.1A', '1A']
+  Row 5: ['5', 'NC', 'Signal', '', '']
+
+--- Table 17 (6x5) ---
+  Row 0: ['Pin No', 'Net Name', 'Signal/Power', 'Frequency / Current (Designed)', 'Frequency / Current (Connector Spec)']
+  Row 1: ['1', '', '', '', '']
+  Row 2: ['2', '', '', '', '']
+  Row 3: ['3', '', '', '', '']
+  Row 4: ['4', '', '', '', '']
+  Row 5: ['5', '', '', '', '']
+
+--- Table 18 (7x5) ---
+  Row 0: ['Connector at End-A', 'Connector at End-A', 'Cable', 'Connector at End-A', 'Connector at End-A']
+  Row 1: ['Pin No', 'Frequency / Current', 'Frequency / AWG', 'Pin No', 'Frequency / Current']
+  Row 2: ['', '', '', '', '']
+  Row 3: ['', '', '', '', '']
+  Row 4: ['', '', '', '', '']
+  Row 5: ['', '', '', '', '']
+  Row 6: ['', '', '', '', '']
+
+--- Table 19 (7x7) ---
+  Row 0: ['Net Name', 'Signal/Power', 'Frequency / Current (Designed)', 'Subsystem1 Connector MPN & Make', 'Subsystem1 Connector MPN & Make', 'Subsystem2 Connector MPN & Make', 'Subsystem2 Connector MPN & Make']
+  Row 1: ['Net Name', 'Signal/Power', 'Frequency / Current (Designed)', 'Pin No', 'Frequency / Current (Connector Spec)', 'Pin No', 'Frequency / Current (Connector Spec)']
+  Row 2: ['VCC_3V3', 'Power', '0.1A', '1', '1A', '1', '1A']
+  Row 3: ['UART_TX', 'Signal', '150KHz', '2', '5MHz', '2', '5MHz']
+  Row 4: ['UART_RX', 'Power', '150KHz', '3', '5MHz', '3', '5MHz']
+  Row 5: ['GND', 'Power', '0.1A', '4', '1A', '4', '1A']
+  Row 6: ['NC', 'Signal', '', '5', '', '5', '']
+
+--- Table 20 (7x5) ---
+  Row 0: ['Connector at End-A', 'Connector at End-A', 'Cable', 'Connector at End-A', 'Connector at End-A']
+  Row 1: ['Pin No', 'Frequency / Current', 'Frequency / AWG', 'Pin No', 'Frequency / Current']
+  Row 2: ['', '', '', '', '']
+  Row 3: ['', '', '', '', '']
+  Row 4: ['', '', '', '', '']
+  Row 5: ['', '', '', '', '']
+  Row 6: ['', '', '', '', '']
+
+--- Table 21 (5x10) ---
+  Row 0: ['', '', 'Module/Chip', 'Module/Chip', 'Module/Chip', 'Module/Chip', 'HW Design', 'HW Design', 'Software', 'Software']
+  Row 1: ['Sl No', 'Net Name', 'GPIO Pin No', 'GPIO No', 'I/O Voltage', 'Pull Config', 'Voltage', 'Pull Config', 'Default', 'Function']
+  Row 2: ['1', 'WL_EN', 'A32', 'GPIO25', '1.8V', 'PU', '1.8V', 'PD', '0', '0-WiFi Disable 1-WiFi Enable']
+  Row 3: ['2', 'BT_EN', 'A44', 'GPIO32', '1.8V', 'Open Collector', '1.8V', 'PU', '1', '0-BT Disable 1-BT Enable']
+  Row 4: ['3', '', '', '', '', '', '', '', '', '']
+
+--- Table 22 (5x10) ---
+  Row 0: ['', '', 'Module/Chip', 'Module/Chip', 'Module/Chip', 'Module/Chip', 'HW Design', 'HW Design', 'Software', 'Software']
+  Row 1: ['Sl No', 'Net Name', 'Pin No', 'IRQ No', 'I/O Voltage', 'Pull Config', 'Voltage', 'Pull Config', 'Type/Active', 'Function']
+  Row 2: ['1', 'PHY_INT#', 'A32', 'Irq22', '1.8V', 'PU', '1.8V', 'PD', '↑', 'Ethernet PHY']
+  Row 3: ['2', 'PWR_OK', 'A44', 'Irq23', '1.8V', 'PU', '1.8V', 'PU', '↓', 'Custom']
+  Row 4: ['3', '', '', '', '', '', '', '', 'High', '']
+
+--- Table 23 (9x3) ---
+  Row 0: ['Device', 'Purpose', 'Additional Info']
+  Row 1: ['Subystem1', 'Subystem1', 'Subystem1']
+  Row 2: ['DSP (internal flash)', 'DSP Image', '']
+  Row 3: ['NAND Flash', 'System Image', '']
+  Row 4: ['SPI NOR', 'System Boot Image', '']
+  Row 5: ['I2C EEPROM', 'FRU Data', 'BIN format']
+  Row 6: ['Subsystem2', 'Subsystem2', 'Subsystem2']
+  Row 7: ['', '', '']
+  Row 8: ['', '', '']
+
+--- Table 24 (7x8) ---
+  Row 0: ['Sl.No', 'Description', 'Qty', 'Mfg', 'Mfg Part No', 'Part Type (C/I/A)', 'RoHS', 'Temperature']
+  Row 1: ['Subsystem 1 - Electrical', 'Subsystem 1 - Electrical', 'Subsystem 1 - Electrical', 'Subsystem 1 - Electrical', 'Subsystem 1 - Electrical', 'Subsystem 1 - Electrical', 'Subsystem 1 - Electrical', 'Subsystem 1 - Electrical']
+  Row 2: ['', '', '', '', '', '', '', '']
+  Row 3: ['', '', '', '', '', '', '', '']
+  Row 4: ['Subsystem 2 - Electrical', 'Subsystem 2 - Electrical', 'Subsystem 2 - Electrical', 'Subsystem 2 - Electrical', 'Subsystem 2 - Electrical', 'Subsystem 2 - Electrical', 'Subsystem 2 - Electrical', 'Subsystem 2 - Electrical']
+  Row 5: ['', '', '', '', '', '', '', '']
+  Row 6: ['', '', '', '', '', '', '', '']
+
+--- Table 25 (5x3) ---
+  Row 0: ['Customer ReqID', 'HW ReqID', 'HDD Section']
+  Row 1: ['CR-xxx-GR', 'HW-xxx-G', '6.1.1.2']
+  Row 2: ['CR-xxx-GR', 'HW-xxx-R', '6.1.1.1']
+  Row 3: ['', '', '']
+  Row 4: ['', '', '']
