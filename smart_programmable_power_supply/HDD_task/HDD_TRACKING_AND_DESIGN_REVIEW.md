@@ -8,31 +8,31 @@
 * **Design Owner**: Hardware Engineering Team / Power Electronics Trainee
 * **Authoritative Reference PRD**: [`prd_final_spps.docx`](file:///home/tthhongs/build_tthongs/av_iv/smart_programmable_power_supply/PRD_task/reference_docs/prd_final_spps.docx) (Rev A1_001, Date: 15-Oct-2026)
 * **Corporate HDD Template**: [`Hardware Design Document_Template_V1.1.docx`](file:///home/tthhongs/build_tthongs/av_iv/smart_programmable_power_supply/HDD_task/reference%20docs%20hdds/Hardware%20Design%20Document_Template_V1.1.docx) (VVDN TP013 V1.1)
-* **Current Engineering Status**: **Phase 2 Complete — Planning, Component Selection, Calculations & Class A BOM Finalized (Awaiting User Advice Before Monolithic HDD Generation)**
-* **Document Version**: `REV_1.0_TRACKING_REVIEW`
-* **Date**: 21st October 2026
+* **Current Engineering Status**: **Phase 2 Complete — Monolithic Hardware Design Document (HDD) Fully Compiled and Verified in Accordance with TP013 V1.1 and PRD A1_001**
+* **Document Version**: `REV_2.0_TRACKING_REVIEW`
+* **Date**: 30th October 2026
 
 ---
 
 ## 1. Executive Summary & Design Readiness Overview
 
-In accordance with the **new Product Requirement Document (`prd_final_spps.docx`)**, the preliminary engineering design phase for the **Smart Programmable Power Supply (SPPS)** has been successfully executed within the dedicated `HDD_task/` directory.
+In accordance with the **authoritative Product Requirement Document (`prd_final_spps.docx`)** and the **VVDN TP013 V1.1 Corporate HDD Template**, the production Hardware Design Document for the **Smart Programmable Power Supply (SPPS)** has been successfully authored and compiled within the dedicated `HDD_task/` directory.
 
-Per your specific directive:
-> *"dont make the final hdd yet , just do the detailed planning and component selections and calculations will advise later , do it all in the hdd dedicated directory, all planning and component selections and the calculations should be done. make an overall tracking review md file for me for reference so that i can accurately find out about it."*
-
-The complete foundation required to generate the final monolithic VVDN TP013 V1.1 Hardware Design Document is **100% complete, mathematically derived, component-selected, and fully cross-referenced**.
+The monolithic deliverable is available in both Markdown source and formatted Microsoft Word formats:
+* **Markdown Master**: [`HARDWARE_DESIGN_DOCUMENT_HDD.md`](HARDWARE_DESIGN_DOCUMENT_HDD.md)
+* **Word Deliverable**: [`HARDWARE_DESIGN_DOCUMENT_HDD.docx`](HARDWARE_DESIGN_DOCUMENT_HDD.docx)
 
 ### 1.1 Design Readiness Scorecard
 
 | Engineering Domain | Readiness | Key Highlights | Verification Document |
 | :--- | :---: | :--- | :--- |
-| **Detailed Implementation Planning** | **100% READY** | Complete 4-stage architecture, TP013 V1.1 section mapping, power sequencing, clock/reset tree, 4-layer stackup, and milestone Gantt chart. | [01_HDD_DETAILED_IMPLEMENTATION_PLANNING.md](file:///home/tthhongs/build_tthongs/av_iv/smart_programmable_power_supply/HDD_task/01_HDD_DETAILED_IMPLEMENTATION_PLANNING.md) |
-| **Component Selections & Trade-Offs**| **100% READY** | Exhaustive part selections for all stages, multi-source alternates, and evaluations for Flyback controller (UCC28740 vs UCC28C43), shunt resistor (10 mΩ), and NTC (15 Ω). | [02_COMPONENT_SELECTION_AND_TRADE_OFF_ANALYSIS.md](file:///home/tthhongs/build_tthongs/av_iv/smart_programmable_power_supply/HDD_task/02_COMPONENT_SELECTION_AND_TRADE_OFF_ANALYSIS.md) |
-| **Mathematical Derivations & Sizing**| **100% READY** | Rigorous formulas for transformer magnetics (PQ26/20, L_p = 220 µH), snubber, LM5176 Buck-Boost inductance, DAC steering, capacitor ripple, and thermal budgets. | [03_MATHEMATICAL_CALCULATIONS_AND_DERIVATIONS.md](file:///home/tthhongs/build_tthongs/av_iv/smart_programmable_power_supply/HDD_task/03_MATHEMATICAL_CALCULATIONS_AND_DERIVATIONS.md) |
-| **Class A Engineering BOM** | **100% READY** | 54 line-item master BOM with exact MPNs, second sources, ratings, tolerances, footprints, and functional justifications. | [04_CLASS_A_BILL_OF_MATERIALS_BOM.md](file:///home/tthhongs/build_tthongs/av_iv/smart_programmable_power_supply/HDD_task/04_CLASS_A_BILL_OF_MATERIALS_BOM.md) |
-| **VVDN Stress Derating Compliance** | **100% PASS** | All active/passive components strictly satisfy ≤ 75% voltage, ≤ 70% current, and ≤ 60% power derating under worst-case 265 V_AC / 50°C ambient. | Documented in Section 9 of [03_MATHEMATICAL_CALCULATIONS_AND_DERIVATIONS.md](file:///home/tthhongs/build_tthongs/av_iv/smart_programmable_power_supply/HDD_task/03_MATHEMATICAL_CALCULATIONS_AND_DERIVATIONS.md) |
-| **Safety & Galvanic Isolation (SELV)**| **100% PASS** | IEC 62368-1 compliance: ≥ 6.4 mm creepage, ≥ 5.0 mm clearance, and 2.0 mm milled PCB air slot under 3000 V_RMS barrier. | Documented in Section 11 of [03_MATHEMATICAL_CALCULATIONS_AND_DERIVATIONS.md](file:///home/tthhongs/build_tthongs/av_iv/smart_programmable_power_supply/HDD_task/03_MATHEMATICAL_CALCULATIONS_AND_DERIVATIONS.md) |
+| **Monolithic HDD Document** | **100% COMPLETE** | Full 20-chapter TP013 V1.1 structure, all 23 corporate standard tables, complete circuit formulations, pin mappings, and Class A BOM. | [HARDWARE_DESIGN_DOCUMENT_HDD.md](HARDWARE_DESIGN_DOCUMENT_HDD.md) / [HARDWARE_DESIGN_DOCUMENT_HDD.docx](HARDWARE_DESIGN_DOCUMENT_HDD.docx) |
+| **Detailed Implementation Planning** | **100% READY** | Complete 4-stage architecture, TP013 V1.1 section mapping, power sequencing, clock/reset tree, 4-layer stackup, and milestone Gantt chart. | [01_HDD_DETAILED_IMPLEMENTATION_PLANNING.md](01_HDD_DETAILED_IMPLEMENTATION_PLANNING.md) |
+| **Component Selections & Trade-Offs**| **100% READY** | Exhaustive part selections for all stages, multi-source alternates, and evaluations for Flyback controller (UCC28740 vs UCC28C43), shunt resistor (10 mΩ), and NTC (15 Ω). | [02_COMPONENT_SELECTION_AND_TRADE_OFF_ANALYSIS.md](02_COMPONENT_SELECTION_AND_TRADE_OFF_ANALYSIS.md) |
+| **Mathematical Derivations & Sizing**| **100% READY** | Rigorous formulas for transformer magnetics (PQ26/20, L_p = 220 µH), snubber, LM5176 Buck-Boost inductance, DAC steering, capacitor ripple, and thermal budgets. | [03_MATHEMATICAL_CALCULATIONS_AND_DERIVATIONS.md](03_MATHEMATICAL_CALCULATIONS_AND_DERIVATIONS.md) |
+| **Class A Engineering BOM** | **100% READY** | 54 line-item master BOM with exact MPNs, second sources, ratings, tolerances, footprints, and functional justifications. | [04_CLASS_A_BILL_OF_MATERIALS_BOM.md](04_CLASS_A_BILL_OF_MATERIALS_BOM.md) |
+| **VVDN Stress Derating Compliance** | **100% PASS** | All active/passive components strictly satisfy ≤ 75% voltage, ≤ 70% current, and ≤ 60% power derating under worst-case 265 V_AC / 50°C ambient. | Documented in Section 13.6 of [HARDWARE_DESIGN_DOCUMENT_HDD.md](HARDWARE_DESIGN_DOCUMENT_HDD.md) |
+| **Safety & Galvanic Isolation (SELV)**| **100% PASS** | IEC 62368-1 compliance: ≥ 6.4 mm creepage, ≥ 5.0 mm clearance, and 2.0 mm milled PCB air slot under 3000 V_RMS barrier. | Documented in Section 13.5 of [HARDWARE_DESIGN_DOCUMENT_HDD.md](HARDWARE_DESIGN_DOCUMENT_HDD.md) |
 
 ---
 
@@ -42,14 +42,17 @@ All deliverables are organized in the dedicated [`HDD_task/`](file:///home/tthho
 
 ```
 HDD_task/
+├── HARDWARE_DESIGN_DOCUMENT_HDD.md <-- MASTER MONOLITHIC HDD (TP013 V1.1 CONFORMANT)
+├── HARDWARE_DESIGN_DOCUMENT_HDD.docx <-- EXECUTIVE WORD RELEASE (.DOCX)
 ├── HDD_TRACKING_AND_DESIGN_REVIEW.md <-- THIS MASTER TRACKING REVIEW DOCUMENT
 ├── 01_HDD_DETAILED_IMPLEMENTATION_PLANNING.md <-- Implementation Plan, Architecture & TP013 Blueprint
 ├── 02_COMPONENT_SELECTION_AND_TRADE_OFF_ANALYSIS.md <-- Detailed Component Sourcing & Multi-Source Matrix
 ├── 03_MATHEMATICAL_CALCULATIONS_AND_DERIVATIONS.md <-- Complete Formulaic Circuit Derivations & Derating
 ├── 04_CLASS_A_BILL_OF_MATERIALS_BOM.md <-- Production-Grade 54-Item Class A BOM
 ├── README.md <-- Workspace Navigation Portal
+├── diagrams/ <-- 13 High-Resolution Architecture & Schematics Diagrams
 └── reference docs hdds/
- └── Hardware Design Document_Template_V1.1.docx <-- Authoritative VVDN TP013 V1.1 HDD Template
+    └── Hardware Design Document_Template_V1.1.docx <-- Authoritative VVDN TP013 V1.1 HDD Template
 ```
 
 ---
@@ -233,13 +236,44 @@ Before consolidating the final monolithic Hardware Design Document (`Hardware De
 
 ---
 
-## 8. Conclusion & Next Steps
+## 8. Schematic Component & Module Equivalent Circuit Library (`components_sch`)
 
-All foundational engineering calculations, multi-source component selections, and implementation plans are **complete and verified**.
+In accordance with user design directives, a dedicated schematic capture repository has been created at [`components_sch/`](file:///home/tthhongs/build_tthongs/av_iv/smart_programmable_power_supply/components_sch) (and mirrored in `HDD_task/components_sch/`). 
 
-Upon your review and advice regarding the items in Section 7:
-1. We will compile the final monolithic **Hardware Design Document (`Hardware Design Document (HDD)_V1.0.docx`)** matching VVDN TP013 V1.1 format.
-2. We will advance directly to Phase 3: **Altium Designer Complete Schematics Capture**.
+Every component is defined in an individual specification document detailing:
+* Reference Designators, Primary & Alternate MPNs, Manufacturers, and Footprints.
+* Exact Pin-to-Net connections and PCB trace sizing.
+* Electrical ratings, stress derating calculations, and thermal analysis.
+* ASCII schematic symbol representations and layout guidelines.
+
+Each module directory also hosts a **comprehensive Module Equivalent Electronic Circuit document** containing:
+* ASCII schematic diagrams showing complete interconnections.
+* Detailed operational theory, mode transitions, and feedback/telemetry math.
+* Complete physical Netlist tables and laboratory test points.
+
+### Directory Summary
+| Module | Module Name | Component Files | Equivalent Electronic Circuit File |
+| :---: | :--- | :---: | :--- |
+| **01** | Mains Input & EMI Filter | 6 files | [`module_01_mains_emi_equivalent_circuit.md`](file:///home/tthhongs/build_tthongs/av_iv/smart_programmable_power_supply/components_sch/module_01_mains_input_and_emi_filter/module_01_mains_emi_equivalent_circuit.md) |
+| **02** | Bridge Rectifier & Bulk DC | 4 files | [`module_02_bridge_rectifier_bulk_equivalent_circuit.md`](file:///home/tthhongs/build_tthongs/av_iv/smart_programmable_power_supply/components_sch/module_02_bridge_rectifier_and_bulk_dc/module_02_bridge_rectifier_bulk_equivalent_circuit.md) |
+| **03** | Isolated Flyback Converter | 7 files | [`module_03_isolated_flyback_equivalent_circuit.md`](file:///home/tthhongs/build_tthongs/av_iv/smart_programmable_power_supply/components_sch/module_03_isolated_flyback_converter/module_03_isolated_flyback_equivalent_circuit.md) |
+| **04** | Buck-Boost Post-Regulator | 9 files | [`module_04_buck_boost_equivalent_circuit.md`](file:///home/tthhongs/build_tthongs/av_iv/smart_programmable_power_supply/components_sch/module_04_buck_boost_post_regulator/module_04_buck_boost_equivalent_circuit.md) |
+| **05** | Fast Hardware CC Protection | 3 files | [`module_05_fast_cc_protection_equivalent_circuit.md`](file:///home/tthhongs/build_tthongs/av_iv/smart_programmable_power_supply/components_sch/module_05_fast_hardware_cc_protection/module_05_fast_cc_protection_equivalent_circuit.md) |
+| **06** | Supervisory MCU Core | 5 files | [`module_06_supervisory_mcu_equivalent_circuit.md`](file:///home/tthhongs/build_tthongs/av_iv/smart_programmable_power_supply/components_sch/module_06_supervisory_mcu_core/module_06_supervisory_mcu_equivalent_circuit.md) |
+| **07** | Dual-Domain Telemetry | 5 files | [`module_07_dual_domain_telemetry_equivalent_circuit.md`](file:///home/tthhongs/build_tthongs/av_iv/smart_programmable_power_supply/components_sch/module_07_dual_domain_telemetry/module_07_dual_domain_telemetry_equivalent_circuit.md) |
+| **08** | Auxiliary Power Distribution | 3 files | [`module_08_auxiliary_power_equivalent_circuit.md`](file:///home/tthhongs/build_tthongs/av_iv/smart_programmable_power_supply/components_sch/module_08_auxiliary_power_distribution/module_08_auxiliary_power_equivalent_circuit.md) |
+| **09** | User Interface & Connectors | 6 files | [`module_09_user_interface_connectors_equivalent_circuit.md`](file:///home/tthhongs/build_tthongs/av_iv/smart_programmable_power_supply/components_sch/module_09_user_interface_and_connectors/module_09_user_interface_connectors_equivalent_circuit.md) |
+| **INDEX**| Master Navigation Portal | — | [`components_sch/README.md`](file:///home/tthhongs/build_tthongs/av_iv/smart_programmable_power_supply/components_sch/README.md) |
+
+---
+
+## 9. Conclusion & Next Steps
+
+All foundational engineering calculations, multi-source component selections, and implementation plans have been formalized into the authoritative monolithic **Hardware Design Document (`HARDWARE_DESIGN_DOCUMENT_HDD.md` / `.docx`)** and broken down into the 57-file **`components_sch`** modular schematic capture library.
+
+Next Steps:
+1. Stakeholder review and customer sign-off on the generated HDD and component library.
+2. Advance directly to Phase 3: **Altium Designer Complete Schematics Capture & PCB Layout**.
 
 ---
 *End of Master Tracking & Design Review Document.*

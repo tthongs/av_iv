@@ -1,0 +1,474 @@
+[Subtitle] P5: Hardware Design Document Template (TP013)
+[Subtitle] P6: Rev:	V1.1
+[Subtitle] P7: 28-MAY-2020
+[Normal] P12: Amendment History
+[Subtitle] P29: Hardware Design Document (HDD)
+[Normal] P36: Revision History
+[Normal] P58: Customer Sign Off
+[Normal] P62: Internal Sign Off
+[TOC Heading1] P64: Table of Contents
+[toc 1] P65: 1	Introduction	10
+[toc 2] P66: 1.1	Purpose	10
+[toc 2] P67: 1.2	Document Conventions	10
+[toc 2] P68: 1.3	Intended Audience and Reading Suggestions	10
+[toc 2] P69: 1.4	Abbreviation	10
+[toc 2] P70: 1.5	References	11
+[toc 1] P71: 2	Product – Technical Overview	12
+[toc 1] P72: 3	System1 Implementation Plan	12
+[toc 1] P73: 4	System1 Hardware Architecture	12
+[toc 2] P74: 4.1	System1 Architecture	12
+[toc 2] P75: 4.2	SubSystem1 Architecture	12
+[toc 2] P76: 4.3	SubSystem2 Architecture	13
+[toc 1] P77: 5	Digital Interface Design	13
+[toc 2] P78: 5.1	Subsystem1 [Main Board]	13
+[toc 3] P79: 5.1.1	Module1 [Major Component like Application Processor, FPGA, CPLD, DSP etc]	14
+[toc 3] P80: 5.1.2	Module2 [Major Component like DSP]	14
+[toc 2] P81: 5.2	Subsystem2 [Daughter Board]	14
+[toc 1] P82: 6	RF Design	15
+[toc 2] P83: 6.1	Subsystem1 [Main Board]	15
+[toc 3] P84: 6.1.1	WiFi	15
+[toc 3] P85: 6.1.2	Zigbee	16
+[toc 2] P86: 6.2	Subsystem2 [Daughter Board]	16
+[toc 1] P87: 7	Analog Design	16
+[toc 2] P88: 7.1	Subsystem1 [Main Board]	16
+[toc 3] P89: 7.1.1	Component/Module1 [Photodiode]	16
+[toc 3] P90: 7.1.2	Component/Module2 [PWM based Analog Signal]	17
+[toc 3] P91: 7.1.3	Component/Module3 [RTD based temperature sensor]	17
+[toc 2] P92: 7.2	Subsystem2 [Daughter Board]	17
+[toc 1] P93: 8	Power Design	17
+[toc 2] P94: 8.1	Subsystem1 Power Architecture	17
+[toc 3] P95: 8.1.1	Power Sequencing	18
+[toc 3] P96: <This section shall capture the power up and down sequencing requriements of all ICs that has multiple power supply inputs in a table and shall clearly explain how the required sequencing is achieved for both power up (using enable/PG etc) and power down (using discharge circuit etc).>	18
+[toc 3] P97: 8.1.2	Power Consumption	18
+[toc 3] P98: 8.1.3	Power Dissipation	19
+[toc 2] P99: 8.2	Subsystem2 Power Architecture	20
+[toc 2] P100: 8.3	Power Input Protection	20
+[toc 2] P101: 8.4	System Power Source	20
+[toc 1] P102: 9	Battery Powered Design	20
+[toc 3] P103: 9.1.1	Battery Capacity Calculation	21
+[toc 3] P104: 9.1.2	Battery Selection and its Certification	21
+[toc 3] P105: 9.1.3	Power Mode & Use Cases	21
+[toc 1] P106: 10	Clock Scheme	22
+[toc 1] P107: 11	Reset Scheme	22
+[toc 1] P108: 12	Hardware Configurations	23
+[toc 2] P109: 12.1	Subsystem1 HW Configurations	23
+[toc 3] P110: 12.1.1	Board Type/Assembly Variant	23
+[toc 3] P111: 12.1.2	Board Revision	24
+[toc 3] P112: 12.1.3	Jumper Configuration	25
+[toc 2] P113: 12.2	Subsystem2 HW Configurations	25
+[toc 1] P114: 13	Design Analysis – Subsysem1	25
+[toc 2] P115: 13.1	DC Analysis	25
+[toc 3] P116: 13.1.1	Module1 – Module2 Interface (Ex: Processor – Flash SPI Interface)	25
+[toc 3] P117: 13.1.2	Module1 – Module3 Interface (Ex: Processor – Microcontroller Interface)	26
+[toc 2] P118: 13.2	Timing Analysis	26
+[toc 2] P119: 13.3	PCB Layer Stack-up Analysis	27
+[toc 2] P120: 13.4	Pre-Layout SI Analysis	27
+[toc 3] P121: 13.4.1	Interface1 (Ex: DDR)	27
+[toc 3] P122: 13.4.2	Interface2 (Ex: RGMII)	27
+[toc 2] P123: 13.5	PCB Floor Plan Analysis	27
+[toc 2] P124: 13.6	Thermal Analysis	28
+[toc 1] P125: 14	Connectors & Cable Assembly	28
+[toc 2] P126: 14.1	Subsystem1 Connectors	28
+[toc 3] P127: 14.1.1	Internal Connectors	28
+[toc 3] P128: 14.1.2	External Connectors	30
+[toc 2] P129: 14.2	Subsystem2 Connectors	30
+[toc 3] P130: 14.2.1	Internal Connectors	30
+[toc 3] P131: 14.2.2	External Connectors	30
+[toc 2] P132: 14.3	Inter Subsystem Connectors	30
+[toc 3] P133: 14.3.1	Subsystem1 – Subsystem2 Connectors	30
+[toc 3] P134: 14.3.2	Subsystem2 – Subsystem3 Connectors	31
+[toc 1] P135: 15	GPIO Mapping	32
+[toc 2] P136: 15.1	Subsystem1 GPIOs	32
+[toc 2] P137: 15.2	Subsystem2 GPIOs	32
+[toc 1] P138: 16	Interrupt Mapping	33
+[toc 2] P139: 16.1	Subsystem1 Interrupts	33
+[toc 2] P140: 16.2	Subsystem2 Interrupts	33
+[toc 1] P141: 17	Programmable ROM Devices	34
+[toc 1] P142: 18	Bill of Material	35
+[toc 1] P143: 19	Design Limitations	35
+[toc 1] P144: 20	Requirement-Design Mapping	35
+[Normal] P146: List of Tables
+[table of figures] P147: Table 1: Abbreviation	11
+[table of figures] P148: Table 2 References	11
+[table of figures] P149: Table 3: Implementation	12
+[table of figures] P150: Table 4: Boot Strapping Pin table	14
+[table of figures] P151: Table 5 Subsystem1 RF – WiFi Radiated Performance	15
+[table of figures] P152: Table 6 Power Sequencing	18
+[table of figures] P153: Table 7 Subsystem1 – Power Consumption	19
+[table of figures] P154: Table 8 Subsystem1 – Power Dissipation	20
+[table of figures] P155: Table 9 Battery Capacity Calculation	21
+[table of figures] P156: Table 10 Power Modes	21
+[table of figures] P157: Table 11 Subsystem1 Assembly Variants	24
+[table of figures] P158: Table 12 Subsystem1 Board Revisions	24
+[table of figures] P159: Table 13 DC Analysis – Module1-Module2 Interface	26
+[table of figures] P160: Table 14 Subsystem1 - UART Header	29
+[table of figures] P161: Table 15 Subsystem1 - UART Header Mating	29
+[table of figures] P162: Table 16 Subsystem1 - UART Header Cable	29
+[table of figures] P163: Table 17 Subsystem1 – Subsystem2 - UART Header	31
+[table of figures] P164: Table 18 Subsystem1 – Subsystem2 - UART Header Cable	31
+[table of figures] P165: Table 19 Module1 GPIOs	32
+[table of figures] P166: Table 20 Module1 Interrupts	33
+[table of figures] P167: Table 21 Programmable ROM	34
+[table of figures] P168: Table 22 Class A BOM	35
+[table of figures] P169: Table 23 Requirement – Design Mapping	36
+[Normal] P171: List of Figures
+[table of figures] P172: Figure 1: Boundary Diagram	12
+[table of figures] P173: Figure 2: System1 - Block Diagram [Zigbee Gateway – Block Diagram]	12
+[table of figures] P174: Figure 3: Subsystem1 - Block Diagram [Main Board – Block Diagram]	13
+[table of figures] P175: Figure 4: Subsystem2 - Block Diagram [Connector Board – Block Diagram]	13
+[table of figures] P176: Figure 5: Subsystem1 – Memory Interface	14
+[table of figures] P177: Figure 6: Subsytem1 RF – WiFi Interface	15
+[table of figures] P178: Figure 7: Subsytem1 RF – WiFi Conducted Performance	15
+[table of figures] P179: Figure 8: Subsytem1 Analog – ADC Interface	16
+[table of figures] P180: Figure 9: Subsytem1 – Power Architecture	17
+[table of figures] P181: Figure 10: Clock Scheme	22
+[table of figures] P182: Figure 11: Reset Scheme	23
+[table of figures] P183: Figure 12: Subsystem1 – PCB Layer Stack-up	27
+[table of figures] P184: Figure 13: Pre-Layout SI  – DDR	27
+[table of figures] P185: Figure 14: Subsystem1 [LLxWW mm] - PCB Top Floor Plan	27
+[table of figures] P186: Figure 15: Subsystem1 [LLxWW mm] - PCB Bottom Floor Plan	27
+[Heading 1] P189: Introduction
+[Heading 2] P190: Purpose
+[Normal] P191: <Briefly describe the purpose this document and what it contains. The purpose of this document is to capture hardware design details of “System1” which is part of the “product/solution” under project ID “CCCC_PPPP”.
+[Normal] P192: This HDD will be treated as reference for the complete hardware implementation of “System1”.>
+[Heading 2] P193: Document Conventions
+[Normal] P194: <Describe any standards or typographical conventions that were followed when writing this HDD, such as fonts or highlighting that have special significance.
+[Normal] P195: For example, any specific notes added for the attention of the specific readers can be highlighted as mentioned below.>
+[List Paragraph] P196: ME – Mechanical specific notes
+[List Paragraph] P197: BSP – BSP specific notes
+[List Paragraph] P198: SAP – System Application specific notes
+[List Paragraph] P199: MAP – Mobile Application specific notes
+[List Paragraph] P200: CAP – Cloud Application specific notes
+[List Paragraph] P201: PAP – PC Application specific notes
+[List Paragraph] P202: PCB – PCB Layout specific notes
+[Heading 2] P203: Intended Audience and Reading Suggestions
+[Normal] P204: <Describe the different types of reader that the document is intended for, such as developers, project managers, marketing staff, users, testers, and documentation writers. Describe what the rest of this PRD contains and how it is organized. Suggest a sequence for reading the document, beginning with the Introductions sections and proceeding through the sections that are most pertinent to each reader type.>
+[List Paragraph] P205: Client Team
+[List Paragraph] P206: Architect Team
+[List Paragraph] P207: Hardware Design team
+[List Paragraph] P208: Hardware Development Team
+[List Paragraph] P209: Quality Assurance Team
+[List Paragraph] P210: Documentation team
+[List Paragraph] P211: Deployment Team
+[Heading 2] P212: Abbreviation
+[Normal] P213: <Define all the terms necessary to properly interpret the HDD, including acronyms and abbreviations. You may wish to build a separate glossary that spans multiple projects or the entire organization, but just include terms specific to a single project in each HDD.>
+[Caption] P214: Table 1: Abbreviation
+[Heading 2] P215: References
+[Normal] P216: <List any other documents or web addresses that this HDD refers. These may include datasheets, PRD, contracts, standards, use case documents, or a vision and scope document. Provide enough information so that the reader could access a copy of each reference, including title, author, version number, date, and source or location.>
+[Normal] P217: Following references can be given
+[Caption] P219: Table 2 References
+[Heading 1] P222: Product – Technical Overview
+[Normal] P223: < Just copy this section from PRD. This is to give an overview of the product to the reader before he/she gets in to the details of the hardware design>
+[Caption] P225: Figure 1: Boundary Diagram
+[Normal] P226: <Add a note here that this HDD is only capturing the hardware design details of the “System1” shown in the above diagram>
+[Heading 1] P229: System1 Implementation Plan
+[Normal] P230: <Embed an xls here which shall list all the customer requirements and HW specific requirements along with their implementation plan. This xls is nothing but the detailed System1 Requirements xls captured in PRD, but updated with implementation plan for each HW requirements. Remove other domains (BSP, MobileApp etc) from the xls & include only the relevant requirement sheet  (pertaining this design document)  in the xls before embedding here>
+[Caption] P232: Table 3: Implementation
+[Heading 1] P235: System1 Hardware Architecture
+[Heading 2] P236: System1 Architecture
+[Normal] P237: <Insert the overall System1 block diagram showing all subsystems (mainly boards), interfaces between them and external power sources/accessories etc. List down the major functionalities covered in each subsystem (board) along with clear justifications for why functionalities are split in different subsystems like this. The given architecture shall be explained from Technical, Manufacturing, cost (only at broader level) and Ease of maintenance perspective in detail.>
+[Caption] P239: Figure 2: System1 - Block Diagram [Zigbee Gateway – Block Diagram]
+[Normal] P240: For example, System1 may have 2 subsystems – Main board and Connector board.>
+[Heading 2] P241: SubSystem1 Architecture
+[Normal] P242: <Insert the detailed block diagram of Subsystem1, say Main board. The block diagram shall have major modules/components included. Some of key points to be taken care while creating block diagram
+[List Paragraph] P243: All off the shelf components/accessories MUST be shown [say Antenna]
+[List Paragraph] P244: All module blocks shall have 3 details Function, Part No, Mfg [Ex: LTE Modem, WP7504, Sierra Wireless]
+[List Paragraph] P245: All signal directions shall be accurate [unidirectional/Bidirectional]
+[List Paragraph] P246: All buses shall have relatively thicker wires/lines
+[List Paragraph] P247: Power block should show all voltage rails
+[List Paragraph] P248: All external I/O components shall be shown with actual image [instead of showing as simple block]
+[List Paragraph] P249: Any glue logic is added at major interface level, it shall be correctly captures with proper logic images [say AND logic of reset]
+[Normal] P250: Note that there shall be no explanation required in this section. All required explanation shall be under System1 Architecture section. Here just insert the Subsystem architecture diagram alone>
+[Caption] P252: Figure 3: Subsystem1 - Block Diagram [Main Board – Block Diagram]
+[Heading 2] P253: SubSystem2 Architecture
+[Normal] P254: <Same as above section and add as many as subsystem section as the system has.>
+[Caption] P256: Figure 4: Subsystem2 - Block Diagram [Connector Board – Block Diagram]
+[Heading 1] P258: Digital Interface Design
+[Heading 2] P259: Subsystem1 [Main Board]
+[Normal] P260: <All components and interfaces shown in the Subsytem1 block diagram shall be explained in detail here. Every section must have below information.
+[List Paragraph] P261: Interface diagram clearly showing all the signals and the glue logic components in the path with proper direction
+[List Paragraph] P262: Component full part number and its datasheet/product page web link
+[List Paragraph] P263: Comparison Matrix table for major components [processor, controller, DSP, FPGA/CPLD etc]
+[List Paragraph] P264: Capture the features of the part that directly satisfies customer/HW requirements [WiFi module support 2x2 MIMO]
+[List Paragraph] P265: Explain design that takes care of other requirements that are not directly supported by part specification [say, how design takes care of 6m cable length support for USB]
+[List Paragraph] P266: Specific notes to software team about the software configurations required on both end [processor & peripheral] for this particular interface [speed mode/frequency for I2C, Auto/Manual mode to be set for IMU and drive strength to be set for RGMII etc]
+[List Paragraph] P267: Calculate/prove that entire path [between processor & peripheral including the glue logic] supports the voltage & frequency of operation
+[List Paragraph] P268: Specific notes to layout team for any special layout guidelines
+[List Paragraph] P269: Specific notes to Mechanical [EMI gasket required for proper contact between connector & enclosure to pass RE tests/ESD protection etc]
+[Normal] P270: Below shall be avoided completely
+[List Paragraph] P271: Internal architecture of the component
+[List Paragraph] P272: Complete feature list of the component
+[List Paragraph] P273: Datasheet contents
+[Heading 3] P275: Module1 [Major Component like Application Processor, FPGA, CPLD, DSP etc]
+[Normal] P276: <Briefly mention what is the purpose of this component in this design.>
+[Heading 4] P277: Boot Strapping
+[Normal] P278: <If the component has mode/boot strapping, capture the complete table which shows all options and highlight [bold & red] to show what is used in this design. If there are options to change it, mention it clearly>
+[Caption] P280: Table 4: Boot Strapping Pin table
+[Heading 4] P281: Memory Interface
+[Normal] P282: <How memory size is sufficient, bandwidth is sufficient, what are the replacement options and higher/lower memory density options are provided etc, shall be explained here.>
+[Caption] P284: Figure 5: Subsystem1 – Memory Interface
+[Heading 4] P285: Programming Interface
+[Normal] P286: <All programming interfaces (JTAG, USB, UART etc) shall be captured in this section with clear explanation of how to get in to that programming mode, say jumper setting / bootstrap changes etc>
+[Heading 4] P287: Peripheral Interface
+[Normal] P288: <All peripheral interfaces shall be captured with all possible design information both to address the requirements and to support cross domain developments properly>
+[Heading 4] P289: GPIO Interface
+[Normal] P290: <This is a must section incase if there are any GPIOs directly/through glue logic connected between two programmable components where VVDN/third party software is running on. Say between board management controller (MSP430) and System processor (MPC8360). The thorough details of what software has to do with these GPIOs shall be clearly explained>
+[Heading 3] P291: Module2 [Major Component like DSP]
+[Normal] P292: <Same as above section and add as many as modules section as the Subsystem has.>
+[Heading 2] P293: Subsystem2 [Daughter Board]
+[Normal] P294: <Same as above section and add as many as subsystem section as the system has.>
+[Heading 1] P296: RF Design
+[Heading 2] P297: Subsystem1 [Main Board]
+[Normal] P298: <All RF interfaces (WiFi, BT, BLE, Zigbee, LTE, GPS etc] present in Susbsytem1 shall be captured in the following sections.>
+[Heading 3] P299: WiFi
+[Normal] P300: <List down all the operating modes of this wireless interface, say 2.4G, 5G, MIMO etc. The subsequent sections shall mention these modes wherever applicable>
+[Heading 4] P301: Interface
+[Normal] P302: <This section shall cover all details as mentioned in Digital interface section [3.1], but only the RF portion of the circuit shall be included here. For ex, if the design has WiFi module over SDIO interface of processor, digital interface section shall cover the SDIO interface between Processor and WiFi module and this section shall cover the RF interface (mainly RF front end circuit between RF baseband and Antenna] along with diagrams, component selections etc.>
+[Caption] P304: Figure 6: Subsytem1 RF – WiFi Interface
+[Heading 4] P305: RF Conducted Performance
+[Normal] P306: <Capture the RF performance required for the overall system along with parameters of all the on board components and derive the expected conducted performance (TX power and RX sensitivity). RF performance requirement may come from certification requirements say PTCRB/TMO/Verizon or from use case (range required).
+[Normal] P307: Insert an image with RF path circuit with TX power & RX sensitivity & insertion loss marked at each stage.>
+[Caption] P308: Figure 7: Subsytem1 RF – WiFi Conducted Performance
+[Heading 4] P309: RF Radiated Performance
+[Normal] P310: <Capture the RF performance (TRP,TIS) required for the overall system along with calculated conducted parameters (from previous section) in a table for each band & the mode supported in this RF interface and then calculate the required antenna performance (gain). This section shall arrive at minimum specification for the antenna selection. >
+[Caption] P312: Table 5 Subsystem1 RF – WiFi Radiated Performance
+[Heading 4] P313: RF Shielding
+[Normal] P314: <This section shall cover the shielding requirements. The details like type of shielding (2pcs/1pc, SMT/TH, Solid/Slotted etc) and components/circuits to be covered within shield, material etc shall be captured here.>
+[Heading 4] P315: RF Simulation/Analysis
+[Normal] P316: <This section shall capture the expected efficiency of the antenna in the given environment (PCB & mechanical assembly). This expected numbers may be arrived from simulation (if there is a need) or from experience, but it need to be captured to set the requirements of the antenna in case of custom design.>
+[Heading 3] P318: Zigbee
+[Normal] P319: <Same as above>
+[Heading 2] P320: Subsystem2 [Daughter Board]
+[Normal] P321: <Same as above>
+[Heading 1] P324: Analog Design
+[Heading 2] P325: Subsystem1 [Main Board]
+[Normal] P326: <All analog components, interfaces, circuits shall be captured in detail in the following sections. Each section must have below information.
+[List Paragraph] P327: Interface diagram including complete analog path components like preamplifier, voltage divider, filters etc.
+[List Paragraph] P328: Each component/block to be explained
+[List Paragraph] P329: Analog voltage value at each node shall be mentioned in the interface diagram. The related gain/loss calculations shall be mentioned in texts
+[List Paragraph] P330: A to D or D to A conversion formula and related sensitivity & resolution details of the entire path
+[List Paragraph] P331: Noise immunity of the entire path
+[List Paragraph] P332: Specific notes to software team for sampling rate, thresholds, offset, filtering, nonlinearity curve, etc
+[Normal] P333: >
+[Heading 3] P334: Component/Module1 [Photodiode]
+[Normal] P335: <explain here>
+[Caption] P337: Figure 8: Subsytem1 Analog – ADC Interface
+[Heading 4] P338: Simulation Results
+[Normal] P339: <Include the analog simulation result here along with all simulation parameters, if the analog interface is complex/larger circuit. For a very simple circuit like that of voltage measurement etc, simulation can be avoided.>
+[Heading 3] P341: Component/Module2 [PWM based Analog Signal]
+[Normal] P342: <explain here>
+[Heading 3] P343: Component/Module3 [RTD based temperature sensor]
+[Normal] P344: <explain here>
+[Heading 2] P346: Subsystem2 [Daughter Board]
+[Normal] P347: <Same as above>
+[Heading 1] P349: Power Design
+[Normal] P350: <In a system which has multiple boards/subsystems, power circuits may be spread across different boards or just kept in 1 board depending on system needs. So, the structure of this “power design” section is completely project dependent.
+[Normal] P351: It is recommended to keep different subsections for each board, if there are enough power circuitry within each, otherwise, keep a common section. But all these subsections are MUST.
+[Heading 2] P352: Subsystem1 Power Architecture
+[Normal] P353: <A detailed diagram with all below details shall be capture here.
+[List Paragraph] P354: All power circuitry components/blocks – switcher, LDO, module etc
+[List Paragraph] P355: If any IC (processor, eth phy) is generating the voltage internally or with external components (pass transistors), capture that also in the diagram
+[List Paragraph] P356: All block output wire shall have output voltage & current [peak, not consumed] marked
+[List Paragraph] P357: If there 2 or more regulators generating same voltage (say 1.8V), but for different loads, then add the load name also at the output
+[List Paragraph] P358: Power up & power down related circuits and signals must be added>
+[Caption] P360: Figure 9: Subsytem1 – Power Architecture
+[Heading 3] P361: Power Sequencing
+[Heading 3] P362: <This section shall capture the power up and down sequencing requirements of all ICs that has multiple power supply inputs in a table and shall clearly explain how the required sequencing is achieved for both power up (using enable/PG etc) and power down (using discharge circuit etc).>
+[Caption] P363: Table 6 Power Sequencing
+[Heading 4] P364: Power Up Sequence
+[Normal] P365: Explain how power up sequencing is designed / controlled in design. The power architecture diagram itself covers this, so a separate diagram is optional to add here. But explanation is required.
+[Heading 4] P366: Power Down Sequence
+[Normal] P367: Explain how power down sequencing is designed / controlled in design. The power architecture diagram itself covers this, so a separate diagram is optional to add here. But explanation is required.
+[Heading 3] P368: Power Consumption
+[Normal] P369: <This section shall capture the peak power consumption of all load ICs from all different voltage rails to arrive the actual power consumption of this subsystem. All calculations should be done with peak current consumption of each IC independent of the use case. But additionally, capture the approximate/assumed use case power consumption also for reference [say NOR flash will consume very less current after booting, if no log storage in NOR flash].
+[Normal] P370: A table has to be prepared as shown below.
+[Caption] P371: Table 7 Subsystem1 – Power Consumption
+[Normal] P373: Explain about the use case if any.
+[Heading 3] P374: Power Dissipation
+[Normal] P375: <This section shall capture the details of power loss in all regulator/power circuitry to calculate the net power dissipation & overall consumption. This table shall provide the current/power consumption on all voltage rails that are input to this particular subsystem>
+[Normal] P376: A table has to be prepared as shown below.
+[Caption] P377: Table 8 Subsystem1 – Power Dissipation
+[Heading 2] P378: Subsystem2 Power Architecture
+[Normal] P379: <Same as above>
+[Heading 2] P381: Power Input Protection
+[Normal] P382: <List and explain all the protection circuits provided at the input power line including overcurrent, overvoltage, thermal, reverse polarity, inrush, transient protections etc with respective circuit details. The details must include the operating range, protection range, type of protection etc in detail.
+[Heading 2] P384: System Power Source
+[Normal] P385: <This section shall capture the total power consumption of the system (including all board consumption & dissipation. Explain about the external power source (like AC/DC adaptor, DC/DC module, Vehicle battery etc) in this section. Mention the efficiency of that external power source (if supplied along with the product) and mention the total power consumption at the input of that power adaptor. Below shall be captured at minimum.
+[List Paragraph] P386: Input voltage range of the adaptor
+[List Paragraph] P387: Output max load current and calculated load current
+[List Paragraph] P388: Efficiency
+[List Paragraph] P389: Total input power
+[List Paragraph] P390: Certification details>
+[Heading 1] P392: Battery Powered Design
+[Normal] P393: <This section is applicable only device is battery powered or there is backup battery available in the system>
+[Heading 3] P394: Battery Capacity Calculation
+[Normal] P395: <Peak power consumption is already calculated in the above sections. Battery powered product should meet minimum backup time for either full operation (peak power consumption) or for specific power mode. Calculate the minimum battery capacity (mAh) required to meet the back up duration.>
+[Caption] P396: Table 9 Battery Capacity Calculation
+[Heading 3] P398: Battery Selection and its Certification
+[Normal] P399: <This section shall detail the battery selection from different perspective – capacity, mechanical, temperature & other certification requirement including transportation certificate etc>
+[Heading 3] P401: Power Mode & Use Cases
+[Normal] P402: List all required power state / modes here along with that mode specific power consumption table. The table may be as detailed in the above section or simple one depending on the no of power rails. This table shall derive the backup time designed for different power modes with the selected battery.
+[Caption] P403: Table 10 Power Modes
+[Normal] P405: Explain about different use case modes.
+[Heading 1] P407: Clock Scheme
+[Normal] P408: <Clock modules are not going to be too much on each of the subsystem and clocks may travel across different subsystems. So, capture complete clock scheme in to one section, no need to divide the clock scheme in to multiple section in this HDD. But, single diagram shall clearly differentiate different subsystems/boards.
+[Normal] P409: Give an explanation about the scheme. This should include what is the clock requirement of each – frequency range, stability, load caps etc and the reason why we have chosen a specific clock source and its spec.
+[Normal] P410: All glue logic (level translation/buffer) shall be captured & explained here.
+[Normal] P411: Specific software configuration for clocks outputs generated by processor/similar, like frequency, slewrate/drive strength, spread spectrum etc shall be captured.
+[Normal] P412: Include all on board & external clock sources like Osc, Crystals, clock multipliers, clock dividers etc. No need to mention the interface clocks. Clocks that are not tied to interface shall be capture here. For ex, MCLK given to Sensor is not an interface clock, but is a base reference clock to sensor, so it should be captured here. Interface clocks are option to add if you want to>
+[Caption] P414: Figure 10: Clock Scheme
+[Normal] P415: IC1: Clock1:
+[Normal] P416: Explain here
+[Normal] P417: IC1: Clock2:
+[Normal] P418: Explain here
+[Normal] P419: IC2:Clock1:
+[Normal] P420: Explain here
+[Heading 1] P423: Reset Scheme
+[Normal] P424: <Reset signals are not going to be too much on each of the subsystem and reset may travel across different subsystems. So, capture complete reset scheme in to one section, no need to divide the reset scheme in to multiple section in this HDD. But, single diagram shall clearly differentiate different subsystems/boards.
+[Normal] P425: Clearly mention all the reset sources [push button, power on reset, factory reset, GPIO based reset, JTAG reset, external resets etc]
+[Normal] P426: Mention reset active level, min pulse width, glue logic details – designed & the requirement by the chipsets
+[Normal] P427: Mention all HW controlled resets (RC, Voltage supervisor) and SW resets and how they have to be timed.
+[Normal] P428: All GPIO resets shall have clear instruction to software team about what all conditions these resets are to be activated/deactivated [say, during every boot / power up or only when required, based on certain other events, when chip is not software accessible etc].
+[Normal] P429: Expected reset sequencing diagram shall be added>
+[Caption] P432: Figure 11: Reset Scheme
+[Heading 1] P434: Hardware Configurations
+[Heading 2] P435: Subsystem1 HW Configurations
+[Heading 3] P436: Board Type/Assembly Variant
+[Normal] P437: <This section shall capture all the board type & assembly variant that need to be detected by some software running on any component (say processor, DSP etc) of the board. It needs not to be only board type GPIOs of processor.
+[Normal] P438: Note that, the content is not to capture the assembly changes required for different variant. But, about how this board type is informed to processor/other modules through GPIOs etc.
+[Caption] P439: Table 11 Subsystem1 Assembly Variants
+[Heading 3] P441: Board Revision
+[Normal] P442: <This section should capture the planned/supported HW revision/detection in the design – say 4 revisions or 8 revisions. Again need not to be only the revision that should be known to Processor. Any software that have to behave in different way for different HW revision, shall be captured here.
+[Caption] P443: Table 12 Subsystem1 Board Revisions
+[Heading 3] P445: Jumper Configuration
+[Normal] P446: <These are pure HW configuration / design options that are planned in the design by doing some HW/assembly changes. For ex, 0E resistor option provided to route console UART of a Microcontroller which is on Daughter board, to either Main board through B2B or to 4 pin header option.
+[Normal] P447: These configurations may be 0E resistor, jumper/header, DIP switches, mounting/nomounting complete circuit. Capture all these in relevant subsections below.
+[Heading 4] P448: Processor UART path selection
+[Normal] P449: <Explain here.>
+[Heading 4] P450: SPI Flash programming path selection
+[Normal] P451: <Explain here.>
+[Heading 2] P453: Subsystem2 HW Configurations
+[Normal] P454: <Same as above>
+[Heading 1] P456: Design Analysis – Subsysem1
+[Normal] P457: <This section shall capture all analysis of subsystem1 (say, main board). For other subsystems, create new sections as required. DC, AC, Pre-layout SI analysis sections may have an interface that runs between two subsystems. In those cases, capture those interfaces in only one Design Analysis-Subsystem section, not in both.
+[Heading 2] P458: DC Analysis
+[Normal] P459: <This section shall capture all interfaces (Standard i/f also) and additionally any signal that is directly connected between two major modules (say GPIO connected between processor and board management microcontroller).>
+[Heading 3] P460: Module1 – Module2 Interface (Ex: Processor – Flash SPI Interface)
+[Normal] P461: <Capture the table as shown in below format.
+[Normal] P462: IC may have different Voh,Vol,Vih,Vil mentioned for different supply voltage and load current. Capture correct values as per the supply voltage used in design and appx load current (source/sink).
+[Normal] P463: If noise margin is 0 or negative, highlight it in red and explain the design precautions taken to avoid any communication issues – like ensure lower load current, trace resistance etc>
+[Normal] P464: Logic High
+[Normal] P465: Logic Low
+[Caption] P466: Table 13 DC Analysis – Module1-Module2 Interface
+[Heading 3] P468: Module1 – Module3 Interface (Ex: Processor – Microcontroller Interface)
+[Normal] P469: <Same as above section. Add as many as sections as required>
+[Heading 2] P471: Timing Analysis
+[Normal] P472: <This section shall capture input setup, input hold time of all receivers along with their respective driver’s output setup & output hold times to ensure that driver & receiver are compatible to each other.
+[Normal] P473: In case the driver doesn’t state output setup/hold time explicitly, derive it from output delay and other parameters and mention in the table.
+[Normal] P474: If timing margin is less than +30pS (corresponding to appx 200mils trace length), then capture length matching constraints to be followed in layout design, like matching trace lengths tightly or loosely intentionally.
+[Normal] P475: As the same timing information would need to be validated, capture the analysis in an xls. Capture all required interfaces in different sheets of a single file and embed that file here>
+[Heading 2] P477: PCB Layer Stack-up Analysis
+[Normal] P478: <This section shall capture the planned layer stackup design for this board along with the justification for the same. Technical justification shall cover below details,
+[List Paragraph] P479: Appx component area & Net count
+[List Paragraph] P480: No of BGA along with their pitch & no of rows/cols
+[List Paragraph] P481: Single Ended & Differential Ended Impedances required
+[List Paragraph] P482: Total power dissipation
+[List Paragraph] P483: PCB size & shape
+[List Paragraph] P484: PCB mounting style>
+[Caption] P485: Figure 12: Subsystem1 – PCB Layer Stack-up
+[Heading 2] P487: Pre-Layout SI Analysis
+[Normal] P488: <Capture the pre-layout SI simulation report here. Simulation is limited to scope of identifying following to maintain setup/hold time requirements & signal quality.,
+[List Paragraph] P489: Maximum allowable trace length
+[List Paragraph] P490: Length matching tolerances without affecting setup/hold time
+[List Paragraph] P491: Termination requirements
+[Heading 3] P492: Interface1 (Ex: DDR)
+[Normal] P493: <insert image here>
+[Caption] P494: Figure 13: Pre-Layout SI  – DDR
+[Normal] P495: Mention trace impedance and termination values.
+[Heading 3] P496: Interface2 (Ex: RGMII)
+[Heading 2] P498: PCB Floor Plan Analysis
+[Normal] P499: <The board dimension and major component placement has to be close to final design. Major components can be shown as blocks, need not to be PCB footprints. Explain the engineering justifications (power/ease of routing/ DFA/ certification/ mechanical etc) for taking this placement approach>
+[Normal] P500: <insert image here>
+[Caption] P501: Figure 14: Subsystem1 [LLxWW mm] - PCB Top Floor Plan
+[Normal] P503: <insert image here>
+[Caption] P504: Figure 15: Subsystem1 [LLxWW mm] - PCB Bottom Floor Plan
+[Heading 2] P506: Thermal Analysis
+[Normal] P507: <This section is only a rough calculation done to identify the possible hot spots on the board, which can be used to design PCB layout, enclosure and thermal solution design accordingly. As the same information would be required for doing thermal simulation, capture the analysis in an xls in format given below. All high power consuming devices are to be captured in this xls.
+[Normal] P508: Mention the product operating ambient temperature range (ex, -20°C to 55°C) and the assumed temperature inside the enclosure (around PCBA. Ex, 60°C). >
+[Normal] P510: “With Thermal Solution” column is not a mandatory section in the xls and it need not to be from simulation results. Rather, with an assumed thermal solution (say heatsink/fan), the new thermal resistance has to be mentioned and the corresponding Tj shall be calculated using formula so that thermal Engineering team would work on possible thermal solution to reduce thermal resistance to the required value.
+[Heading 1] P512: Connectors & Cable Assembly
+[Normal] P513: <This section shall capture all connectors used in the system whether it is B2B or B2C. Connector pin out table has to be captured with all required information [SMD/TH, mating cycles, shielded/unshielded etc] and the corresponding cable assembly top level design [cable type – shielded/unshielded, cable diameter, length etc] shall be captured. Note off the shelf cable details are not to be captured here, only the designed cables shall be added.
+[Normal] P514: Note connector part number and component selection justification etc, shall be captured in the respective interface section only, not here>
+[Heading 2] P515: Subsystem1 Connectors
+[Heading 3] P516: Internal Connectors
+[Normal] P517: < All connectors that are within the board shall be captured in “Internal connectors” section of respective board/subsystem. Example, UART header, Expansion header>
+[Heading 4] P518: Connector 1 [UART Header]
+[Normal] P519: Connector MPN & Make
+[Caption] P520: Table 14 Subsystem1 - UART Header
+[Normal] P522: Matting Connector [Optional – If internal connector provision is given for future B2B connection, Say add-on board]
+[Normal] P523: Connector MPN & Make
+[Caption] P524: Table 15 Subsystem1 - UART Header Mating
+[Normal] P526: Matting Cable [Optional – If internal connector provision is given for future B2C connection, Say add-on board]
+[Caption] P527: Table 16 Subsystem1 - UART Header Cable
+[Normal] P529: Explain the other specs of the cable here with some diagram.
+[Heading 4] P530: Connector 1 [Expansion Header]
+[Normal] P531: Connector MPN & Make
+[Heading 3] P532: External Connectors
+[Normal] P533: <All connectors that are used for external communication of system, board shall be captured in “Externa connectors” section of respective board/subsystem. Example, RJ45 connector directly mounted on board, USB cable connector with cable assembly, connected to B2C mounted on board.>
+[Normal] P534: <Rest is same as internal connectors section>
+[Heading 2] P535: Subsystem2 Connectors
+[Heading 3] P536: Internal Connectors
+[Normal] P537: <Same as Subsystem1 section>
+[Heading 3] P538: External Connectors
+[Normal] P539: <Same as Subsystem1 section>
+[Heading 2] P540: Inter Subsystem Connectors
+[Normal] P541: <All connectors that are internal to system, but used for communication between two boards, shall be captured in “Inter Subsystem” section. Example, B2B connector between main board & camera sensor board and B2C connector between main board and Pushbutton board.>
+[Heading 3] P542: Subsystem1 – Subsystem2 Connectors
+[Heading 4] P543: Connector 1 [Camera Interface]
+[Caption] P545: Table 17 Subsystem1 – Subsystem2 - UART Header
+[Normal] P547: Matting Cable [Optional – If internal connector provision is given for future B2C connection, Say add-on board]
+[Caption] P548: Table 18 Subsystem1 – Subsystem2 - UART Header Cable
+[Normal] P550: Explain the other specs of the cable here with some diagram.
+[Heading 4] P551: Connector 2 [Daughter Board Interface]
+[Normal] P552: <Insert table as needed>
+[Heading 3] P554: Subsystem2 – Subsystem3 Connectors
+[Normal] P555: <Same as above and insert as many as required>
+[Heading 1] P558: GPIO Mapping
+[Normal] P559: <This section shall capture GPIOs of all modules (say, processor, DSP, Microcontroller etc) where some piece of VVDN software is running. This section is to consolidate all GPIOs in one place for easy reference (mainly for software team). The detailed functionality of these GPIOs should be captured in the relevant sections above.
+[Normal] P560: Note that software-function column should be filled from module perspective (what need to be configured by software), not what is expected by the receiver IC as there may be other hardware logic (inverter) in between.
+[Normal] P561: >
+[Heading 2] P562: Subsystem1 GPIOs
+[Heading 4] P563: Module1 [Processor]
+[Normal] P564: <Insert table as needed>
+[Caption] P565: Table 19 Module1 GPIOs
+[Heading 4] P567: Module2 [MSP430]
+[Normal] P568: <Insert table as needed>
+[Heading 2] P569: Subsystem2 GPIOs
+[Normal] P570: <Same as above section>
+[Heading 1] P571: Interrupt Mapping
+[Normal] P572: <This section shall capture the interrupt inputs of all modules (say, processor, DSP, Microcontroller etc) where some piece of VVDN software is running. This section is to consolidate all interrupts in one place for easy reference (mainly for software team) and also the detailed flow of action to be taken (if there any custom actions) by software, shall be explained here..
+[Normal] P573: Note that active low, active high, positive edge, rising edge mentioned in the table should be from module/receiver perspective as there may be other hardware logic (inverter) in between.
+[Normal] P574: >
+[Heading 2] P575: Subsystem1 Interrupts
+[Heading 4] P576: Module1 [Processor]
+[Normal] P577: <Insert table as needed>
+[Caption] P578: Table 20 Module1 Interrupts
+[Normal] P579: <Below this table, explain all interrupts provided for custom functions.
+[Normal] P580: PWR_OK
+[Normal] P581: When this interrupt is triggered, reboot the entire systems and stay in bootloader till this pin goes to high.
+[Heading 4] P583: Module2 [MSP430]
+[Normal] P584: <Insert table as needed>
+[Heading 2] P585: Subsystem2 Interrupts
+[Normal] P586: <Same as above section>
+[Heading 1] P588: Programmable ROM Devices
+[Normal] P589: <Capture the list of programmable ROM devices in a table along with additional programming information like how to fuse, erase and what type of data to store like FRU data etc.>
+[Caption] P590: Table 21 Programmable ROM
+[Heading 1] P592: Bill of Material
+[Normal] P593: <Capture BOM for all individual subsystems in following sections separately. Do not combine the BOM in to single. Bare PCB, Mechanical parts, accessories shall not be included in this BOM. Also there is no need of putting the cost info here. The shown columns are standard. If a specific project calls for automotive component selection, then add another column. Similarly if life time etc whichever is project critical>
+[Caption] P595: Table 22 Class A BOM
+[Heading 1] P598: Design Limitations
+[Normal] P599: <Along with reasons, list down all the requirements that are not supported or partially supported in the design and also list the configurations/features of the component that are not supported etc.
+[Normal] P600: This section is mainly to give a clear notification to customer as well as cross domain teams>
+[Heading 1] P603: Requirement-Design Mapping
+[Normal] P604: <Insert a table which captures the all customer requirement ID, HW requirement ID and the HDD section where the implementation for this particular requirement, is present.>
+[Caption] P606: Table 23 Requirement – Design Mapping
