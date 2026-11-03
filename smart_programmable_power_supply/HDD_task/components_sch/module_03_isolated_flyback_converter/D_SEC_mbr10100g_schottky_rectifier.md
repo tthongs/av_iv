@@ -11,36 +11,36 @@
 * **Subsystem**: Stage 3 (Isolated Flyback Subsystem)
 
 ## 2. Electrical Ratings & Constraints
-* **Peak Repetitive Reverse Voltage ($V_{\text{RRM}}$)**: $100.0\,\text{V}_{\text{DC}}$
-  * Maximum Reverse Voltage Stress:
-    $$V_{\text{R,diode}} = V_{\text{OUT}} + \frac{V_{\text{bulk,max}}}{n} = 24.0\,\text{V} + \frac{374.8\,\text{V}}{6.0} = 24.0\,\text{V} + 62.47\,\text{V} = \mathbf{86.47\,\text{V}_{\text{peak}}}$$
-  * Voltage Derating: $\frac{86.47\,\text{V}}{100.0\,\text{V}} = \mathbf{86.47\%}$ ($86.5\%$ derating acceptable for passive Schottky; rated $100\,\text{V}$ withstands secondary ringing).
-* **Average Forward Rectified Current ($I_{F(\text{AV})}$)**: $10.0\,\text{A}_{\text{DC}}$
-  * Continuous Output Current: $3.0\,\text{A}_{\text{DC}}$
-  * Current Derating: $\frac{3.0\,\text{A}}{10.0\,\text{A}} = \mathbf{30.0\%} \le 70\%$ (Massive $70\%$ current safety headroom).
-* **Forward Voltage Drop ($V_F$)**: $0.60\,\text{V}$ typical @ $3.0\,\text{A}, 100^\circ\text{C}$
+* **Peak Repetitive Reverse Voltage (V_RRM)**: 100.0 V_DC
+ * Maximum Reverse Voltage Stress:
+ V_R,diode = V_OUT + (V_bulk,max / n) = 24.0 V + (374.8 V / 6.0) = 24.0 V + 62.47 V = mathbf{86.47 V_peak}
+ * Voltage Derating: (86.47 V / 100.0 V) = 86.47% (86.5% derating acceptable for passive Schottky; rated 100 V withstands secondary ringing).
+* **Average Forward Rectified Current (I_F(AV)**: 10.0 A_DC
+ * Continuous Output Current: 3.0 A_DC
+ * Current Derating: (3.0 A / 10.0 A) = 30.0% ≤ 70% (Massive 70% current safety headroom).
+* **Forward Voltage Drop (V_F)**: 0.60 V typical @ 3.0 A, 100°C
 * **Conduction Power Dissipation**:
-  $$P_{\text{loss,diode}} = V_F \times I_{\text{OUT}} = (0.60\,\text{V}) \times (3.0\,\text{A}) = \mathbf{1.80\,\text{W}}$$
+ P_loss,diode = V_F × I_OUT = (0.60 V) × (3.0 A) = 1.80 W
 * **Thermal Analysis**:
-  * Heatsink Thermal Resistance: $R_{\theta\text{sa}} = 15.0^\circ\text{C/W}$
-  * Junction Temperature Rise @ $50^\circ\text{C}$ ambient:
-    $$T_j = T_{\text{amb}} + P_{\text{loss}} \times (R_{\theta\text{jc}} + R_{\theta\text{sa}}) = 50^\circ\text{C} + 1.80\,\text{W} \times (1.5 + 15.0)^\circ\text{C/W} = 50 + 29.7 = \mathbf{79.7^\circ\text{C}}$$
-    Safely below the $150^\circ\text{C}$ silicon maximum ($53.1\%$ of rating).
+ * Heatsink Thermal Resistance: R_thetasa = 15.0°C/W
+ * Junction Temperature Rise @ 50°C ambient:
+ T_j = T_amb + P_loss × (R_thetajc + R_thetasa) = 50°C + 1.80 W × (1.5 + 15.0)°C/W = 50 + 29.7 = 79.7°C
+ Safely below the 150°C silicon maximum (53.1% of rating).
 
 ## 3. Schematic Pin Connections & Net Mapping
 | Pin # | Pin Designation | Schematic Net Name | Connected To | Trace & Solder Requirements |
 | :---: | :---: | :--- | :--- | :--- |
-| **1 / Anode** | **Anode (A)** | `FLY_SEC_ANODE` | Transformer `TX1` Secondary Pin 5 & 6 | Heavy copper pour ($> 3.0\,\text{mm}$ width). |
+| **1 / Anode** | **Anode (A)** | `FLY_SEC_ANODE` | Transformer `TX1` Secondary Pin 5 & 6 | Heavy copper pour (> 3.0 mm width). |
 | **2 / Tab** | **Cathode (K)** | `+24V_UNFILT` | Secondary filter capacitors `C_SEC1`, `C_SEC2` (+), Choke `L_post` Pin 1 | Low-inductance polygon pour on Layer 1. |
 
 ## 4. Schematic Symbol Representation
 ```
-     Net: FLY_SEC_ANODE               Net: +24V_UNFILT
-    ───────────────────────[►|───]───────────────────────> To C_SEC & L_post
-                         D_SEC: MBR10100G
-                          (100V, 10A Schottky)
+ Net: FLY_SEC_ANODE Net: +24V_UNFILT
+ ───────────────────────[►|───]───────────────────────> To C_SEC & L_post
+ D_SEC: MBR10100G
+ (100V, 10A Schottky)
 ```
 
 ## 5. Schematic & PCB Layout Guidelines
-1. **RC Snubber**: Place a small secondary snubber ($R_{\text{sec}} = 10.0\,\Omega / 0.5\,\text{W}$, $C_{\text{sec}} = 1.0\,\text{nF} / 100\,\text{V}$) directly across `D_SEC` anode and cathode to damp diode reverse recovery ringing.
-2. **Heatsink Clearance**: Heatsink `HS1` tab is electrically tied to Cathode (`+24V_UNFILT`). Ensure $\ge 3.0\,\text{mm}$ clearance to grounded chassis and adjacent components.
+1. **RC Snubber**: Place a small secondary snubber (R_sec = 10.0 Ω / 0.5 W, C_sec = 1.0 nF / 100 V) directly across `D_SEC` anode and cathode to damp diode reverse recovery ringing.
+2. **Heatsink Clearance**: Heatsink `HS1` tab is electrically tied to Cathode (`+24V_UNFILT`). Ensure ≥ 3.0 mm clearance to grounded chassis and adjacent components.

@@ -5,19 +5,19 @@
 * **Component Type**: Two-Winding Common-Mode Inductors
 * **Manufacturer**: Wurth Elektronik
 * **Primary MPNs**:
-  * `L_CM1`: `744823215` ($15.0\,	ext{mH} \pm 30\%$, $1.10\,	ext{A}_{	ext{RMS}}$, Toroid Core)
-  * `L_CM2`: `744822472` ($4.70\,	ext{mH} \pm 30\%$, $1.60\,	ext{A}_{	ext{RMS}}$, Sectional Winding Core)
+ * `L_CM1`: `744823215` (15.0 mH ± 30%, 1.10 A_ RMS, Toroid Core)
+ * `L_CM2`: `744822472` (4.70 mH ± 30%, 1.60 A_ RMS, Sectional Winding Core)
 * **Alternate Manufacturers**: KEMET (`SC-10-10J`) / Bourns (`7355-V-RC`)
-* **Package / Footprint**: 4-Pin Through-Hole Toroidal Header (Pitch $15.0 	imes 10.0\,	ext{mm}$)
+* **Package / Footprint**: 4-Pin Through-Hole Toroidal Header (Pitch 15.0 imes 10.0 mm)
 * **Subsystem**: Stage 1 (Mains AC Input & EMI Filter)
 
 ## 2. Electrical Ratings & Constraints
-* **Operating Voltage**: $250\,	ext{V}_{	ext{AC RMS}}$ continuous ($500\,	ext{V}$ dielectric test withstand between windings)
-* **Current Rating**: $1.10\,	ext{A}$ (`L_CM1`) / $1.60\,	ext{A}$ (`L_CM2`) (Operating RMS: $0.55\,	ext{A}$ @ $230\,	ext{V}$, $1.60\,	ext{A}$ @ $85\,	ext{V}$)
+* **Operating Voltage**: 250 V_ AC RMS continuous (500 V dielectric test withstand between windings)
+* **Current Rating**: 1.10 A (`L_CM1`) / 1.60 A (`L_CM2`) (Operating RMS: 0.55 A @ 230 V, 1.60 A @ 85 V)
 * **Frequency Coverage**:
-  * `L_CM1` ($15\,	ext{mH}$): Sized for $150\,	ext{kHz} - 2.0\,	ext{MHz}$ low-frequency attenuation.
-  * `L_CM2` ($4.7\,	ext{mH}$): Sized for $2.0\,	ext{MHz} - 30.0\,	ext{MHz}$ high-frequency attenuation.
-* **Combined CM Attenuation**: $> 35.4\,	ext{dB}$ at $150\,	ext{kHz}$, ensuring CISPR 32 Class B compliance.
+ * `L_CM1` (15 mH): Sized for 150 kHz - 2.0 MHz low-frequency attenuation.
+ * `L_CM2` (4.7 mH): Sized for 2.0 MHz - 30.0 MHz high-frequency attenuation.
+* **Combined CM Attenuation**: > 35.4 dB at 150 kHz, ensuring CISPR 32 Class B compliance.
 
 ## 3. Schematic Pin Connections & Net Mapping
 ### L_CM1 (Stage 1 Choke)
@@ -38,11 +38,11 @@
 
 ## 4. Schematic Symbol Representation
 ```
-     Net: AC_LINE_FUSED             L_CM1                   Net: AC_LINE_CM1            L_CM2                   Net: AC_LINE_FILT
-    ──────────────────────●═══[ W1: 15mH ]═══───────────────●═══[ W1: 4.7mH ]═══────────────> To BR1 Pin 2
-                               ║║                                        ║║
-    ──────────────────────●═══[ W2: 15mH ]═══───────────────●═══[ W2: 4.7mH ]═══────────────> To BR1 Pin 3
-     Net: AC_NEUTRAL_PROT                           Net: AC_NEUTRAL_CM1         Net: AC_NEUTRAL_FILT
+ Net: AC_LINE_FUSED L_CM1 Net: AC_LINE_CM1 L_CM2 Net: AC_LINE_FILT
+ ──────────────────────●═══[ W1: 15mH ]═══───────────────●═══[ W1: 4.7mH ]═══────────────> To BR1 Pin 2
+ ║║ ║║
+ ──────────────────────●═══[ W2: 15mH ]═══───────────────●═══[ W2: 4.7mH ]═══────────────> To BR1 Pin 3
+ Net: AC_NEUTRAL_PROT Net: AC_NEUTRAL_CM1 Net: AC_NEUTRAL_FILT
 ```
 
 ## 5. Schematic & PCB Layout Guidelines

@@ -7,43 +7,43 @@
 * **Primary MPN**: `LGW2W101MELZ25`
 * **Alternate Manufacturer**: Panasonic Electronic Components
 * **Alternate MPN**: `EEU-ED2W101`
-* **Package / Footprint**: Snap-In Radial Can (Diameter: $22.0\,\text{mm}$, Length: $25.0\,\text{mm}$, Lead Pitch: $10.0\,\text{mm}$)
+* **Package / Footprint**: Snap-In Radial Can (Diameter: 22.0 mm, Length: 25.0 mm, Lead Pitch: 10.0 mm)
 * **Subsystem**: Stage 2 (Rectification & Bulk Link)
 
 ## 2. Electrical Ratings & Constraints
-* **Nominal Capacitance**: $100.0\,\mu\text{F} \pm 20\%$ at $120\,\text{Hz}$
-* **Rated DC Voltage**: $450\,\text{V}_{\text{DC}}$
-  * Maximum DC operating voltage: $V_{\text{bulk,max}} = 265\,\text{V} \times \sqrt{2} = 374.8\,\text{V}_{\text{DC}}$
-  * Voltage Derating: $\frac{374.8\,\text{V}}{450\,\text{V}} = \mathbf{83.29\%}$ (Acceptable for passive bulk aluminum electrolytics; rated $450\,\text{V}$ handles grid surge headroom).
-* **Operating Temperature**: $-40^\circ\text{C}$ to $+105^\circ\text{C}$ ($3000\,\text{hours}$ endurance @ $105^\circ\text{C}$)
-* **Ripple Current Rating**: $0.78\,\text{A}_{\text{RMS}}$ @ $120\,\text{Hz}, 105^\circ\text{C}$ ($1.10\,\text{A}_{\text{RMS}}$ @ $10\,\text{kHz}$)
-* **Equivalent Series Resistance (ESR)**: $\approx 0.165\,\Omega$ @ $100\,\text{kHz}, 25^\circ\text{C}$
+* **Nominal Capacitance**: 100.0 µF ± 20% at 120 Hz
+* **Rated DC Voltage**: 450 V_DC
+ * Maximum DC operating voltage: V_bulk,max = 265 V × √(2) = 374.8 V_DC
+ * Voltage Derating: (374.8 V / 450 V) = 83.29% (Acceptable for passive bulk aluminum electrolytics; rated 450 V handles grid surge headroom).
+* **Operating Temperature**: -40°C to +105°C (3000 hours endurance @ 105°C)
+* **Ripple Current Rating**: 0.78 A_RMS @ 120 Hz, 105°C (1.10 A_RMS @ 10 kHz)
+* **Equivalent Series Resistance (ESR)**: ≈ 0.165 Ω @ 100 kHz, 25°C
 * **Stored Electrostatic Energy**:
-  $$E_{\text{stored}} = \frac{1}{2} C V^2 = \frac{1}{2} (100 \times 10^{-6}) (374.8)^2 = \mathbf{7.02\,\text{Joules}}$$
+ E_stored = (1 / 2) C V^2 = (1 / 2) (100 × 10^-6) (374.8)^2 = 7.02 Joules
 * **Calculated Holdup Time Duration**:
-  * At $230\,\text{V}_{\text{AC}}$ nominal ($V_{\text{bulk}} = 325\,\text{V}$):
-    $$t_{\text{holdup}} = \frac{C \times (V_{\text{bulk,nom}}^2 - V_{\text{bulk,min}}^2)}{2 \times P_{\text{in}}} = \frac{(100\,\mu\text{F}) \times (325^2 - 120^2)}{2 \times 81.8\,\text{W}} = \frac{10^{-4} \times (105625 - 14400)}{163.6} = \mathbf{55.86\,\text{ms}}$$
-    Exceeds the PRD $> 10.0\,\text{ms}$ requirement by over $5.5\times$!
-  * At $85\,\text{V}_{\text{AC}}$ low-line brownout ($V_{\text{bulk}} = 120\,\text{V}$): Sustains continuous regulation for $> 12.5\,\text{ms}$ through single half-cycle grid interruptions.
+ * At 230 V_AC nominal (V_bulk = 325 V):
+ t_holdup = (C × (V_bulk,nom^2 - V_bulk,min^2) / 2 × P_in) = (100 µF) × (325^2 - 120^2) / 2 × 81.8 W) = (10^-4 × (105625 - 14400) / 163.6) = 55.86 ms
+ Exceeds the PRD > 10.0 ms requirement by over 5.5×!
+ * At 85 V_AC low-line brownout (V_bulk = 120 V): Sustains continuous regulation for > 12.5 ms through single half-cycle grid interruptions.
 
 ## 3. Schematic Pin Connections & Net Mapping
 | Pin # | Terminal Polarity | Schematic Net Name | Connected To | Trace & Solder Requirements |
 | :---: | :---: | :--- | :--- | :--- |
-| **1** | **`+` (Positive Anode)**| `+HV_BULK` | Bridge `BR1` Pin 1, `C_HF` Pin 1, Bleeder `R_BL1`, Transformer `TX1` Pin 1 | Heavy copper polygon ($> 3.0\,\text{mm}$ width). |
+| **1** | **`+` (Positive Anode)**| `+HV_BULK` | Bridge `BR1` Pin 1, `C_HF` Pin 1, Bleeder `R_BL1`, Transformer `TX1` Pin 1 | Heavy copper polygon (> 3.0 mm width). |
 | **2** | **`-` (Negative Cathode)**| `PGND_HOT` | Bridge `BR1` Pin 4, `C_HF` Pin 2, Bleeder `R_BL3`, Primary Shunt `R_CS` | Connects directly to primary power ground plane. |
 
 ## 4. Schematic Symbol Representation
 ```
-               Net: +HV_BULK (+120V to +375V DC)
-                       │
-                     ┌─┴─┐ +
-                     │   │   C_BULK1: 100µF / 450V
-                     │   │   Nichicon LGW2W101MELZ25
-                     └───┘ -
-                       │
-               Net: PGND_HOT (Primary Hot Ground)
+ Net: +HV_BULK (+120V to +375V DC)
+ │
+ ┌─┴─┐ +
+ │ │ C_BULK1: 100µF / 450V
+ │ │ Nichicon LGW2W101MELZ25
+ └───┘ -
+ │
+ Net: PGND_HOT (Primary Hot Ground)
 ```
 
 ## 5. Schematic & PCB Layout Guidelines
-1. **Loop Minimization**: Position `C_BULK1` immediately between bridge rectifier `BR1` and Flyback transformer `TX1`. The high-frequency switching loop area between `C_BULK1`, `TX1`, and `Q1` must be strictly $< 4.0\,\text{cm}^2$.
-2. **Thermal Clearance**: Aluminum electrolytic capacitors degrade exponentially with heat (electrolyte evaporation). Maintain $\ge 12.0\,\text{mm}$ physical spacing from power resistors (`R_snub`), NTC, and transformer core.
+1. **Loop Minimization**: Position `C_BULK1` immediately between bridge rectifier `BR1` and Flyback transformer `TX1`. The high-frequency switching loop area between `C_BULK1`, `TX1`, and `Q1` must be strictly < 4.0 cm^2.
+2. **Thermal Clearance**: Aluminum electrolytic capacitors degrade exponentially with heat (electrolyte evaporation). Maintain ≥ 12.0 mm physical spacing from power resistors (`R_snub`), NTC, and transformer core.

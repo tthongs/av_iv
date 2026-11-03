@@ -4,96 +4,96 @@ HDD Generator Part 3: Sections 13 to 20
 """
 
 def get_sections_13_to_17():
-    return """---
+ return """---
 
 # 13. Design Analysis – Subsystem1
 
 ## 13.1 DC Analysis
-To ensure robust digital logic noise margins across the mixed-signal microcontroller, power monitor, and switching controllers, DC input/output voltage levels are verified under worst-case temperature ($-20^\circ\text{C}$ to $+85^\circ\text{C}$) and $+3.3\,\text{V} \pm 5\%$ supply tolerance:
+To ensure robust digital logic noise margins across the mixed-signal microcontroller, power monitor, and switching controllers, DC input/output voltage levels are verified under worst-case temperature (-20°C to +85°C) and +3.3 V ± 5% supply tolerance:
 
 ### Table 14: High-Level DC Noise Margin Analysis [V_OH(min) vs V_IH(min)]
 | Driving Signal / Interface | Driver Component | V_OH(min) (V) | I_OH (mA) | Receiver Component | V_IH(min) (V) | I_IH (µA) | High Noise Margin (V_OH - V_IH) | Pass / Fail Status |
 | :--- | :--- | :---: | :---: | :--- | :---: | :---: | :---: | :---: |
-| **I2C1_SCL / SDA** | Pull-Up Resistor ($2.2\,\text{k}\Omega$) | $3.135\,\text{V}$ | $0.0\,\text{mA}$ | INA226 / SSD1306 | $2.310\,\text{V}$ | $\pm 1.0\,\mu\text{A}$ | $+0.825\,\text{V}$ ($26.3\%$) | **PASS (Exceeds > 0.4V)** |
-| **LM5176_ENABLE** | STM32 Pin `PB0` (via NPN) | $2.900\,\text{V}$ | $0.62\,\text{mA}$ | MMBT3904 Base | $0.750\,\text{V}$ | $620\,\mu\text{A}$ | $+2.150\,\text{V}$ ($74.1\%$) | **PASS (Saturates NPN)** |
-| **SWD Debug (SWDIO)**| STM32 Pin `PA13` | $2.900\,\text{V}$ | $4.0\,\text{mA}$ | External Debug Probe | $2.000\,\text{V}$ | $\pm 10\,\mu\text{A}$ | $+0.900\,\text{V}$ ($31.0\%$) | **PASS** |
-| **Status LEDs (CV/CC)**| STM32 Pins `PC6/PC7` | $2.900\,\text{V}$ | $1.5\,\text{mA}$ | Kingbright SMD LED | $2.000\,\text{V}$ | $1500\,\mu\text{A}$ | $+0.900\,\text{V}$ (Forward V) | **PASS** |
+| **I2C1_SCL / SDA** | Pull-Up Resistor (2.2 kΩ) | 3.135 V | 0.0 mA | INA226 / SSD1306 | 2.310 V | ± 1.0 µA | +0.825 V (26.3%) | **PASS (Exceeds > 0.4V)** |
+| **LM5176_ENABLE** | STM32 Pin `PB0` (via NPN) | 2.900 V | 0.62 mA | MMBT3904 Base | 0.750 V | 620 µA | +2.150 V (74.1%) | **PASS (Saturates NPN)** |
+| **SWD Debug (SWDIO)**| STM32 Pin `PA13` | 2.900 V | 4.0 mA | External Debug Probe | 2.000 V | ± 10 µA | +0.900 V (31.0%) | **PASS** |
+| **Status LEDs (CV/CC)**| STM32 Pins `PC6/PC7` | 2.900 V | 1.5 mA | Kingbright SMD LED | 2.000 V | 1500 µA | +0.900 V (Forward V) | **PASS** |
 
 ### Table 15: Low-Level DC Noise Margin Analysis [V_OL(max) vs V_IL(max)]
 | Driving Signal / Interface | Driver Component | V_OL(max) (V) | I_OL (mA) | Receiver Component | V_IL(max) (V) | I_IL (µA) | Low Noise Margin (V_IL - V_OL) | Pass / Fail Status |
 | :--- | :--- | :---: | :---: | :--- | :---: | :---: | :---: | :---: |
-| **I2C1_SCL / SDA** | INA226 Open-Drain | $0.400\,\text{V}$ | $3.0\,\text{mA}$ | STM32 `PB8/PB9` | $0.990\,\text{V}$ | $\pm 1.0\,\mu\text{A}$ | $+0.590\,\text{V}$ ($17.9\%$) | **PASS (Exceeds > 0.4V)** |
-| **LM5176_ENABLE** | MMBT3904 Collector | $0.150\,\text{V}$ | $0.50\,\text{mA}$ | LM5176 Pin 6 | $0.400\,\text{V}$ | $10\,\mu\text{A}$ | $+0.250\,\text{V}$ ($62.5\%$) | **PASS (Guarantees OFF)**|
-| **SWD Debug (SWDIO)**| External Debug Probe | $0.400\,\text{V}$ | $4.0\,\text{mA}$ | STM32 Pin `PA13` | $0.990\,\text{V}$ | $\pm 10\,\mu\text{A}$ | $+0.590\,\text{V}$ ($17.9\%$) | **PASS** |
-| **Rotary Enc Inputs** | Bourns Mechanical Enc | $0.050\,\text{V}$ | $0.33\,\text{mA}$ | STM32 Pins `PA0/1` | $0.990\,\text{V}$ | $\pm 5.0\,\mu\text{A}$ | $+0.940\,\text{V}$ ($28.5\%$) | **PASS** |
+| **I2C1_SCL / SDA** | INA226 Open-Drain | 0.400 V | 3.0 mA | STM32 `PB8/PB9` | 0.990 V | ± 1.0 µA | +0.590 V (17.9%) | **PASS (Exceeds > 0.4V)** |
+| **LM5176_ENABLE** | MMBT3904 Collector | 0.150 V | 0.50 mA | LM5176 Pin 6 | 0.400 V | 10 µA | +0.250 V (62.5%) | **PASS (Guarantees OFF)**|
+| **SWD Debug (SWDIO)**| External Debug Probe | 0.400 V | 4.0 mA | STM32 Pin `PA13` | 0.990 V | ± 10 µA | +0.590 V (17.9%) | **PASS** |
+| **Rotary Enc Inputs** | Bourns Mechanical Enc | 0.050 V | 0.33 mA | STM32 Pins `PA0/1` | 0.990 V | ± 5.0 µA | +0.940 V (28.5%) | **PASS** |
 
 ## 13.2 Timing Analysis
 * **I2C Bus Timing (Fast-Mode 400 kHz)**:
-  * Clock period: $T_{\text{SCL}} = 2.50\,\mu\text{s}$.
-  * Bus capacitance: $C_{\text{bus}} = 35.0\,\text{pF}$.
-  * Pull-up resistance: $R_p = 2.2\,\text{k}\Omega$.
-  * Bus rise time: $t_r = 0.8473 \times (2200\,\Omega) \times (35 \times 10^{-12}\,\text{F}) = 65.2\,\text{ns}$ (Standard specifies $t_{r,\text{max}} = 300\,\text{ns}$; timing margin $= 78.3\%$).
-  * Bus fall time: $t_f = 0.23 \times (C_{\text{bus}} / I_{\text{OL}}) \times \Delta V = 0.23 \times (35\,\text{pF} / 3\,\text{mA}) \times 3.3\,\text{V} = 8.85\,\text{ns} \ll 300\,\text{ns}$.
+ * Clock period: T_SCL = 2.50 µs.
+ * Bus capacitance: C_bus = 35.0 pF.
+ * Pull-up resistance: R_p = 2.2 kΩ.
+ * Bus rise time: t_r = 0.8473 × (2200 Ω) × (35 × 10^-12 F) = 65.2 ns (Standard specifies t_r,max = 300 ns; timing margin = 78.3%).
+ * Bus fall time: t_f = 0.23 × (C_bus / I_OL) × Δ V = 0.23 × (35 pF / 3 mA) × 3.3 V = 8.85 ns << 300 ns.
 * **Hardware Autonomous Overcurrent Clamp Timing**:
-  * Shunt current trip event to INA240 output rise: $1.20\,\mu\text{s}$.
-  * TLV3501 comparator trip and transition: $4.5\,\text{ns}$.
-  * NPN pull-down saturation and LM5176 `COMP` capacitor discharge: $250\,\text{ns}$.
-  * LM5176 PWM pulse truncation: $800\,\text{ns}$.
-  * Total hardware clamp response time: $2.25\,\mu\text{s} \ll 5.0\,\mu\text{s}$ limit.
+ * Shunt current trip event to INA240 output rise: 1.20 µs.
+ * TLV3501 comparator trip and transition: 4.5 ns.
+ * NPN pull-down saturation and LM5176 `COMP` capacitor discharge: 250 ns.
+ * LM5176 PWM pulse truncation: 800 ns.
+ * Total hardware clamp response time: 2.25 µs << 5.0 µs limit.
 * **Telemetry Loop Timing & CPU Budget**:
-  * 10 Hz timer interrupt period: $100.0\,\text{ms}$.
-  * I2C reading of INA226 (6 bytes): $180\,\mu\text{s}$.
-  * ADC DMA conversion of primary $V_{\text{AC}}$ and $I_{\text{AC}}$ (128 samples averaged): $45\,\mu\text{s}$.
-  * True RMS power and efficiency mathematical computation: $35\,\mu\text{s}$.
-  * OLED display frame buffer update (1 kB over I2C): $24.5\,\text{ms}$.
-  * Total CPU active time per $100\,\text{ms}$ epoch: $24.76\,\text{ms}$ ($24.76\%$ CPU loading @ $170\,\text{MHz}$).
+ * 10 Hz timer interrupt period: 100.0 ms.
+ * I2C reading of INA226 (6 bytes): 180 µs.
+ * ADC DMA conversion of primary V_AC and I_AC (128 samples averaged): 45 µs.
+ * True RMS power and efficiency mathematical computation: 35 µs.
+ * OLED display frame buffer update (1 kB over I2C): 24.5 ms.
+ * Total CPU active time per 100 ms epoch: 24.76 ms (24.76% CPU loading @ 170 MHz).
 
 ## 13.3 PCB Layer Stack-up Analysis
-To minimize ground bounce, eliminate common-mode noise coupling, and handle continuous $3.0\,\text{A}_{\text{DC}}$ current without excessive copper heating, a balanced 4-layer FR4 high-Tg ($170^\circ\text{C}$) stackup with **$2.0\,\text{oz}$ outer copper** is specified:
+To minimize ground bounce, eliminate common-mode noise coupling, and handle continuous 3.0 A_DC current without excessive copper heating, a balanced 4-layer FR4 high-Tg (170°C) stackup with **2.0 oz outer copper** is specified:
 
 | Layer # | Layer Name | Copper Weight | Dielectric Thickness | Material | Primary Electrical Function & Routing Allocation |
 | :---: | :--- | :---: | :---: | :---: | :--- |
 | **L1 (Top)** | **High-Current Power / Components**| 2.0 oz (70 µm) | 0.20 mm Prepreg | FR4 High-Tg | AC mains input polygon pours, bulk DC link, primary Flyback switching loop, Buck-Boost H-bridge power polygon pours, surface mount components. |
 | **L2 (In1)** | **Continuous Ground Plane** | 1.0 oz (35 µm) | 1.00 mm Core | FR4 High-Tg | Solid low-impedance ground plane split across galvanic barrier (`PGND_HOT` / `PGND_SEC`), providing continuous image return path for L1. |
-| **L3 (In2)** | **Auxiliary Power / Intermediate Bus**| 1.0 oz (35 µm) | 0.20 mm Prepreg | FR4 High-Tg | $+24.0\,\text{V}$ intermediate power plane, $+12\,\text{V}$ gate drive plane, $+5\,\text{V}$ display rail, $+3.3\,\text{V}$ logic supply copper pours. |
+| **L3 (In2)** | **Auxiliary Power / Intermediate Bus**| 1.0 oz (35 µm) | 0.20 mm Prepreg | FR4 High-Tg | +24.0 V intermediate power plane, +12 V gate drive plane, +5 V display rail, +3.3 V logic supply copper pours. |
 | **L4 (Bot)** | **Signal Routing & Heatsink Copper** | 2.0 oz (70 µm) | — | FR4 High-Tg | Secondary quiet signal routing, I2C traces, SWD, thermal via breakout planes for D2PAK CoolMOS and SuperSO8 power FETs. |
 | **Total** | **Finished Board Thickness** | — | **1.60 mm ± 10%** | FR4 High-Tg | Standard IPC Class 2 multilayer fabrication. |
 
-* **Controlled Impedance**: Digital traces on Layer 4 referenced to Layer 2 ground plane achieve single-ended characteristic impedance of $Z_0 = 50.0\,\Omega \pm 10\%$ ($w = 0.35\,\text{mm}$, $h = 0.20\,\text{mm}$, $\epsilon_r = 4.4$).
+* **Controlled Impedance**: Digital traces on Layer 4 referenced to Layer 2 ground plane achieve single-ended characteristic impedance of Z_0 = 50.0 Ω ± 10% (w = 0.35 mm, h = 0.20 mm, epsilon_r = 4.4).
 
 ## 13.4 Pre-Layout SI Analysis
 * **Switching Node di/dt & dv/dt Analysis**:
-  * Primary Flyback Drain Node (`Q1` drain): Slew rate $dv/dt \approx 15.0\,\text{V/ns}$ with peak voltage $599\,\text{V}$. The RCD snubber diode `D_snub` (STTH110A) and damping resistors ($3\times 68\,\text{k}\Omega$) absorb transformer leakage energy and damp parasitic ringing to $< 10\%$ overshoot.
-  * Buck-Boost Switch Nodes (`SW1`, `SW2`): Slew rate $dv/dt \approx 3.5\,\text{V/ns}$ with peak voltage $28\,\text{V}$. Series gate resistors $R_g = 4.7\,\Omega \pm 1\%$ placed directly adjacent to the gate pins of `QA..QD` control switching transition times to $\approx 12\,\text{ns}$, preventing gate ringing and false shoot-through.
+ * Primary Flyback Drain Node (`Q1` drain): Slew rate dv/dt ≈ 15.0 V/ns with peak voltage 599 V. The RCD snubber diode `D_snub` (STTH110A) and damping resistors (3× 68 kΩ) absorb transformer leakage energy and damp parasitic ringing to < 10% overshoot.
+ * Buck-Boost Switch Nodes (`SW1`, `SW2`): Slew rate dv/dt ≈ 3.5 V/ns with peak voltage 28 V. Series gate resistors R_g = 4.7 Ω ± 1% placed directly adjacent to the gate pins of `QA..QD` control switching transition times to ≈ 12 ns, preventing gate ringing and false shoot-through.
 * **I2C Bus Signal Integrity**:
-  * Series damping resistors $R_s = 22.0\,\Omega$ placed at MCU pins `PB8`/`PB9` suppress transmission line reflections on long display cables. With $C_{\text{bus}} = 35\,\text{pF}$ and $R_p = 2.2\,\text{k}\Omega$, rise edges exhibit smooth monotonic charging with zero undershoot ringing.
+ * Series damping resistors R_s = 22.0 Ω placed at MCU pins `PB8`/`PB9` suppress transmission line reflections on long display cables. With C_bus = 35 pF and R_p = 2.2 kΩ, rise edges exhibit smooth monotonic charging with zero undershoot ringing.
 
 ## 13.5 PCB Floor Plan Analysis & Isolation Slot
-The physical PCBA measures **$160.0\,\text{mm} \times 100.0\,\text{mm}$**, partitioned cleanly from left to right:
-1. **Left Zone (Primary Hot Domain, $65\,\text{mm} \times 100\,\text{mm}$)**: AC inlet socket `J1`, fuse `F1`, NTC, MOV, two-stage EMI filter, bridge rectifier `BR1`, bulk capacitor `C_BULK1`, Flyback transformer `TX1`, CoolMOS `Q1`, and snubber network.
-2. **Central Safety Isolation Barrier ($10\,\text{mm}$ Width)**: Enforces $\ge 6.4\,\text{mm}$ physical surface creepage and $\ge 5.0\,\text{mm}$ clearance through air. A **$2.0\,\text{mm}$ wide milled PCB air slot** is routed completely through the FR4 substrate directly beneath:
-   * Transformer `TX1` (separating primary pin bobbins 1-4 from secondary pin bobbins 5-8).
-   * Optocoupler `OPTO1` (separating primary pins 1-2 from secondary pins 3-4).
-   * Isolated voltage sensor `AMC1311` (separating high-side pins 1-4 from low-side pins 5-8).
-3. **Right Zone (Secondary SELV Touch-Safe Domain, $85\,\text{mm} \times 100\,\text{mm}$)**: Schottky rectifier `D_SEC` with clip heatsink, $+24\,\text{V}$ filter capacitors, LM5176 Buck-Boost controller, four SuperSO8 FETs, $10\,\mu\text{H}$ flat-wire inductor, output filter bank, $10\,\text{m}\Omega$ shunt, STM32G474 MCU, OLED display, rotary encoders, and Pomona $4\,\text{mm}$ output binding posts.
+The physical PCBA measures **160.0 mm × 100.0 mm**, partitioned cleanly from left to right:
+1. **Left Zone (Primary Hot Domain, 65 mm × 100 mm)**: AC inlet socket `J1`, fuse `F1`, NTC, MOV, two-stage EMI filter, bridge rectifier `BR1`, bulk capacitor `C_BULK1`, Flyback transformer `TX1`, CoolMOS `Q1`, and snubber network.
+2. **Central Safety Isolation Barrier (10 mm Width)**: Enforces ≥ 6.4 mm physical surface creepage and ≥ 5.0 mm clearance through air. A **2.0 mm wide milled PCB air slot** is routed completely through the FR4 substrate directly beneath:
+ * Transformer `TX1` (separating primary pin bobbins 1-4 from secondary pin bobbins 5-8).
+ * Optocoupler `OPTO1` (separating primary pins 1-2 from secondary pins 3-4).
+ * Isolated voltage sensor `AMC1311` (separating high-side pins 1-4 from low-side pins 5-8).
+3. **Right Zone (Secondary SELV Touch-Safe Domain, 85 mm × 100 mm)**: Schottky rectifier `D_SEC` with clip heatsink, +24 V filter capacitors, LM5176 Buck-Boost controller, four SuperSO8 FETs, 10 µH flat-wire inductor, output filter bank, 10 mΩ shunt, STM32G474 MCU, OLED display, rotary encoders, and Pomona 4 mm output binding posts.
 * **High-Current Switching Loop Area Minimization**:
-  * Flyback Primary Loop (C_BULK1 $\rightarrow$ TX1 Primary $\rightarrow$ Q1 Drain/Source $\rightarrow$ R_CS $\rightarrow$ GND): Polygon area constrained to $< 3.8\,\text{cm}^2$.
-  * Buck-Boost Input Commutation Loop (C_IN $\rightarrow$ QA $\rightarrow$ QB $\rightarrow$ GND): Area constrained to $< 1.2\,\text{cm}^2$.
-  * Buck-Boost Output Commutation Loop (C_OUT $\rightarrow$ QC $\rightarrow$ QD $\rightarrow$ GND): Area constrained to $< 1.2\,\text{cm}^2$.
+ * Flyback Primary Loop (C_BULK1 rightarrow TX1 Primary rightarrow Q1 Drain/Source rightarrow R_CS rightarrow GND): Polygon area constrained to < 3.8 cm^2.
+ * Buck-Boost Input Commutation Loop (C_IN rightarrow QA rightarrow QB rightarrow GND): Area constrained to < 1.2 cm^2.
+ * Buck-Boost Output Commutation Loop (C_OUT rightarrow QC rightarrow QD rightarrow GND): Area constrained to < 1.2 cm^2.
 
 ## 13.6 Thermal Analysis
-Thermal dissipation and junction temperature rise are evaluated under maximum continuous full load ($60.0\,\text{W}$ DC output) under worst-case industrial ambient temperature ($T_{\text{amb}} = 50.0^\circ\text{C}$) with **pure natural convection cooling (zero fans)**:
+Thermal dissipation and junction temperature rise are evaluated under maximum continuous full load (60.0 W DC output) under worst-case industrial ambient temperature (T_amb = 50.0°C) with **pure natural convection cooling (zero fans)**:
 
 | Critical Component | Package | Power Loss (W) | Thermal Resistance | Max Junction Temp (T_j) | Absolute Max Rating | Derating Margin Compliance |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **CoolMOS Switch `Q1`** | D2PAK (TO-263) | $0.85\,\text{W}$ | $R_{\theta\text{ja}} = 59.3^\circ\text{C/W}$ (with 2oz copper) | $T_j = 50 + (0.85 \times 59.3) = \mathbf{100.4^\circ\text{C}}$ | $150.0^\circ\text{C}$ | **PASS ($66.9\% \le 75\%$ derating limit)** |
-| **Schottky Diode `D_SEC`** | TO-220-2 | $1.80\,\text{W}$ | $R_{\theta\text{ja}} = 1.5 + 15.0 = 16.5^\circ\text{C/W}$ (with heatsink) | $T_j = 50 + (1.80 \times 16.5) = \mathbf{79.7^\circ\text{C}}$ | $150.0^\circ\text{C}$ | **PASS ($53.1\% \le 75\%$ derating limit)** |
-| **Buck-Boost FETs `QA..QD`** | SuperSO8 | $0.105\,\text{W}$ / FET | $R_{\theta\text{ja}} = 35.0^\circ\text{C/W}$ (with 2oz thermal vias) | $T_j = 50 + (0.105 \times 35.0) = \mathbf{53.7^\circ\text{C}}$ | $150.0^\circ\text{C}$ | **PASS ($35.8\% \le 75\%$ derating limit)** |
-| **Transformer `TX1` Core** | PQ26/20 3C95 | $1.85\,\text{W}$ | $R_{\theta\text{ca}} \approx 18.0^\circ\text{C/W}$ | $T_{\text{hotspot}} = 50 + (1.85 \times 18.0) = \mathbf{83.3^\circ\text{C}}$ | $130.0^\circ\text{C}$ | **PASS ($64.1\%$ of core rating)** |
-| **Power Inductor `L1`** | SMD $12.5\,\text{mm}$ | $0.15\,\text{W}$ | $R_{\theta\text{ja}} \approx 28.0^\circ\text{C/W}$ | $T_{\text{hotspot}} = 50 + (0.15 \times 28.0) = \mathbf{54.2^\circ\text{C}}$ | $125.0^\circ\text{C}$ | **PASS ($43.4\%$ of rating)** |
-| **Bridge Rectifier `BR1`** | GBU-4 | $1.62\,\text{W}$ | $R_{\theta\text{ja}} \approx 22.0^\circ\text{C/W}$ | $T_j = 50 + (1.62 \times 22.0) = \mathbf{85.6^\circ\text{C}}$ | $150.0^\circ\text{C}$ | **PASS ($57.1\% \le 75\%$ derating limit)** |
+| **CoolMOS Switch `Q1`** | D2PAK (TO-263) | 0.85 W | R_thetaja = 59.3°C/W (with 2oz copper) | T_j = 50 + (0.85 × 59.3) = 100.4°C | 150.0°C | **PASS (66.9% ≤ 75% derating limit)** |
+| **Schottky Diode `D_SEC`** | TO-220-2 | 1.80 W | R_thetaja = 1.5 + 15.0 = 16.5°C/W (with heatsink) | T_j = 50 + (1.80 × 16.5) = 79.7°C | 150.0°C | **PASS (53.1% ≤ 75% derating limit)** |
+| **Buck-Boost FETs `QA..QD`** | SuperSO8 | 0.105 W / FET | R_thetaja = 35.0°C/W (with 2oz thermal vias) | T_j = 50 + (0.105 × 35.0) = 53.7°C | 150.0°C | **PASS (35.8% ≤ 75% derating limit)** |
+| **Transformer `TX1` Core** | PQ26/20 3C95 | 1.85 W | R_thetaca ≈ 18.0°C/W | T_hotspot = 50 + (1.85 × 18.0) = 83.3°C | 130.0°C | **PASS (64.1% of core rating)** |
+| **Power Inductor `L1`** | SMD 12.5 mm | 0.15 W | R_thetaja ≈ 28.0°C/W | T_hotspot = 50 + (0.15 × 28.0) = 54.2°C | 125.0°C | **PASS (43.4% of rating)** |
+| **Bridge Rectifier `BR1`** | GBU-4 | 1.62 W | R_thetaja ≈ 22.0°C/W | T_j = 50 + (1.62 × 22.0) = 85.6°C | 150.0°C | **PASS (57.1% ≤ 75% derating limit)** |
 
-* All semiconductor silicon junction temperatures remain strictly below **$105.0^\circ\text{C}$**, satisfying VVDN Corporate Reliability Rules ($T_{j,\text{max}} \le 110^\circ\text{C}$) under maximum $50.0^\circ\text{C}$ ambient.
+* All semiconductor silicon junction temperatures remain strictly below **105.0°C**, satisfying VVDN Corporate Reliability Rules (T_j,max ≤ 110°C) under maximum 50.0°C ambient.
 
 ---
 
@@ -105,52 +105,52 @@ Thermal dissipation and junction temperature rise are evaluated under maximum co
 The internal board connectors facilitate debugging, factory firmware flashing, and user interface interfacing:
 
 #### Connector 1 [UART Telemetry Header - J5]
-* **Connector MPN & Make**: Molex `22-28-4030` / Samtec `TSW-103-07-G-S` ($3\text{-pin}$, $2.54\,\text{mm}$ pitch, vertical pin strip).
+* **Connector MPN & Make**: Molex `22-28-4030` / Samtec `TSW-103-07-G-S` (3-pin, 2.54 mm pitch, vertical pin strip).
 * **Mating Housing**: Molex `0022013037` with crimp terminals `0008500114`.
-* **Cable Specification**: $24\,\text{AWG}$ stranded copper, PVC insulated, $300\,\text{V}$ rating, length $150\,\text{mm}$.
+* **Cable Specification**: 24 AWG stranded copper, PVC insulated, 300 V rating, length 150 mm.
 
 ### Table 14: Subsystem1 - UART Header (J5)
 | Pin No | Net Name | Signal / Power Type | Designed Voltage / Current | Description |
 | :---: | :--- | :---: | :---: | :--- |
-| **1** | **`+3.3V_VDD`** | Power | $+3.30\,\text{V}_{\text{DC}}$ / $20\,\text{mA}$ | Housekeeping logic rail for opto-isolated serial cable. |
-| **2** | **`UART1_TX`** | Digital Output | $+3.3\,\text{V}$ Logic / $4\,\text{mA}$ | Transmit data stream from STM32 pin `PA9` ($115,200\,\text{baud}$). |
-| **3** | **`GND_SEC`** | Ground | $0.0\,\text{V}$ / Return | Secondary touch-safe quiet ground reference. |
+| **1** | **`+3.3V_VDD`** | Power | +3.30 V_DC / 20 mA | Housekeeping logic rail for opto-isolated serial cable. |
+| **2** | **`UART1_TX`** | Digital Output | +3.3 V Logic / 4 mA | Transmit data stream from STM32 pin `PA9` (115,200 baud). |
+| **3** | **`GND_SEC`** | Ground | 0.0 V / Return | Secondary touch-safe quiet ground reference. |
 
 #### Connector 2 [SWD Debug Header - J4]
-* **Connector MPN & Make**: Molex `22-28-4040` / Samtec `TSW-104-07-G-S` ($4\text{-pin}$, $2.54\,\text{mm}$ pitch, vertical shrouded header).
+* **Connector MPN & Make**: Molex `22-28-4040` / Samtec `TSW-104-07-G-S` (4-pin, 2.54 mm pitch, vertical shrouded header).
 
 ### Table 15: Subsystem1 - SWD Debug Header (J4)
 | Pin No | Net Name | Signal / Power Type | Designed Voltage / Current | Description |
 | :---: | :--- | :---: | :---: | :--- |
-| **1** | **`+3.3V_VDD`** | Power Reference | $+3.30\,\text{V}_{\text{DC}}$ / $10\,\text{mA}$ | Reference voltage for external debug probe (ST-Link V3). |
-| **2** | **`SWDIO`** | Bidirectional Data | $+3.3\,\text{V}$ Logic / $4\,\text{mA}$ | Serial Wire Data input/output (STM32 pin `PA13`). |
-| **3** | **`SWCLK`** | Clock Input | $+3.3\,\text{V}$ Logic / $4\,\text{mA}$ | Serial Wire Clock input (STM32 pin `PA14`). |
-| **4** | **`GND_SEC`** | Ground | $0.0\,\text{V}$ / Return | Secondary touch-safe quiet ground reference. |
+| **1** | **`+3.3V_VDD`** | Power Reference | +3.30 V_DC / 10 mA | Reference voltage for external debug probe (ST-Link V3). |
+| **2** | **`SWDIO`** | Bidirectional Data | +3.3 V Logic / 4 mA | Serial Wire Data input/output (STM32 pin `PA13`). |
+| **3** | **`SWCLK`** | Clock Input | +3.3 V Logic / 4 mA | Serial Wire Clock input (STM32 pin `PA14`). |
+| **4** | **`GND_SEC`** | Ground | 0.0 V / Return | Secondary touch-safe quiet ground reference. |
 
 #### Connector 3 [OLED Display Header - J6]
-* **Connector MPN & Make**: Samtec `SSW-104-02-G-S` ($4\text{-pin}$, $2.54\,\text{mm}$ right-angle female socket).
+* **Connector MPN & Make**: Samtec `SSW-104-02-G-S` (4-pin, 2.54 mm right-angle female socket).
 * **Pinout**: Pin 1 (`GND`), Pin 2 (`+5V_DISP`), Pin 3 (`I2C1_SCL`), Pin 4 (`I2C1_SDA`).
 
 ### 14.1.2 External Connectors
 
 #### External Connector 1 [AC Mains Inlet - J1]
-* **Connector MPN & Make**: Schurter `6100.3300` / TE Connectivity `1-6609987-1` (IEC 320-C14 chassis appliance inlet, $10.0\,\text{A}$, $250\,\text{V}_{\text{AC}}$, $50/60\,\text{Hz}$, screw-mount with quick-connect / solder terminals).
+* **Connector MPN & Make**: Schurter `6100.3300` / TE Connectivity `1-6609987-1` (IEC 320-C14 chassis appliance inlet, 10.0 A, 250 V_AC, 50/60 Hz, screw-mount with quick-connect / solder terminals).
 
 ### Table 16: External AC Mains Inlet (J1)
 | Terminal No | Terminal Designation | Net Name | Designed Voltage / Current | Functional Description |
 | :---: | :--- | :--- | :---: | :--- |
-| **L** | **Live** | `AC_LINE` | $85\,\text{V} - 265\,\text{V}_{\text{AC}}$ / $1.60\,\text{A}_{\text{RMS}}$ | Connects to 2A ceramic cartridge fuse `F1`. |
-| **N** | **Neutral** | `AC_NEUTRAL` | $0.0\,\text{V}$ Nominal / $1.60\,\text{A}_{\text{RMS}}$ | Connects to 15Ω inrush limiting thermistor `NTC1`. |
+| **L** | **Live** | `AC_LINE` | 85 V - 265 V_AC / 1.60 A_RMS | Connects to 2A ceramic cartridge fuse `F1`. |
+| **N** | **Neutral** | `AC_NEUTRAL` | 0.0 V Nominal / 1.60 A_RMS | Connects to 15Ω inrush limiting thermistor `NTC1`. |
 | **E** | **Earth** | `EARTH_GND` | Chassis Ground / Fault Return | Direct chassis screw bond and Class Y1 capacitor return. |
 
 #### External Connector 2 [Output Binding Posts - J2, J3]
-* **Connector MPN & Make**: Pomona Electronics `3770-2` (Red) / `3770-0` (Black) heavy-duty $4\,\text{mm}$ gold-plated turret terminal binding posts ($30.0\,\text{A}$, $1000\,\text{V}_{\text{RMS}}$, panel mount with standard $19.05\,\text{mm}$ center-to-center spacing).
+* **Connector MPN & Make**: Pomona Electronics `3770-2` (Red) / `3770-0` (Black) heavy-duty 4 mm gold-plated turret terminal binding posts (30.0 A, 1000 V_RMS, panel mount with standard 19.05 mm center-to-center spacing).
 
 ### Table 17: External Output Binding Posts (J2, J3)
 | Terminal Ref | Body Color | Net Name | Designed Voltage / Current | Description |
 | :---: | :---: | :--- | :---: | :--- |
-| **`J2`** | **Red** | **`+V_OUT`** | $+5.0\,\text{V} - +20.0\,\text{V}_{\text{DC}}$ / $3.0\,\text{A}_{\text{DC}}$ | Positive DC output power terminal. |
-| **`J3`** | **Black** | **`-V_OUT (GND)`** | $0.0\,\text{V}_{\text{DC}}$ / $3.0\,\text{A}_{\text{DC}}$ Return | Negative DC output power return terminal. |
+| **`J2`** | **Red** | **`+V_OUT`** | +5.0 V - +20.0 V_DC / 3.0 A_DC | Positive DC output power terminal. |
+| **`J3`** | **Black** | **`-V_OUT (GND)`** | 0.0 V_DC / 3.0 A_DC Return | Negative DC output power return terminal. |
 
 ---
 
@@ -164,34 +164,34 @@ All microcontroller GPIO pins on `U5` (STMicroelectronics `STM32G474RET6`, LQFP-
 | :---: | :---: | :--- | :---: | :---: | :---: | :---: | :---: | :--- |
 | **1** | `VBAT` | `+3.3V_VDD` | Power | — | — | — | — | Backup battery rail (tied to +3.3V logic supply). |
 | **2** | `PC13` | `ENC1_SW` | Input | CMOS | Pull-Up | High-Z | GPIO (EXTI13) | Push-button switch on Rotary Encoder 1 (Coarse/Fine Toggle). |
-| **3** | `PC14` | `OSC32_IN` | Input | Analog | None | High-Z | LSE Clock In | $32.768\,\text{kHz}$ crystal input (`ABS07`). |
-| **4** | `PC15` | `OSC32_OUT`| Output | Analog | None | High-Z | LSE Clock Out | $32.768\,\text{kHz}$ crystal output. |
-| **5** | `PF0` | `OSC_IN` | Input | Analog | None | High-Z | HSE Clock In | $24.000\,\text{MHz}$ crystal input (`ABM8G`). |
-| **6** | `PF1` | `OSC_OUT` | Output | Analog | None | High-Z | HSE Clock Out | $24.000\,\text{MHz}$ crystal output. |
-| **7** | `NRST` | `MCU_RESET_N`| Input | CMOS | Pull-Up | Reset | Dedicated | Active-low hardware reset pin with $100\,\text{nF}$ filter. |
+| **3** | `PC14` | `OSC32_IN` | Input | Analog | None | High-Z | LSE Clock In | 32.768 kHz crystal input (`ABS07`). |
+| **4** | `PC15` | `OSC32_OUT`| Output | Analog | None | High-Z | LSE Clock Out | 32.768 kHz crystal output. |
+| **5** | `PF0` | `OSC_IN` | Input | Analog | None | High-Z | HSE Clock In | 24.000 MHz crystal input (`ABM8G`). |
+| **6** | `PF1` | `OSC_OUT` | Output | Analog | None | High-Z | HSE Clock Out | 24.000 MHz crystal output. |
+| **7** | `NRST` | `MCU_RESET_N`| Input | CMOS | Pull-Up | Reset | Dedicated | Active-low hardware reset pin with 100 nF filter. |
 | **8** | `PC0` | `ADC1_IN6` | Input | Analog | None | High-Z | ADC1 Channel 6 | Senses primary AC input voltage from `AMC1311` iso-amp. |
-| **9** | `PC1` | `ADC1_IN7` | Input | Analog | None | High-Z | ADC1 Channel 7 | Senses primary AC line current from $1000:1$ CT burden. |
+| **9** | `PC1` | `ADC1_IN7` | Input | Analog | None | High-Z | ADC1 Channel 7 | Senses primary AC line current from 1000:1 CT burden. |
 | **10**| `PC2` | `ADC1_IN8` | Input | Analog | None | High-Z | ADC1 Channel 8 | Auxiliary board temperature sensor (NTC voltage divider). |
-| **11**| `PC3` | `ADC1_IN9` | Input | Analog | None | High-Z | ADC1 Channel 9 | Senses intermediate $+24.0\,\text{V}$ rail voltage divider. |
+| **11**| `PC3` | `ADC1_IN9` | Input | Analog | None | High-Z | ADC1 Channel 9 | Senses intermediate +24.0 V rail voltage divider. |
 | **14**| `PA0` | `TIM2_CH1` | Input | CMOS | Pull-Up | High-Z | TIM2 Channel 1 | Rotary Encoder 1 Phase A input (Quadrature decoding). |
 | **15**| `PA1` | `TIM2_CH2` | Input | CMOS | Pull-Up | High-Z | TIM2 Channel 2 | Rotary Encoder 1 Phase B input. |
 | **16**| `PA2` | `ENC2_SW` | Input | CMOS | Pull-Up | High-Z | GPIO (EXTI2) | Push-button switch on Rotary Encoder 2 (Output ON/OFF). |
-| **20**| `PA4` | `DAC1_OUT1`| Output | Analog | None | High-Z | DAC1 Channel 1 | $12\text{-Bit}$ DAC Voltage Steering reference into LM5176 `FB`. |
+| **20**| `PA4` | `DAC1_OUT1`| Output | Analog | None | High-Z | DAC1 Channel 1 | 12-Bit DAC Voltage Steering reference into LM5176 `FB`. |
 | **24**| `PA6` | `TIM3_CH1` | Input | CMOS | Pull-Up | High-Z | TIM3 Channel 1 | Rotary Encoder 2 Phase A input. |
 | **25**| `PA7` | `TIM3_CH2` | Input | CMOS | Pull-Up | High-Z | TIM3 Channel 2 | Rotary Encoder 2 Phase B input. |
-| **26**| `PC4` | `ADC2_IN5` | Input | Analog | None | High-Z | ADC2 Channel 5 | Direct hardware output voltage sense ($V_{\text{OUT}}$ divider). |
-| **27**| `PC5` | `ADC2_IN11`| Input | Analog | None | High-Z | ADC2 Channel 11| Direct hardware load current sense ($I_{\text{OUT}}$ amplifier). |
-| **28**| `PB0` | `LM5176_EN`| Output | Push-Pull | None | Low | GPIO Output | Drives base of NPN clamp to disable LM5176 ($1 = \text{OFF}$). |
+| **26**| `PC4` | `ADC2_IN5` | Input | Analog | None | High-Z | ADC2 Channel 5 | Direct hardware output voltage sense (V_OUT divider). |
+| **27**| `PC5` | `ADC2_IN11`| Input | Analog | None | High-Z | ADC2 Channel 11| Direct hardware load current sense (I_OUT amplifier). |
+| **28**| `PB0` | `LM5176_EN`| Output | Push-Pull | None | Low | GPIO Output | Drives base of NPN clamp to disable LM5176 (1 = OFF). |
 | **37**| `PC6` | `LED_CV` | Output | Push-Pull | None | Low | GPIO Output | Drives Green Front-Panel LED (Constant Voltage Mode). |
 | **38**| `PC7` | `LED_CC` | Output | Push-Pull | None | Low | GPIO Output | Drives Amber Front-Panel LED (Constant Current Clamp Mode).|
 | **39**| `PC8` | `LED_FAULT` | Output | Push-Pull | None | Low | GPIO Output | Drives Red Front-Panel LED (Fault / Trip Shutdown). |
-| **42**| `PA9` | `USART1_TX`| Output | Push-Pull | None | High-Z | USART1 TX | External serial telemetry logging output ($115,200\,\text{baud}$). |
+| **42**| `PA9` | `USART1_TX`| Output | Push-Pull | None | High-Z | USART1 TX | External serial telemetry logging output (115,200 baud). |
 | **43**| `PA10`| `USART1_RX`| Input | CMOS | Pull-Up | High-Z | USART1 RX | External serial command input. |
 | **46**| `PA13`| `SWDIO` | Bidir | CMOS | Pull-Up | High-Z | SYS_JTMS-SWDIO | Serial Wire Debug Data I/O. |
 | **49**| `PA14`| `SWCLK` | Input | CMOS | Pull-Down| High-Z | SYS_JTCK-SWCLK | Serial Wire Debug Clock. |
-| **60**| `BOOT0`| `BOOT0` | Input | CMOS | Pull-Down| Low | Dedicated | Hardware boot mode configuration (tied to GND via $10\,\text{k}\Omega$). |
-| **61**| `PB8` | `I2C1_SCL` | Bidir | Open-Drain| None | High-Z | I2C1 SCL | Fast-Mode $400\,\text{kHz}$ clock for INA226 and OLED display. |
-| **62**| `PB9` | `I2C1_SDA` | Bidir | Open-Drain| None | High-Z | I2C1 SDA | Fast-Mode $400\,\text{kHz}$ data for INA226 and OLED display. |
+| **60**| `BOOT0`| `BOOT0` | Input | CMOS | Pull-Down| Low | Dedicated | Hardware boot mode configuration (tied to GND via 10 kΩ). |
+| **61**| `PB8` | `I2C1_SCL` | Bidir | Open-Drain| None | High-Z | I2C1 SCL | Fast-Mode 400 kHz clock for INA226 and OLED display. |
+| **62**| `PB9` | `I2C1_SDA` | Bidir | Open-Drain| None | High-Z | I2C1 SDA | Fast-Mode 400 kHz data for INA226 and OLED display. |
 
 ---
 
@@ -203,16 +203,16 @@ The STM32G474RET6 Nested Vectored Interrupt Controller (NVIC) is configured with
 ### Table 20: Module 1 Interrupt Mapping
 | Interrupt Source / Vector | Priority | Sub-Priority | Trigger Condition | Execution Budget (µs) | ISR Functional Role & Servicing Procedure |
 | :--- | :---: | :---: | :--- | :---: | :--- |
-| **`HardFault_Handler`** | $-1$ | — | Bus error, invalid memory access | $< 5.0\,\mu\text{s}$ | Instantly executes emergency shutdown: asserts `PB0` HIGH to kill LM5176. |
-| **`EXTI2_IRQHandler`** | 1 | 0 | Falling Edge on `PA2` (Encoder 2 Switch) | $< 25\,\mu\text{s}$ | User Output Enable/Disable toggle request. Toggles `LM5176_EN` state. |
-| **`EXTI13_IRQHandler`** | 1 | 1 | Falling Edge on `PC13` (Encoder 1 Switch) | $< 15\,\mu\text{s}$ | User Tuning Mode toggle (switches between $10\,\text{mV}$ fine and $1.0\,\text{V}$ coarse).|
-| **`TIM2_IRQHandler`** | 2 | 0 | Encoder 1 Count Overflow / Change | $< 35\,\mu\text{s}$ | Rotary Encoder 1 moved. Updates voltage setpoint register and recalculates DAC. |
-| **`TIM3_IRQHandler`** | 2 | 1 | Encoder 2 Count Overflow / Change | $< 35\,\mu\text{s}$ | Rotary Encoder 2 moved. Adjusts software overcurrent warning threshold. |
-| **`DMA1_Channel1_IRQHandler`**| 3 | 0 | DMA Buffer Half / Full Transfer Complete | $< 45\,\mu\text{s}$ | ADC sampling buffer ready. Computes true RMS AC input voltage and current. |
-| **`TIM6_DAC_IRQHandler`** | 4 | 0 | TIM6 Timer Update ($100.0\,\text{ms}$ tick) | $< 250\,\mu\text{s}$ | Master $10\,\text{Hz}$ Telemetry Loop: reads INA226, calculates $\eta$, triggers OLED. |
-| **`I2C1_EV_IRQHandler`** | 5 | 0 | I2C Byte Transfer Finished (DMA mode) | $< 10\,\mu\text{s}$ | Non-blocking OLED display DMA transmission completion handler. |
-| **`I2C1_ER_IRQHandler`** | 5 | 1 | I2C Bus Acknowledge Failure or Error | $< 30\,\mu\text{s}$ | Resets I2C1 peripheral in case of OLED disconnect or bus noise spike. |
-| **`SysTick_Handler`** | 15 | 0 | $1.0\,\text{ms}$ System Tick Overflow | $< 5.0\,\mu\text{s}$ | System millisecond timebase for software debouncing timers and LED blinkers. |
+| **`HardFault_Handler`** | -1 | — | Bus error, invalid memory access | < 5.0 µs | Instantly executes emergency shutdown: asserts `PB0` HIGH to kill LM5176. |
+| **`EXTI2_IRQHandler`** | 1 | 0 | Falling Edge on `PA2` (Encoder 2 Switch) | < 25 µs | User Output Enable/Disable toggle request. Toggles `LM5176_EN` state. |
+| **`EXTI13_IRQHandler`** | 1 | 1 | Falling Edge on `PC13` (Encoder 1 Switch) | < 15 µs | User Tuning Mode toggle (switches between 10 mV fine and 1.0 V coarse).|
+| **`TIM2_IRQHandler`** | 2 | 0 | Encoder 1 Count Overflow / Change | < 35 µs | Rotary Encoder 1 moved. Updates voltage setpoint register and recalculates DAC. |
+| **`TIM3_IRQHandler`** | 2 | 1 | Encoder 2 Count Overflow / Change | < 35 µs | Rotary Encoder 2 moved. Adjusts software overcurrent warning threshold. |
+| **`DMA1_Channel1_IRQHandler`**| 3 | 0 | DMA Buffer Half / Full Transfer Complete | < 45 µs | ADC sampling buffer ready. Computes true RMS AC input voltage and current. |
+| **`TIM6_DAC_IRQHandler`** | 4 | 0 | TIM6 Timer Update (100.0 ms tick) | < 250 µs | Master 10 Hz Telemetry Loop: reads INA226, calculates η, triggers OLED. |
+| **`I2C1_EV_IRQHandler`** | 5 | 0 | I2C Byte Transfer Finished (DMA mode) | < 10 µs | Non-blocking OLED display DMA transmission completion handler. |
+| **`I2C1_ER_IRQHandler`** | 5 | 1 | I2C Bus Acknowledge Failure or Error | < 30 µs | Resets I2C1 peripheral in case of OLED disconnect or bus noise spike. |
+| **`SysTick_Handler`** | 15 | 0 | 1.0 ms System Tick Overflow | < 5.0 µs | System millisecond timebase for software debouncing timers and LED blinkers. |
 
 ---
 
@@ -223,15 +223,15 @@ The SPPS hardware integrates non-volatile memory resources within the STM32G474R
 ### Table 21: Programmable ROM Devices
 | Device Identifier | Memory Type | Size / Organization | Address Space | Programming Interface | Functional Contents & Allocation |
 | :--- | :---: | :---: | :---: | :---: | :--- |
-| **STM32 Flash Bank 1** | Embedded NOR Flash | $256\,\text{kB}$ ($128 \times 2\,\text{kB}$ pages) | `0x0800 0000` - `0x0803 FFFF` | SWD / DFU Bootloader | Primary bootloader, vector table, and core control application firmware ($< 120\,\text{kB}$). |
-| **STM32 Flash Bank 2** | Embedded NOR Flash | $240\,\text{kB}$ ($120 \times 2\,\text{kB}$ pages) | `0x0804 0000` - `0x0807 BFFF` | SWD / In-Application (IAP) | Secondary application image for fail-safe Dual-Bank In-Application Firmware Updates. |
-| **EEPROM Emulation Sector**| Embedded NOR Flash | $16\,\text{kB}$ ($8 \times 2\,\text{kB}$ pages) | `0x0807 C000` - `0x0807 FFFF` | Internal Firmware Flash Driver | Stores factory calibration coefficients (DAC linearity offset/gain, INA226 calibration, CT burden scaling) and user power-on setpoints. |
-| **System Memory (ROM)** | Factory Masked ROM | $32\,\text{kB}$ | `0x1FFF 0000` - `0x1FFF 7FFF` | Factory Hardwired | STMicroelectronics factory DFU bootloader supporting USART1 in-system programming. |
-| **Option Bytes** | Flash Configuration Bits| $64\,\text{Bytes}$ | `0x1FFF 7800` - `0x1FFF 783F` | SWD / Flash Registers | Hardware configuration: Readout Protection (RDP Level 1), Brownout Reset (BOR Level 3), Dual-Bank mode. |
+| **STM32 Flash Bank 1** | Embedded NOR Flash | 256 kB (128 × 2 kB pages) | `0x0800 0000` - `0x0803 FFFF` | SWD / DFU Bootloader | Primary bootloader, vector table, and core control application firmware (< 120 kB). |
+| **STM32 Flash Bank 2** | Embedded NOR Flash | 240 kB (120 × 2 kB pages) | `0x0804 0000` - `0x0807 BFFF` | SWD / In-Application (IAP) | Secondary application image for fail-safe Dual-Bank In-Application Firmware Updates. |
+| **EEPROM Emulation Sector**| Embedded NOR Flash | 16 kB (8 × 2 kB pages) | `0x0807 C000` - `0x0807 FFFF` | Internal Firmware Flash Driver | Stores factory calibration coefficients (DAC linearity offset/gain, INA226 calibration, CT burden scaling) and user power-on setpoints. |
+| **System Memory (ROM)** | Factory Masked ROM | 32 kB | `0x1FFF 0000` - `0x1FFF 7FFF` | Factory Hardwired | STMicroelectronics factory DFU bootloader supporting USART1 in-system programming. |
+| **Option Bytes** | Flash Configuration Bits| 64 Bytes | `0x1FFF 7800` - `0x1FFF 783F` | SWD / Flash Registers | Hardware configuration: Readout Protection (RDP Level 1), Brownout Reset (BOR Level 3), Dual-Bank mode. |
 """
 
 def get_sections_18_to_20():
-    return """---
+ return """---
 
 # 18. Bill of Material
 
@@ -302,20 +302,20 @@ The table below documents the complete **Class A Engineering Bill of Materials (
 The physical, electrical, and thermal boundaries of the SPPS hardware design are established below. Operating outside these boundaries may degrade performance or trigger protective shutdown:
 
 1. **AC Mains Input Voltage Envelope**:
-   * Minimum Continuous Operating Voltage: $85.0\,\text{V}_{\text{AC RMS}}$. Below $80.0\,\text{V}_{\text{AC}}$, input current exceeds $1.7\,\text{A}_{\text{RMS}}$ and primary Flyback controller UVLO triggers graceful shutdown.
-   * Maximum Continuous Operating Voltage: $265.0\,\text{V}_{\text{AC RMS}}$. Above $275.0\,\text{V}_{\text{AC}}$, the $300\,\text{V}_{\text{RMS}}$ MOV begins conduction and bulk voltage exceeds $390\,\text{V}_{\text{DC}}$.
+ * Minimum Continuous Operating Voltage: 85.0 V_AC RMS. Below 80.0 V_AC, input current exceeds 1.7 A_RMS and primary Flyback controller UVLO triggers graceful shutdown.
+ * Maximum Continuous Operating Voltage: 265.0 V_AC RMS. Above 275.0 V_AC, the 300 V_RMS MOV begins conduction and bulk voltage exceeds 390 V_DC.
 2. **Output Power & Current Envelope**:
-   * Maximum Continuous Output Power: Strictly limited to $60.0\,\text{W}$ ($20.0\,\text{V} \times 3.0\,\text{A}$).
-   * Continuous Output Current Limit: $3.0\,\text{A}_{\text{DC}}$ across full $5.0\,\text{V}$ to $20.0\,\text{V}$ span. Peak current is clamped at $3.50\,\text{A}$ by LM5176 native hardware limit.
-   * Peak Transient Overload: $84.0\,\text{W}$ ($20.0\,\text{V} / 4.2\,\text{A}$ or $24.0\,\text{V} / 3.5\,\text{A}$ intermediate) for a maximum duration of $500\,\text{ms}$. Extended operation above $60\,\text{W}$ will induce thermal accumulation.
+ * Maximum Continuous Output Power: Strictly limited to 60.0 W (20.0 V × 3.0 A).
+ * Continuous Output Current Limit: 3.0 A_DC across full 5.0 V to 20.0 V span. Peak current is clamped at 3.50 A by LM5176 native hardware limit.
+ * Peak Transient Overload: 84.0 W (20.0 V / 4.2 A or 24.0 V / 3.5 A intermediate) for a maximum duration of 500 ms. Extended operation above 60 W will induce thermal accumulation.
 3. **Capacitive Load Stability Boundary**:
-   * The output compensation network ($R_{\text{comp}} = 12.4\,\text{k}\Omega$, $C_{\text{comp}} = 82\,\text{nF}$, $C_{\text{comp2}} = 15\,\text{pF}$) guarantees stable closed-loop phase margin ($\ge 65^\circ$) for external capacitive loads up to **$C_{\text{load,max}} = 1000\,\mu\text{F}$**. Capacitive loads exceeding $2200\,\mu\text{F}$ may degrade transient phase margin and induce loop hunting during dynamic load steps.
+ * The output compensation network (R_comp = 12.4 kΩ, C_comp = 82 nF, C_comp2 = 15 pF) guarantees stable closed-loop phase margin (≥ 65°) for external capacitive loads up to **C_load,max = 1000 µF**. Capacitive loads exceeding 2200 µF may degrade transient phase margin and induce loop hunting during dynamic load steps.
 4. **Minimum Load Requirements**:
-   * The Buck-Boost stage features synchronous rectification and operates down to **$0.0\,\text{A}$ (true zero load)** with stable output regulation.
+ * The Buck-Boost stage features synchronous rectification and operates down to **0.0 A (true zero load)** with stable output regulation.
 5. **Thermal & Environmental Operating Boundaries**:
-   * Ambient Operating Temperature: $-20.0^\circ\text{C}$ to $+50.0^\circ\text{C}$.
-   * Cooling Mode: **Pure natural convection (free air)**. Minimum chassis ventilation clearance of $25.0\,\text{mm}$ is required above and beneath the PCBA. Enclosing the board in a hermetically sealed box without heat sinking will exceed thermal ratings.
-   * Maximum Internal Component Junction Temperature: $T_j \le 110.0^\circ\text{C}$ under worst-case full load at $50^\circ\text{C}$ ambient.
+ * Ambient Operating Temperature: -20.0°C to +50.0°C.
+ * Cooling Mode: **Pure natural convection (free air)**. Minimum chassis ventilation clearance of 25.0 mm is required above and beneath the PCBA. Enclosing the board in a hermetically sealed box without heat sinking will exceed thermal ratings.
+ * Maximum Internal Component Junction Temperature: T_j ≤ 110.0°C under worst-case full load at 50°C ambient.
 
 ---
 
@@ -369,12 +369,12 @@ The table below establishes complete bi-directional traceability connecting ever
 """
 
 def append_part3():
-    target = "smart_programmable_power_supply/HDD_task/HARDWARE_DESIGN_DOCUMENT_HDD.md"
-    print(f"Appending sections 13 to 20 to {target}...")
-    with open(target, "a") as f:
-        f.write(get_sections_13_to_17())
-        f.write(get_sections_18_to_20())
-    print("Part 3 successfully appended.")
+ target = "smart_programmable_power_supply/HDD_task/HARDWARE_DESIGN_DOCUMENT_HDD.md"
+ print(f"Appending sections 13 to 20 to {target}...")
+ with open(target, "a") as f:
+ f.write(get_sections_13_to_17()
+ f.write(get_sections_18_to_20()
+ print("Part 3 successfully appended.")
 
 if __name__ == "__main__":
-    append_part3()
+ append_part3()

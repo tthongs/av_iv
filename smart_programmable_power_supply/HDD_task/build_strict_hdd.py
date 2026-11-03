@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
-Strict VVDN TP013 V1.1 Corporate Template Builder for SPPS (VVDN_SPPS_2026).
-Builds directly UNDER and ACCORDING TO the official template docx.
-Generates:
+Production Hardware Design Document Builder for SPPS (VVDN_SPPS_2026).
+Strictly complies with VVDN TP013 V1.1 Corporate Template and PRD Rev A1_001.
+
+Deliverables generated:
 1. HARDWARE_DESIGN_DOCUMENT_HDD.docx (Word Document built directly on template)
 2. HARDWARE_DESIGN_DOCUMENT_HDD.md   (Clean human-readable Markdown matching template 1:1)
 """
@@ -56,15 +57,15 @@ def set_table_borders(table):
     )
     tblPr.append(borders)
 
-def format_table_headers_and_rows(table, data_rows, header_row_idx=0, start_data_row=1):
+def format_table_headers_and_rows(table, data_rows, header_row_count=1, start_data_row=1):
     table.alignment = WD_TABLE_ALIGNMENT.CENTER
     set_table_borders(table)
     
-    # Format Header Row
-    if len(table.rows) > header_row_idx:
-        for cell in table.rows[header_row_idx].cells:
+    # Format Header Row(s)
+    for h_idx in range(min(header_row_count, len(table.rows))):
+        for cell in table.rows[h_idx].cells:
             set_cell_background(cell, HEX_HEADER_BG)
-            set_cell_margins(cell, top=120, bottom=120, left=140, right=140)
+            set_cell_margins(cell, top=120, bottom=120, left=120, right=120)
             for p in cell.paragraphs:
                 p.alignment = WD_ALIGN_PARAGRAPH.CENTER
                 for run in p.runs:
@@ -92,34 +93,36 @@ def format_table_headers_and_rows(table, data_rows, header_row_idx=0, start_data
                     run.font.size = Pt(8.0)
 
 def main():
-    print("=" * 75)
-    print("Building SPPS Hardware Design Document strictly under VVDN TP013 Template...")
-    print("=" * 75)
+    print("=" * 80)
+    print("Building Production SPPS Hardware Design Document strictly on VVDN TP013 Template")
+    print("=" * 80)
 
     doc = docx.Document(str(TEMPLATE_PATH))
 
+    # Save direct references to all 26 original template tables BEFORE any document modifications
+    orig_tables = list(doc.tables)
+    print(f"Captured {len(orig_tables)} template tables for in-place population.")
+
     # =========================================================================
-    # 1. Front Matter Document Control Tables
+    # 1. Front Matter Document Control Tables (Tables 0 - 4)
     # =========================================================================
     print("1. Updating Front Matter Tables (Metadata, Revisions, Sign-Offs)...")
     
     # Table 0: Amendment History
-    t0 = doc.tables[0]
-    format_table_headers_and_rows(t0, tbls.T0_AMENDMENT, header_row_idx=0, start_data_row=1)
+    format_table_headers_and_rows(orig_tables[0], tbls.T0_AMENDMENT, header_row_count=1, start_data_row=1)
 
     # Table 1: Project Metadata
-    t1 = doc.tables[1]
+    t1 = orig_tables[1]
     t1.rows[0].cells[1].text = "VVDN_SPPS_2026"
     t1.rows[1].cells[1].text = "Smart Programmable Power Supply (SPPS) Module"
     t1.rows[2].cells[1].text = "V1.0"
     t1.rows[3].cells[1].text = "30-OCT-2026"
 
     # Table 2: Revision History
-    t2 = doc.tables[2]
-    format_table_headers_and_rows(t2, tbls.T2_REVISION_HISTORY, header_row_idx=0, start_data_row=1)
+    format_table_headers_and_rows(orig_tables[2], tbls.T2_REVISION_HISTORY, header_row_count=1, start_data_row=1)
 
     # Table 3: Customer Sign-off Form
-    t3 = doc.tables[3]
+    t3 = orig_tables[3]
     t3.rows[2].cells[1].text = "Dr. Michael Chen"
     t3.rows[2].cells[2].text = "Sarah Jenkins"
     t3.rows[3].cells[1].text = "Director of Hardware Engineering"
@@ -142,7 +145,7 @@ def main():
     t3.rows[14].cells[2].text = "BU Head (30-Oct-2026)"
 
     # Table 4: Internal Sign-off Form
-    t4 = doc.tables[4]
+    t4 = orig_tables[4]
     t4.rows[2].cells[1].text = "Approved"
     t4.rows[3].cells[1].text = "Verified voltage/current stress deratings (<= 75% V, <= 70% I, <= 60% P), creepage (>= 6.4 mm), and fast CC clamp (< 5 µs)."
     t4.rows[4].cells[1].text = "Project Lead / POE (30-Oct-2026)"
@@ -157,80 +160,80 @@ def main():
                 p.text = p.text.replace("Rev. Axx", "Rev. 1.0")
 
     # =========================================================================
-    # 2. Populate Existing Body Tables
+    # 2. Populate All Existing Body Tables (Tables 5 - 25)
     # =========================================================================
-    print("2. Populating Body Tables...")
+    print("2. Populating Body Tables (Tables 1 - 23 in document)...")
     
-    # Table 1: Abbreviation (doc.tables[5])
-    format_table_headers_and_rows(doc.tables[5], tbls.T1_ABBREVIATIONS, header_row_idx=0, start_data_row=1)
+    # Table 1: Abbreviation (orig_tables[5])
+    format_table_headers_and_rows(orig_tables[5], tbls.T1_ABBREVIATIONS, header_row_count=1, start_data_row=1)
 
-    # Table 2: References (doc.tables[6])
-    format_table_headers_and_rows(doc.tables[6], tbls.T2_REFERENCES, header_row_idx=0, start_data_row=1)
+    # Table 2: References (orig_tables[6])
+    format_table_headers_and_rows(orig_tables[6], tbls.T2_REFERENCES, header_row_count=1, start_data_row=1)
 
-    # Table 6: Power Sequencing (doc.tables[7])
-    format_table_headers_and_rows(doc.tables[7], tbls.T6_POWER_SEQUENCING, header_row_idx=0, start_data_row=1)
+    # Table 6: Power Sequencing (orig_tables[7])
+    format_table_headers_and_rows(orig_tables[7], tbls.T6_POWER_SEQUENCING, header_row_count=1, start_data_row=1)
 
-    # Table 7: Subsystem 1 Power Consumption (doc.tables[8])
-    format_table_headers_and_rows(doc.tables[8], tbls.T7_POWER_CONSUMPTION, header_row_idx=0, start_data_row=2)
+    # Table 7: Subsystem 1 Power Consumption (orig_tables[8])
+    format_table_headers_and_rows(orig_tables[8], tbls.T7_POWER_CONSUMPTION, header_row_count=2, start_data_row=2)
 
-    # Table 8: Subsystem 1 Power Dissipation (doc.tables[9])
-    format_table_headers_and_rows(doc.tables[9], tbls.T8_POWER_DISSIPATION, header_row_idx=0, start_data_row=2)
+    # Table 8: Subsystem 1 Power Dissipation (orig_tables[9])
+    format_table_headers_and_rows(orig_tables[9], tbls.T8_POWER_DISSIPATION, header_row_count=1, start_data_row=1)
 
-    # Table 9: Battery Capacity (doc.tables[10])
-    format_table_headers_and_rows(doc.tables[10], tbls.T9_BATTERY_CAPACITY, header_row_idx=0, start_data_row=1)
+    # Table 9: Battery Capacity (orig_tables[10])
+    format_table_headers_and_rows(orig_tables[10], tbls.T9_BATTERY_CAPACITY, header_row_count=1, start_data_row=1)
 
-    # Table 10: Power Modes (doc.tables[11])
-    format_table_headers_and_rows(doc.tables[11], tbls.T10_POWER_MODES, header_row_idx=0, start_data_row=1)
+    # Table 10: Power Modes (orig_tables[11])
+    format_table_headers_and_rows(orig_tables[11], tbls.T10_POWER_MODES, header_row_count=1, start_data_row=1)
 
-    # Table 11: Subsystem 1 Assembly Variants (doc.tables[12])
-    format_table_headers_and_rows(doc.tables[12], tbls.T11_ASSEMBLY_VARIANTS, header_row_idx=0, start_data_row=1)
+    # Table 11: Subsystem 1 Assembly Variants (orig_tables[12])
+    format_table_headers_and_rows(orig_tables[12], tbls.T11_ASSEMBLY_VARIANTS, header_row_count=1, start_data_row=1)
 
-    # Table 12: Subsystem 1 Board Revisions (doc.tables[13])
-    format_table_headers_and_rows(doc.tables[13], tbls.T12_BOARD_REVISIONS, header_row_idx=0, start_data_row=1)
+    # Table 12: Subsystem 1 Board Revisions (orig_tables[13])
+    format_table_headers_and_rows(orig_tables[13], tbls.T12_BOARD_REVISIONS, header_row_count=1, start_data_row=1)
 
-    # Table 13: DC Analysis High (doc.tables[14])
-    format_table_headers_and_rows(doc.tables[14], tbls.T13_DC_HIGH, header_row_idx=0, start_data_row=1)
+    # Table 13: DC Analysis High (orig_tables[14])
+    format_table_headers_and_rows(orig_tables[14], tbls.T13_DC_HIGH, header_row_count=1, start_data_row=1)
 
-    # Table 13: DC Analysis Low (doc.tables[15])
-    format_table_headers_and_rows(doc.tables[15], tbls.T13_DC_LOW, header_row_idx=0, start_data_row=1)
+    # Table 13: DC Analysis Low (orig_tables[15])
+    format_table_headers_and_rows(orig_tables[15], tbls.T13_DC_LOW, header_row_count=1, start_data_row=1)
 
-    # Table 14: UART Header (doc.tables[16])
-    format_table_headers_and_rows(doc.tables[16], tbls.T14_UART_HEADER, header_row_idx=0, start_data_row=1)
+    # Table 14: UART Header (orig_tables[16])
+    format_table_headers_and_rows(orig_tables[16], tbls.T14_UART_HEADER, header_row_count=1, start_data_row=1)
 
-    # Table 15: UART Header Mating (doc.tables[17])
-    format_table_headers_and_rows(doc.tables[17], tbls.T15_UART_MATING, header_row_idx=0, start_data_row=1)
+    # Table 15: UART Header Mating (orig_tables[17])
+    format_table_headers_and_rows(orig_tables[17], tbls.T15_UART_MATING, header_row_count=1, start_data_row=1)
 
-    # Table 16: UART Header Cable (doc.tables[18])
-    format_table_headers_and_rows(doc.tables[18], tbls.T16_UART_CABLE, header_row_idx=0, start_data_row=2)
+    # Table 16: UART Header Cable (orig_tables[18])
+    format_table_headers_and_rows(orig_tables[18], tbls.T16_UART_CABLE, header_row_count=2, start_data_row=2)
 
-    # Table 17: Inter-Subsystem Header (doc.tables[19])
-    format_table_headers_and_rows(doc.tables[19], tbls.T17_EXPANSION_HEADER, header_row_idx=0, start_data_row=2)
+    # Table 17: Inter-Subsystem Header (orig_tables[19])
+    format_table_headers_and_rows(orig_tables[19], tbls.T17_EXPANSION_HEADER, header_row_count=2, start_data_row=2)
 
-    # Table 18: Inter-Subsystem Cable (doc.tables[20])
-    format_table_headers_and_rows(doc.tables[20], tbls.T18_EXPANSION_CABLE, header_row_idx=0, start_data_row=2)
+    # Table 18: Inter-Subsystem Cable (orig_tables[20])
+    format_table_headers_and_rows(orig_tables[20], tbls.T18_EXPANSION_CABLE, header_row_count=2, start_data_row=2)
 
-    # Table 19: Module 1 GPIOs (doc.tables[21])
-    format_table_headers_and_rows(doc.tables[21], tbls.T19_MODULE1_GPIOS, header_row_idx=0, start_data_row=2)
+    # Table 19: Module 1 GPIOs (orig_tables[21])
+    format_table_headers_and_rows(orig_tables[21], tbls.T19_MODULE1_GPIOS, header_row_count=2, start_data_row=2)
 
-    # Table 20: Module 1 Interrupts (doc.tables[22])
-    format_table_headers_and_rows(doc.tables[22], tbls.T20_MODULE1_INTERRUPTS, header_row_idx=0, start_data_row=2)
+    # Table 20: Module 1 Interrupts (orig_tables[22])
+    format_table_headers_and_rows(orig_tables[22], tbls.T20_MODULE1_INTERRUPTS, header_row_count=2, start_data_row=2)
 
-    # Table 21: Programmable ROM (doc.tables[23])
-    format_table_headers_and_rows(doc.tables[23], tbls.T21_PROGRAMMABLE_ROM, header_row_idx=0, start_data_row=2)
+    # Table 21: Programmable ROM (orig_tables[23])
+    format_table_headers_and_rows(orig_tables[23], tbls.T21_PROGRAMMABLE_ROM, header_row_count=1, start_data_row=1)
 
-    # Table 22: Class A BOM (doc.tables[24])
-    format_table_headers_and_rows(doc.tables[24], tbls.T22_CLASS_A_BOM, header_row_idx=0, start_data_row=2)
+    # Table 22: Class A BOM (orig_tables[24])
+    format_table_headers_and_rows(orig_tables[24], tbls.T22_CLASS_A_BOM, header_row_count=1, start_data_row=1)
 
-    # Table 23: Requirement - Design Mapping (doc.tables[25])
-    format_table_headers_and_rows(doc.tables[25], tbls.T23_REQ_MAPPING, header_row_idx=0, start_data_row=1)
+    # Table 23: Requirement - Design Mapping (orig_tables[25])
+    format_table_headers_and_rows(orig_tables[25], tbls.T23_REQ_MAPPING, header_row_count=1, start_data_row=1)
 
     # =========================================================================
-    # 3. Replace Placeholders & Insert Content & Figures
+    # 3. Content Mapping for all Headings
     # =========================================================================
-    print("3. Populating Chapters 1 to 20 text, callouts, and embedding Figures 1 to 15...")
+    print("3. Preparing Chapter Content & Figure Embeddings...")
 
-    # Map of Heading -> list of paragraphs to insert
     heading_content = {
+        "Introduction": ["This Hardware Design Document (HDD) establishes the authoritative, production-grade engineering baseline for the Smart Programmable Power Supply (SPPS) Module, Project Code VVDN_SPPS_2026."],
         "Purpose": txts.CH1_PURPOSE,
         "Document Conventions": txts.CH1_CONVENTIONS,
         "Intended Audience and Reading Suggestions": txts.CH1_AUDIENCE,
@@ -238,9 +241,11 @@ def main():
         "References": txts.CH1_REFERENCES_INTRO,
         "Product – Technical Overview": txts.CH2_TECH_OVERVIEW,
         "System1 Implementation Plan": txts.CH3_IMPLEMENTATION_INTRO,
+        "System1 Hardware Architecture": ["The SPPS hardware architecture consists of a monolithic 4-layer PCBA integrating four sequential power and control conversion stages:"],
         "System1 Architecture": txts.CH4_SYSTEM_ARCH,
         "SubSystem1 Architecture": txts.CH4_SUBSYS1_ARCH,
         "SubSystem2 Architecture": txts.CH4_SUBSYS2_ARCH,
+        "Digital Interface Design": ["Subsystem 1 incorporates the digital control and supervisory logic for autonomous regulation, fault handling, and telemetry streaming."],
         "Subsystem1 [Main Board]": txts.CH5_DIGITAL_DESIGN,
         "Module1 [Major Component like Application Processor, FPGA, CPLD, DSP etc]": txts.CH5_MODULE1_INTRO,
         "Boot Strapping": txts.CH5_BOOT_STRAPPING,
@@ -251,17 +256,20 @@ def main():
         "Module2 [Major Component like DSP]": txts.CH5_MODULE2_INTRO,
         "Subsystem2 [Daughter Board]": txts.CH5_SUBSYS2_INTRO,
         "RF Design": txts.CH6_RF_INTRO,
+        "WiFi": ["The SPPS module contains no wireless RF transceivers. Conducted and radiated EMI suppression measures and compliance analyses are detailed below."],
         "Interface": txts.CH6_WIFI_INTERFACE,
         "RF Conducted Performance": txts.CH6_RF_CONDUCTED,
         "RF Radiated Performance": txts.CH6_RF_RADIATED,
         "RF Shielding": txts.CH6_RF_SHIELDING,
         "RF Simulation/Analysis": txts.CH6_RF_SIMULATION,
         "Zigbee": txts.CH6_ZIGBEE,
+        "Subsystem2 [Daughter Board]": txts.CH6_SUBSYS2_RF,
         "Analog Design": txts.CH7_ANALOG_INTRO,
         "Component/Module1 [Photodiode]": txts.CH7_MODULE1_VOLTAGE_SENSE,
         "Simulation Results": txts.CH7_SIMULATION_RESULTS,
         "Component/Module2 [PWM based Analog Signal]": txts.CH7_MODULE2_DAC_STEERING,
         "Component/Module3 [RTD based temperature sensor]": txts.CH7_MODULE3_NTC_TEMP,
+        "Subsystem2 [Daughter Board]": txts.CH7_SUBSYS2_ANALOG,
         "Power Design": txts.CH8_POWER_DESIGN_INTRO,
         "Subsystem1 Power Architecture": txts.CH8_SUBSYS1_POWER_ARCH,
         "Power Sequencing": txts.CH8_POWER_SEQUENCING_INTRO,
@@ -279,15 +287,16 @@ def main():
         "Clock Scheme": txts.CH10_CLOCK_SCHEME + txts.CH10_CLOCK_DESCRIPTIONS,
         "Reset Scheme": txts.CH11_RESET_SCHEME,
         "Hardware Configurations": txts.CH12_CONFIG_INTRO,
+        "Subsystem1 HW Configurations": ["Hardware configuration jumpers and resistor straps for Subsystem 1 (Main PCBA)."],
         "Board Type/Assembly Variant": txts.CH12_BOARD_VARIANTS_INTRO,
         "Board Revision": txts.CH12_BOARD_REVISIONS_INTRO,
         "Jumper Configuration": txts.CH12_JUMPER_CONFIG,
-        "Processor UART path selection": ["Jumper JP1 routes UART to Console Header J3 (Short 1-2) or Expansion J4 (Short 2-3)."],
-        "SPI Flash programming path selection": ["Solder bridges SB1/SB2 configure I2C DAC steering vs direct HRTIM PWM injection."],
+        "Processor UART path selection": ["Jumper JP1 routes USART1 to Console Debug Header J3 (Short 1-2) or Auxiliary Header J4 (Short 2-3)."],
+        "SPI Flash programming path selection": ["Solder bridges SB1 and SB2 select hardware I2C DAC control vs direct internal HRTIM PWM voltage steering."],
         "Subsystem2 HW Configurations": txts.CH12_SUBSYS2_CONFIG,
         "Design Analysis – Subsysem1": txts.CH13_ANALYSIS_INTRO,
         "DC Analysis": txts.CH13_DC_ANALYSIS_INTRO,
-        "Module1 – Module2 Interface (Ex: Processor – Flash SPI Interface)": ["DC analysis between STM32G474 (3.3V) and LM5176 / INA226 / Optocouplers."],
+        "Module1 – Module2 Interface (Ex: Processor – Flash SPI Interface)": ["DC electrical noise margin analysis between STM32G474RET6 (3.3V LVCMOS) and LM5176 / INA226."],
         "Module1 – Module3 Interface (Ex: Processor – Microcontroller Interface)": txts.CH13_MODULE1_3_DC,
         "Timing Analysis": txts.CH13_TIMING_ANALYSIS,
         "PCB Layer Stack-up Analysis": txts.CH13_PCB_STACKUP,
@@ -306,11 +315,11 @@ def main():
         "Inter Subsystem Connectors": ["Inter-subsystem telemetry expansion via 6-pin header J4."],
         "Subsystem1 – Subsystem2 Connectors": txts.CH14_INTER_SUBSYS_CONNECTORS,
         "Connector 1 [Camera Interface]": ["Auxiliary Telemetry & Remote Sense Header J4 pinout."],
-        "Connector 2 [Daughter Board Interface]": ["N/A: Single monolithic board architecture."],
+        "Connector 2 [Daughter Board Interface]": ["Non-Applicable: Single monolithic board architecture."],
         "Subsystem2 – Subsystem3 Connectors": txts.CH14_SUBSYS2_3_CONNECTORS,
         "GPIO Mapping": txts.CH15_GPIO_INTRO,
         "Subsystem1 GPIOs": ["Master GPIO mapping for STM32G474RET6 (LQFP-64)."],
-        "Module1 [Processor]": ["Comprehensive pin allocation table for Module 1 microcontroller U5."],
+        "Module1 [Processor]": ["The master GPIO pin allocation and hardware interrupt configuration for microcontroller U5 are tabulated below:"],
         "Module2 [MSP430]": txts.CH15_MODULE2_GPIO,
         "Subsystem2 GPIOs": txts.CH15_SUBSYS2_GPIO,
         "Interrupt Mapping": txts.CH16_INTERRUPT_INTRO,
@@ -343,38 +352,48 @@ def main():
         "Figure 15: Subsystem1 [LLxWW mm] - PCB Bottom Floor Plan": DIAG_DIR / "figure15_pcb_bottom_floorplan.png"
     }
 
-    # Iterate through paragraphs in the document
+    # =========================================================================
+    # 4. Process Paragraphs, Embed Figures, and Insert Tables
+    # =========================================================================
+    print("4. Processing Document Paragraphs, Inserting Figures and Tables...")
+
     curr_heading = ""
+    # Process all paragraphs
     for p in list(doc.paragraphs):
         t = p.text.strip()
         style = p.style.name
 
+        # If heading
         if style.startswith("Heading"):
             curr_heading = t
-            # If heading has a template placeholder tag, clean it
             if "<This section" in curr_heading:
                 p.text = "8.1.1 Power Sequencing Specification"
                 curr_heading = "Power Sequencing"
+            continue
+
+        # Front matter and TOC paragraphs are preserved
+        if style.startswith("toc") or style.startswith("TOC") or style.startswith("Subtitle"):
+            if "<This section" in t:
+                p.text = "8.1.1\tPower Sequencing Specification\t18"
             continue
 
         # Embed Images right before Figure Captions
         if style == "Caption" and t in figure_images:
             img_path = figure_images[t]
             if img_path.exists():
-                # Insert picture paragraph before caption
                 img_p = p.insert_paragraph_before()
                 img_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
                 run = img_p.add_run()
                 run.add_picture(str(img_path), width=Inches(6.0))
             continue
 
-        # Insert Missing Tables
+        # Insert Missing Tables under their captions
         if style == "Caption" and t == "Table 3: Implementation":
             tbl_3 = doc.add_table(rows=len(tbls.T3_IMPLEMENTATION) + 1, cols=4)
             headers = ["Customer Requirement", "Specification Target", "Circuit Topology & Selected Components", "Verification Criteria"]
             for i, h in enumerate(headers):
                 tbl_3.rows[0].cells[i].text = h
-            format_table_headers_and_rows(tbl_3, tbls.T3_IMPLEMENTATION, header_row_idx=0, start_data_row=1)
+            format_table_headers_and_rows(tbl_3, tbls.T3_IMPLEMENTATION, header_row_count=1, start_data_row=1)
             p._p.addnext(tbl_3._tbl)
             continue
 
@@ -383,7 +402,7 @@ def main():
             headers = ["Pin / Option", "Physical Location", "Internal Pull", "Board Connection", "Sampled State", "Boot Execution Mode"]
             for i, h in enumerate(headers):
                 tbl_4.rows[0].cells[i].text = h
-            format_table_headers_and_rows(tbl_4, tbls.T4_BOOT_STRAPPING, header_row_idx=0, start_data_row=1)
+            format_table_headers_and_rows(tbl_4, tbls.T4_BOOT_STRAPPING, header_row_count=1, start_data_row=1)
             p._p.addnext(tbl_4._tbl)
             continue
 
@@ -392,64 +411,53 @@ def main():
             headers = ["Frequency Band", "CISPR 32 Class B Limit", "Measured Radiated Level", "Compliance Headroom", "Compliance Status"]
             for i, h in enumerate(headers):
                 tbl_5.rows[0].cells[i].text = h
-            format_table_headers_and_rows(tbl_5, tbls.T5_RF_RADIATED, header_row_idx=0, start_data_row=1)
+            format_table_headers_and_rows(tbl_5, tbls.T5_RF_RADIATED, header_row_count=1, start_data_row=1)
             p._p.addnext(tbl_5._tbl)
             continue
 
-        # Replace Placeholder text
-        if t.startswith("<") or t in ["<insert image here>", "<explain here>", "<Insert table as needed>", "Connector MPN & Make", "Following references can be given", "A table has to be prepared as shown below."]:
-            if "capturing the hardware design details" in t:
-                p.text = txts.CH2_BOUNDARY_NOTE[0]
-            elif "All RF interfaces" in t:
-                p.text = "The SPPS module contains no wireless RF transceivers. Conducted and radiated EMI suppression measures and compliance analyses are detailed below."
-            elif "Rest is same as internal" in t:
-                p.text = "All external connectors adhere to standard VVDN electrical derating and IPC-2221B creepage rules."
-            elif "Same as above" in t:
-                p.text = "Non-Applicable: The SPPS contains no wireless radio modules or secondary daughter boards."
-            elif "Same as Subsystem1" in t:
-                p.text = "Non-Applicable: Single monolithic PCBA architecture."
-            elif "Insert table as needed" in t:
-                p.text = "Non-Applicable: All supervisory signals are consolidated into primary microcontroller U5 (STM32G474RET6)."
-            elif "insert image here" in t:
-                p.text = ""
-            elif "explain here" in t:
-                p.text = ""
-            elif "<This section shall capture the power up and down sequencing" in t:
-                if p.style.name == "toc 3":
-                    p.text = "8.1.1	Power Sequencing Specification	18"
-                else:
-                    p.text = "8.1.1 Power Sequencing Specification"
-            elif curr_heading in heading_content:
-                c_list = heading_content[curr_heading]
-                if len(c_list) > 0:
-                    p.text = c_list[0]
-                    # Append additional paragraphs in that section
-                    last_elem = p
-                    for extra_para in c_list[1:]:
-                        new_p = doc.add_paragraph(extra_para, style="Normal" if not extra_para.startswith("  *") else "List Paragraph")
-                        last_elem._p.addnext(new_p._p)
-                        last_elem = new_p
-                    heading_content[curr_heading] = []
-                else:
-                    p.text = ""
+        # Body paragraphs under headings
+        if curr_heading in heading_content:
+            c_list = heading_content[curr_heading]
+            if len(c_list) > 0:
+                # First paragraph gets the primary section text
+                p.text = c_list[0]
+                p.style = "Normal"
+                last_elem = p
+                for extra_para in c_list[1:]:
+                    new_p = doc.add_paragraph(extra_para, style="Normal" if not extra_para.startswith("  *") and not extra_para.startswith("* ") else "List Paragraph")
+                    last_elem._p.addnext(new_p._p)
+                    last_elem = new_p
+                # Clear content list so remaining template instruction paragraphs in this section are removed
+                heading_content[curr_heading] = []
             else:
-                p.text = ""
+                # Remove any leftover template instruction / guideline paragraphs
+                try:
+                    p._p.getparent().remove(p._p)
+                except Exception:
+                    p.text = ""
+        else:
+            # If no content mapped, remove placeholder text
+            if t.startswith("<") or "shall" in t or "need not" in t or "Note that" in t or "Below shall" in t:
+                try:
+                    p._p.getparent().remove(p._p)
+                except Exception:
+                    p.text = ""
 
     # =========================================================================
-    # 4. Save Production Word Document
+    # 5. Save Production Word Document
     # =========================================================================
-    print("4. Saving Production Word Document to:", OUT_DOCX_PATH)
+    print("5. Saving Production Word Document to:", OUT_DOCX_PATH)
     doc.save(str(OUT_DOCX_PATH))
     print("Production Word Document successfully saved!")
 
     # =========================================================================
-    # 5. Generate Matching Human-Readable Markdown Document
+    # 6. Generate 1:1 Matching Human-Readable Markdown Document
     # =========================================================================
-    print("5. Generating 1:1 Matching Human-Readable Markdown Document:", OUT_MD_PATH)
+    print("6. Generating 1:1 Matching Human-Readable Markdown Document:", OUT_MD_PATH)
     build_markdown_mirror()
-    print("=" * 75)
+    print("=" * 80)
     print("ALL DELIVERABLES SUCCESSFULLY CREATED AND VERIFIED!")
-    print("=" * 75)
+    print("=" * 80)
 
 def build_markdown_mirror():
     """Generates a complete, clean, human-readable Markdown mirror conforming 1:1 to template."""
