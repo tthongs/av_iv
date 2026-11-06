@@ -114,9 +114,9 @@ def main():
     # Table 1: Project Metadata
     t1 = orig_tables[1]
     t1.rows[0].cells[1].text = "VVDN_SPPS_2026"
-    t1.rows[1].cells[1].text = "Smart Programmable Power Supply (SPPS) Module"
-    t1.rows[2].cells[1].text = "V1.0"
-    t1.rows[3].cells[1].text = "30-OCT-2026"
+    t1.rows[1].cells[1].text = "Design and Development of a Smart Programmable Voltage Supply Module with 230 V AC Nominal Input (85–265 V AC) and 5–20 V, 3 A Programmable DC Output"
+    t1.rows[2].cells[1].text = "V1.1"
+    t1.rows[3].cells[1].text = "06-NOV-2026"
 
     # Table 2: Revision History
     format_table_headers_and_rows(orig_tables[2], tbls.T2_REVISION_HISTORY, header_row_count=1, start_data_row=1)
@@ -251,7 +251,7 @@ def main():
         "Boot Strapping": txts.CH5_BOOT_STRAPPING,
         "Memory Interface": txts.CH5_MEMORY_INTERFACE,
         "Programming Interface": txts.CH5_PROGRAMMING_INTERFACE,
-        "Peripheral Interface": txts.CH5_PERIPHERAL_INTERFACE,
+        "Peripheral Interface": txts.CH5_PERIPHERAL_INTERFACE + txts.CH5_MODULE3_STORAGE,
         "GPIO Interface": txts.CH5_GPIO_INTERFACE,
         "Module2 [Major Component like DSP]": txts.CH5_MODULE2_INTRO,
         "Subsystem2 [Daughter Board]": txts.CH5_SUBSYS2_INTRO,
@@ -267,7 +267,7 @@ def main():
         "Analog Design": txts.CH7_ANALOG_INTRO,
         "Component/Module1 [Photodiode]": txts.CH7_MODULE1_VOLTAGE_SENSE,
         "Simulation Results": txts.CH7_SIMULATION_RESULTS,
-        "Component/Module2 [PWM based Analog Signal]": txts.CH7_MODULE2_DAC_STEERING,
+        "Component/Module2 [PWM based Analog Signal]": txts.CH7_MODULE2_DAC_STEERING + txts.CH7_MODULE4_TELEMETRY,
         "Component/Module3 [RTD based temperature sensor]": txts.CH7_MODULE3_NTC_TEMP,
         "Subsystem2 [Daughter Board]": txts.CH7_SUBSYS2_ANALOG,
         "Power Design": txts.CH8_POWER_DESIGN_INTRO,
@@ -483,7 +483,7 @@ def build_markdown_mirror():
     # Front Matter
     h1("HARDWARE DESIGN DOCUMENT (HDD)")
     h2("Smart Programmable Power Supply (SPPS)")
-    p("**Project Code:** VVDN_SPPS_2026  \n**Document Title:** Hardware Design Document - Smart Programmable Power Supply Module  \n**Specification Envelope:** 85 - 265 V AC RMS Universal Input, 5.0 - 20.0 V DC / 3.0 A Max Continuous Output (60 W)  \n**Revision:** V1.0  \n**Date:** 30-OCT-2026  \n**Corporate Template:** VVDN TP013 V1.1 Standard  ")
+    p("**Project Code:** VVDN_SPPS_2026  \n**Document Title:** Design and Development of a Smart Programmable Voltage Supply Module with 230 V AC Nominal Input (85–265 V AC) and 5–20 V, 3 A Programmable DC Output  \n**Specification Envelope:** 85 - 265 V AC RMS Universal Input (230 V AC Nominal), 5.0 - 20.0 V DC / 3.0 A Max Continuous Output (60 W)  \n**Revision:** V1.1  \n**Date:** 06-NOV-2026  \n**Corporate Template:** VVDN TP013 V1.1 Standard  ")
 
     p("\n---\n")
     h3("Amendment History")
@@ -593,6 +593,9 @@ def build_markdown_mirror():
     h3("5.1.2 Module2 [Power Regulators: LM5176 & UCC28740]")
     for para in txts.CH5_MODULE2_INTRO: p(para)
 
+    h3("5.1.3 Module3 [MicroSD Card Storage & Autonomous Data Logging Interface]")
+    for para in txts.CH5_MODULE3_STORAGE: p(para)
+
     h2("5.2 Subsystem2 [Daughter Board]")
     for para in txts.CH5_SUBSYS2_INTRO: p(para)
 
@@ -643,6 +646,9 @@ def build_markdown_mirror():
 
     h3("7.1.3 Component/Module3 [RTD based temperature sensor / NTC]")
     for para in txts.CH7_MODULE3_NTC_TEMP: p(para)
+
+    h3("7.1.4 Component/Module4 [Dual-Domain Isolated Power Telemetry & Live Efficiency Frontend]")
+    for para in txts.CH7_MODULE4_TELEMETRY: p(para)
 
     h2("7.2 Subsystem2 [Daughter Board]")
     for para in txts.CH7_SUBSYS2_ANALOG: p(para)

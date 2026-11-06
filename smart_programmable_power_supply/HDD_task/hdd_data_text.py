@@ -7,7 +7,8 @@ Zero dollar signs, zero raw LaTeX math, 100% clean Unicode notation.
 CH1_PURPOSE = [
     "The purpose of this Hardware Design Document (HDD) is to define the definitive, production-grade hardware engineering "
     "design, circuit topologies, mathematical derivations, component selections, PCB layer stackup, safety isolation boundaries, "
-    "and Class A Bill of Materials (BOM) for the Smart Programmable Power Supply (SPPS) module (VVDN_SPPS_2026).",
+    "and Class A Bill of Materials (BOM) for the Smart Programmable Voltage Supply Module (VVDN_SPPS_2026): "
+    "Design and Development of a Smart Programmable Voltage Supply Module with 230 V AC Nominal Input (85–265 V AC) and 5–20 V, 3 A Programmable DC Output.",
     "This document serves as the authoritative technical baseline translating all customer functional and electrical requirements specified "
     "in the authoritative Product Requirement Document (PRD Rev A1_001) into fully verified schematic architectures "
     "and PCB layout physical guidelines in strict conformance with VVDN Corporate Engineering Template TP013 Rev V1.1.",
@@ -54,9 +55,10 @@ CH1_REFERENCES_INTRO = [
 
 CH2_TECH_OVERVIEW = [
     "The Smart Programmable Power Supply (SPPS) module (VVDN_SPPS_2026) is a high-performance, compact, digitally supervised "
-    "power converter engineered for demanding industrial test benches, automated test equipment (ATE), and laboratory instrumentation. "
-    "The system operates across a universal AC line envelope of 85 - 265 V AC RMS (47 - 63 Hz) and delivers a widely programmable, "
-    "dynamically adjustable DC output from 5.0 V to 20.0 V DC at up to 3.0 A continuous output current (60.0 W maximum power).",
+    "power converter engineered for demanding industrial test benches, automated test equipment (ATE), and laboratory instrumentation: "
+    "Design and Development of a Smart Programmable Voltage Supply Module with 230 V AC Nominal Input (85–265 V AC) and 5–20 V, 3 A Programmable DC Output. "
+    "The system operates across a universal AC line envelope of 85 - 265 V AC RMS (47 - 63 Hz, 230 V AC Nominal) and delivers a widely programmable, "
+    "dynamically adjustable DC output from 5.0 V to 20.0 V DC at up to 3.0 A continuous output current (60.0 W maximum continuous power).",
     "To achieve industry-leading conversion efficiency (>= 88% peak), ultra-low output ripple (<= 50 mVpp across the entire envelope), "
     "and sub-5 µs fast hardware constant-current clamping, the SPPS incorporates an optimized 4-stage cascaded power architecture:",
     "Stage 1 (Mains Input & EMI Protection): Integrates a 2.0 A ceramic time-lag fuse (F1), a 300 V RMS / 4.5 kA Metal Oxide Varistor (RV1), "
@@ -66,15 +68,17 @@ CH2_TECH_OVERVIEW = [
     "Stage 2 (Rectification & Bulk Energy Reservoir): Utilizes a glass-passivated 600 V / 4 A GBU4J bridge rectifier (D1) and a high-reliability "
     "82 µF / 450 V 105°C aluminum electrolytic capacitor (C4) providing a robust 120 V to 375 V DC high-voltage rail and exceeding the 20.0 ms AC line dropout holdup requirement (calculated actual holdup = 20.8 ms).",
     "Stage 3 (Galvanic Isolation & Intermediate Pre-Regulation): Employs a high-efficiency Quasi-Resonant (QR) Flyback converter based on the "
-    "Texas Instruments UCC28740 controller driving an 800 V / 9 A STP10NK80Z power MOSFET and a custom PQ26/20 transformer (L_p = 220 µH, N_p:N_s = 6:1, "
+    "Texas Instruments UCC28740 controller (with UCC28C43 fixed-PWM alternate) driving an 800 V / 9 A STP10NK80Z power MOSFET and a custom PQ26/20 transformer (L_p = 220 µH, N_p:N_s = 6:1, "
     "triple-insulated wire providing >= 3.0 kV AC reinforced galvanic isolation). The Flyback stage produces a stiff, pre-regulated 24.0 V DC intermediate rail (+/- 2.5%, 65 W capability) with 94.2% peak efficiency.",
     "Stage 4 (Synchronous Buck-Boost Post-Regulator): Driven by a Texas Instruments LM5176 4-switch synchronous buck-boost controller operating at "
     "300 kHz, four Infineon BSC035N10NS5 100 V / 100 A SuperSO8 MOSFETs (R_DS(on) = 3.5 mΩ), and a Coilcraft SER2918-682KL (6.8 µH / 18 A) flat-wire inductor. "
     "This stage seamlessly transitions between Buck, Buck-Boost, and Boost operating topologies to generate the continuous 5.0 - 20.0 V / 3.0 A output with <= 50 mVpp ripple.",
-    "Supervisory & Telemetry Domain: Supervised by an STMicroelectronics STM32G474RET6 ARM Cortex-M4F mixed-signal microcontroller (170 MHz core, "
-    "512 KB Flash, 128 KB SRAM, high-resolution timers, 12-bit DACs). The MCU executes active 12-bit DAC voltage injection steering into the LM5176 feedback loop, "
-    "interrogates dual primary and secondary Texas Instruments INA226 16-bit power telemetry monitors over an isolated I2C bus (ISO1640), supervises a sub-5 µs fast hardware "
-    "analog comparator CC clamp (TLV3201), drives an onboard 0.96-inch 128x64 OLED dashboard, and exposes an isolated serial console."
+    "Supervisory, Telemetry & Logging Domain: Supervised by an STMicroelectronics STM32G474RET6 ARM Cortex-M4F mixed-signal microcontroller (170 MHz core, "
+    "512 KB Flash, 128 KB SRAM, high-resolution timers, 12-bit DACs). The MCU executes active 12-bit DAC voltage injection steering into the LM5176 feedback loop (R_DAC = 30.1 kΩ), "
+    "samples primary AC mains voltage via a Texas Instruments AMC1311BDWVR reinforced isolated amplifier (201:1 divider) and primary AC current via a Talema AC1010 toroidal CT (1000:1 ratio, 100 Ω burden), "
+    "interrogates a secondary Texas Instruments INA226AIDGSR 16-bit monitor over I2C1 to calculate real-time conversion efficiency (eta = P_DC / P_AC) at a 10 Hz rate, "
+    "supervises an autonomous non-blocking MicroSD FAT32 continuous data logger (push-push socket J6 over SPI2), supervises a sub-5 µs fast hardware "
+    "analog comparator CC clamp (TLV3201), drives an onboard 1.30-inch 128x64 OLED dashboard (SH1106/SSD1306), and exposes an isolated SCPI serial console over USB-C / UART."
 ]
 
 CH2_BOUNDARY_NOTE = [
@@ -102,16 +106,17 @@ CH4_SYSTEM_ARCH = [
 ]
 
 CH4_SUBSYS1_ARCH = [
-    "Subsystem 1 (Main PCBA: VVDN_SPPS_MAIN_V1.0) comprises nine tightly integrated functional modules:",
+    "Subsystem 1 (Main PCBA: VVDN_SPPS_MAIN_V1.0) comprises ten tightly integrated functional modules:",
     "Module 1 (Mains AC Input & Surge Protection): Phoenix Contact 3-pin terminal J1, 2.0 A ceramic fuse F1, 300 V MOV RV1, 10 Ω NTC RT1.",
     "Module 2 (EMI Line Filter & Bulk DC Reservoir): Two-stage common-mode/differential filter (FL1, FL2, C1, C2, C3A/B) and GBU4J bridge D1 + 82 µF / 450 V C4.",
-    "Module 3 (Isolated Intermediate Flyback Stage): UCC28740 quasi-resonant controller U1, STP10NK80Z MOSFET Q1, PQ26/20 transformer TX1 (220 µH), MBR20100CT rectifier D2.",
+    "Module 3 (Isolated Intermediate Flyback Stage): UCC28740 quasi-resonant controller U1 (UCC28C43 alternate), STP10NK80Z MOSFET Q1, PQ26/20 transformer TX1 (220 µH), MBR20100CT rectifier D2.",
     "Module 4 (Synchronous 4-Switch Buck-Boost Post-Regulator): LM5176 controller U4, 4x BSC035N10NS5 MOSFETs Q2-Q5, Coilcraft SER2918-682KL inductor L1, polymer output filters.",
     "Module 5 (Fast Hardware CC Protection Clamp): TLV3201 high-speed comparator U8, 10 mΩ Kelvin current shunt RS2, active gate disconnector Q7.",
     "Module 6 (Supervisory Microcontroller Core): STM32G474RET6 MCU U5 (170 MHz Cortex-M4F), 24.000 MHz crystal Y1, SWD port J5, debug UART J3.",
-    "Module 7 (Dual-Domain Power Telemetry): Texas Instruments INA226 monitors (U6 primary, U7 secondary), ISO1640 digital isolator U3.",
+    "Module 7 (Dual-Domain Power Telemetry & Live Efficiency Engine): Texas Instruments AMC1311BDWVR reinforced isolated amplifier U6 across a 201:1 high-voltage divider, Talema AC1010 1000:1 current transformer CT1 with 100.0 Ω burden resistor on the primary AC line, and Texas Instruments INA226AIDGSR monitor U7 on the secondary DC output, calculating real-time AC input power, DC output power, and live conversion efficiency (eta = P_DC / P_AC) at 10 Hz.",
     "Module 8 (Auxiliary Power Distribution Network): Flyback auxiliary winding (14 V), TPS7A4700 ultra-low-noise 3.3 V LDO U9, AZ1117-5.0 LDO U10.",
-    "Module 9 (User Interface & Terminals): 0.96-inch I2C OLED display, Pomona 6883 heavy-duty DC binding posts J2, status LEDs (Green/Red)."
+    "Module 9 (User Interface & Terminals): 1.30-inch I2C OLED display (SH1106/SSD1306), Pomona 6883 heavy-duty DC binding posts J2, rotary encoders, and status LEDs (Green/Red).",
+    "Module 10 (MicroSD Non-Volatile Data Logging Subsystem): Push-push MicroSD card connector J6 connected to STM32 SPI2 bus with Bourns CDDFN10-0524P TVS ESD protection and Card Detect GPIO, executing continuous 12-parameter telemetry data logging in FAT32 CSV format."
 ]
 
 CH4_SUBSYS2_ARCH = [
@@ -163,17 +168,34 @@ CH5_PROGRAMMING_INTERFACE = [
 ]
 
 CH5_PERIPHERAL_INTERFACE = [
-    "The supervisory microcontroller interfaces to system peripherals through dedicated low-noise digital buses:",
-    "1. Isolated Primary Telemetry I2C Bus: I2C1 (Fast-Mode+ @ 1.0 MHz, PB6/PB7) communicates with the primary INA226 monitor (U6) "
-    "through a Texas Instruments ISO1640 bidirectional digital isolator providing 3.0 kV AC reinforced galvanic isolation. "
-    "External 4.7 kΩ pull-up resistors to +3.3V_MCU and +3.3V_PRI ensure rise times < 45 ns.",
-    "2. Secondary Telemetry & OLED I2C Bus: I2C1 also addresses the secondary INA226 power monitor (U7, address 0x40) and the "
-    "Solomon Systech SSD1306 0.96-inch OLED controller (address 0x3C). Telemetry polling occurs at 10 Hz nominal via DMA.",
-    "3. Isolated Serial Debug Console UART: USART1 (PA9/PA10) operates at 115,200 baud (8-N-1) and routes to 4-pin header J3 through "
-    "an optocoupled interface, providing human-readable SCPI commands and real-time ASCII telemetry streaming.",
-    "4. Precision 12-Bit DAC Output Lines: Internal DAC1 Channel 1 outputs 0.00 V to 2.45 V into the LM5176 feedback resistor network (R_DAC = 30.1 kΩ), "
-    "steering output voltage from 20.0 V down to 5.0 V with 4.88 mV resolution. Internal DAC3 Channel 1 outputs 0.00 V to 1.50 V into the LM5176 "
-    "current sense amplifier, setting hardware CC limits from 0.0 A to 3.0 A."
+    "The supervisory microcontroller interfaces to system peripherals through dedicated low-noise digital and analog buses:",
+    "1. Primary AC Telemetry Sampling Channels: Dual-channel synchronous sampling using STM32 ADC1: Channel 6 (PC0) receives the single-ended "
+    "filtered output from the AMC1311 isolated amplifier (primary AC voltage), and Channel 7 (PC1) receives the biased AC voltage across the Talema CT1 burden resistor (primary AC current).",
+    "2. Secondary Telemetry & OLED I2C Bus: I2C1 (Fast-Mode 400 kHz on PB8/PB9) addresses the secondary INA226 power monitor (U7, address 0x40) and the "
+    "1.30-inch OLED display controller (address 0x3C). Telemetry polling occurs at 10 Hz nominal via DMA.",
+    "3. MicroSD SPI2 Storage Bus: SPI2 (PB12 CS, PB13 SCK, PB14 MISO, PB15 MOSI) operates up to 20.0 MHz to stream 512-byte sector buffers to "
+    "push-push socket J6 with FatFs FAT32 file system format.",
+    "4. Isolated Serial Debug / SCPI Console UART: USART1 (PA9/PA10) operates at 115,200 baud (8-N-1) and routes to 4-pin header J3 through "
+    "an optocoupled interface, providing full SCPI command parsing (:MEASure?, :VOLTage, :CURRent, :LOG:DATA?) and ASCII telemetry streaming.",
+    "5. Precision 12-Bit DAC Output Lines: Internal DAC1 Channel 1 (PA4) outputs 0.00 V to 2.45 V into the LM5176 feedback resistor network (R_DAC = 30.1 kΩ), "
+    "steering output voltage from 20.0 V down to 5.0 V with 3.66 mV/LSB resolution. Internal DAC3 Channel 1 outputs 0.00 V to 1.50 V into the LM5176 "
+    "current sense threshold, setting hardware CC limits from 0.0 A to 3.0 A."
+]
+
+CH5_MODULE3_STORAGE = [
+    "Module 3: MicroSD Removable Storage & Data Logging Interface (Socket J6).",
+    "The SPPS incorporates a dedicated high-speed MicroSD card interface for autonomous, long-term operational telemetry recording without requiring an external PC connection. "
+    "The interface connects directly to the STM32G474RET6 hardware SPI2 peripheral:",
+    "1. Physical Bus Architecture: Operates over a 4-wire synchronous SPI2 bus configured in Master Mode (CPOL=0, CPHA=0):",
+    "  * SD_CS_N (PB12): Active-low chip select with 100 kΩ pull-up to +3.3V_SEC, asserting low during 512-byte block transfers.",
+    "  * SD_SCK (PB13): Serial clock generated by the MCU, operating at 400 kHz during SD card identification and initializing up to 20.0 MHz during data streaming.",
+    "  * SD_MISO (PB14): Master-In Slave-Out line receiving data from the MicroSD card, biased with a 47 kΩ pull-up.",
+    "  * SD_MOSI (PB15): Master-Out Slave-In line transmitting command packets and block data to the MicroSD card.",
+    "  * SD_CD_N (PC6): Active-low Card Detect mechanical switch input with an external 10 kΩ pull-up, generating EXTI9_5 interrupts on card insertion and removal.",
+    "2. Power Decoupling & ESD Protection: The socket is powered from +3.3V_SEC through a dedicated ferrite bead (FB_SD, 600 Ω @ 100 MHz) bypassed by a 10 µF tantalum capacitor in parallel with a 100 nF ceramic MLCC. "
+    "All signal lines pass through a Bourns CDDFN10-0524P low-capacitance (0.35 pF) TVS diode array protecting against +/- 15 kV air / +/- 8 kV contact ESD discharge.",
+    "3. File System & Logging Schema: Middleware utilizes ChaN's FatFs R0.15 supporting standard FAT32 formatting on cards up to 32 GB. A 4 KB FreeRTOS circular ring buffer decouples 10 Hz sampling "
+    "from flash write latency, appending 12-parameter timestamped CSV records continuously."
 ]
 
 CH5_GPIO_INTERFACE = [
@@ -322,6 +344,29 @@ CH7_MODULE3_NTC_TEMP = [
     "the MCU instantly de-asserts LM5176_ENABLE and latches the power stage off. Auto-recovery is permitted only after the board cools below 75.0°C (30°C hysteresis)."
 ]
 
+CH7_MODULE4_TELEMETRY = [
+    "7.1.4 Dual-Domain Isolated Power Telemetry Frontend (AMC1311 & Talema AC1010):",
+    "To achieve certified 3000 V RMS reinforced safety isolation while measuring real-time conversion efficiency (eta = P_DC / P_AC), "
+    "dedicated analog sensing frontends are deployed across primary and secondary domains:",
+    "1. Primary AC Mains Voltage Sensing: Sensed via a high-voltage resistive divider string comprising three 500 kΩ 0.1% resistors (R_HV1 - R_HV3, 1206 footprint, 1.5 MΩ total) "
+    "and a 7.50 kΩ 0.1% bottom resistor (R_HV_BOT). The attenuation ratio is 201.0:1. The attenuated voltage feeds the high-impedance (1 GΩ) input of the "
+    "Texas Instruments AMC1311BDWVR reinforced isolated amplifier (7000 V peak barrier, 5.85 mm creepage). Symmetrical differential outputs (OUTP, OUTN) are routed through "
+    "an active op-amp differential-to-single-ended low-pass filter (fc = 2.5 kHz) into STM32 ADC1 pin PC0 (ADC1_IN6).",
+    "2. Primary AC Mains Current Sensing: The live AC mains conductor passes through the central aperture of a Talema AC1010 encapsulated toroidal current transformer "
+    "(1000:1 turns ratio, 4000 V RMS dielectric withstand). Secondary current develops an AC voltage drop across a precision 100.0 Ω +/- 0.1% metal film burden resistor (R_burden). "
+    "The burden resistor is biased around a quiet +1.650 V DC analog midpoint reference generated by a precision resistor divider and 1.0 µF bypass capacitor. Sensed AC current "
+    "is low-pass filtered (1 kΩ + 10 nF, fc = 15.9 kHz) and sampled by STM32 ADC1 pin PC1 (ADC1_IN7).",
+    "3. Secondary DC Telemetry: Measured directly on the touch-safe SELV domain using a Texas Instruments INA226AIDGSR 16-bit power monitor (I2C address 0x40). "
+    "Output voltage VOUT is sensed via the VBUS pin with 1.25 mV/LSB resolution, and load current is sensed across a precision 10.0 mΩ Bourns CSS2H shunt resistor "
+    "with 2.5 µV / 250 µA/LSB resolution.",
+    "4. Mathematical Power & Efficiency Calculation: The STM32G474 accumulates N = 1000 ADC samples synchronously over every 20.0 ms mains cycle (50 Hz):",
+    "  * True RMS Voltage: V_AC,RMS = sqrt((1/N) * sum_{k=1}^N (v_line[k])^2) * (201.0 / sqrt(2)).",
+    "  * True RMS Current: I_AC,RMS = sqrt((1/N) * sum_{k=1}^N (i_line[k])^2) * (1000 / 100.0) = sqrt((1/N) * sum (i_line)^2) * 10.0 A/V.",
+    "  * Real Active AC Input Power: P_AC = (1/N) * sum_{k=1}^N (v_line[k] * i_line[k]).",
+    "  * DC Load Power: P_DC = V_OUT * I_OUT (read directly from INA226 registers).",
+    "  * Conversion Efficiency: eta = (P_DC / P_AC) * 100%. Computed at a 10 Hz rate (every 100 ms) and updated on the OLED display and MicroSD CSV logger."
+]
+
 CH7_SUBSYS2_ANALOG = [
     "7.2 Subsystem 2 Analog Design:",
     "Non-Applicable: Monolithic single-board architecture integrates all analog circuits on Subsystem 1."
@@ -380,7 +425,12 @@ CH8_POWER_CONSUMPTION_INTRO = [
 
 CH8_POWER_DISSIPATION_INTRO = [
     "8.1.3 Power Dissipation & Conversion Efficiency:",
-    "The table below presents the loss breakdown and power dissipation for each conversion stage operating at worst-case full load (230 V AC input, 20.0 V DC @ 3.0 A / 60 W output):"
+    "The table below presents the loss breakdown and power dissipation for each conversion stage operating at worst-case full load (230 V AC input, 20.0 V DC @ 3.0 A / 60 W output):",
+    "Real-Time Efficiency Monitoring Flow: In addition to static bench ratings, the SPPS continuously computes and logs live operating conversion efficiency. "
+    "The STM32 supervisory core synchronously samples instantaneous primary AC voltage via isolated amplifier U6 (AMC1311) on pin PC0 and primary AC current via toroidal "
+    "transformer CT1 on pin PC1, integrating true active input power P_AC = (1/N) sum (v(t) * i(t)). Simultaneously, secondary DC load power P_DC = V_OUT * I_OUT is read "
+    "over I2C from INA226 U7. Every 100 ms (10 Hz rate), conversion efficiency eta = (P_DC / P_AC) * 100% is computed with +/- 0.5% calibrated accuracy, "
+    "rendered as a live bar graph on the 1.30-inch OLED display, streamed via SCPI (:MEAS:EFF?), and committed to the MicroSD CSV log."
 ]
 
 CH8_SUBSYS2_POWER = [
@@ -639,7 +689,13 @@ CH14_EXTERNAL_CONNECTORS = [
     "2. DC Output Power Binding Posts (J2):",
     "  * Manufacturer: Pomona Electronics. Part Number: 6883 (Heavy-Duty Dual Binding Post with 5-Way Banana Jacks).",
     "  * Specifications: Gold-plated brass contacts, 30 A continuous rating (exceeding maximum 3.0 A load by 10x). Insulation: Polycarbonate, rated 2500 Vrms.",
-    "  * Pinout: Red Binding Post = VOUT+ (Programmable DC Output, 5.0 - 20.0 V), Black Binding Post = GND_SEC (Secondary Reference Ground)."
+    "  * Pinout: Red Binding Post = VOUT+ (Programmable DC Output, 5.0 - 20.0 V), Black Binding Post = GND_SEC (Secondary Reference Ground).",
+    "3. MicroSD Card Socket (J6):",
+    "  * Manufacturer: Amphenol ICC. Part Number: 10100303-68211LF (Push-Push MicroSD Socket).",
+    "  * Specifications: 8-pin surface-mount connector with integrated card detection switch and mechanical push-push ejector mechanism. "
+    "Rated for 10,000 insertion/extraction cycles. Contact resistance < 100 mΩ. Gold-plated beryllium copper contacts.",
+    "  * Pinout: Pin 1 = DAT2 (NC/Pull-up), Pin 2 = CD/DAT3 (SD_CS_N, PB12), Pin 3 = CMD (SD_MOSI, PB15), Pin 4 = VDD (+3.3V_SD), "
+    "Pin 5 = CLK (SD_SCK, PB13), Pin 6 = VSS (GND_SEC), Pin 7 = DAT0 (SD_MISO, PB14), Pin 8 = DAT1 (NC/Pull-up), Pin 9/10 = Card Detect (SD_CD_N, PC6)."
 ]
 
 CH14_SUBSYS2_CONNECTORS = [
@@ -709,13 +765,13 @@ CH16_SUBSYS2_INTERRUPT = [
 
 CH17_ROM_INTRO = [
     "Chapter 17: Programmable ROM Devices.",
-    "The SPPS utilizes embedded non-volatile Flash memory within the STM32G474RET6 microcontroller. "
-    "The table below details memory regions, storage purposes, and programming methods:"
+    "The SPPS utilizes embedded non-volatile Flash memory within the STM32G474RET6 microcontroller alongside an external removable MicroSD card "
+    "for mass operational telemetry logging. The table below details memory regions, storage purposes, and programming methods:"
 ]
 
 CH18_BOM_INTRO = [
     "Chapter 18: Bill of Material (Class A Engineering BOM).",
-    "The table below lists the complete 54-item production-grade Class A Bill of Materials for Subsystem 1 (Main PCBA: VVDN_SPPS_MAIN_V1.0). "
+    "The table below lists the complete 58-item production-grade Class A Bill of Materials for Subsystem 1 (Main PCBA: VVDN_SPPS_MAIN_V1.0). "
     "Bare PCB, enclosure mechanicals, and heatsinks are excluded. All components are 100% RoHS compliant and qualified across the industrial temperature range:"
 ]
 
