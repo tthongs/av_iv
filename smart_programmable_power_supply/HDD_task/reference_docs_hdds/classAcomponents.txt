@@ -1,0 +1,5 @@
+R (fuse , NTC thermistor)
+GBU606
+UC3842
+D2PAK power mosfet NTB60N06
+
