@@ -98,7 +98,7 @@ The bulk capacitor must maintain the DC bus voltage above $V_{bulk(min)} = 90\,\
 
 ## 4. Uniform-Frequency Current-Mode PWM Flyback Controller Architecture
 
-The primary controller employs the industry-standard **UC3843** (or modern CMOS **UCC28C43**) operating in **Uniform-Frequency Peak Current-Mode PWM Control**:
+The primary controller employs the industry-standard **UC3842** (or modern CMOS **UCC28C42**) operating in **Uniform-Frequency Peak Current-Mode PWM Control**:
 
 ```text
                Uniform-Frequency 65 kHz PWM Clock Waveform (Gate & Drain)
@@ -121,7 +121,7 @@ The primary controller employs the industry-standard **UC3843** (or modern CMOS 
 
 ### Why Uniform-Frequency PWM Operation?
 1. **Predictable EMI Spectral Profile**: A fixed 65 kHz clock concentrates switching fundamental and harmonics at deterministic frequencies (65 kHz, 130 kHz, 195 kHz), allowing the 2-stage input common-mode and differential EMI filter to be calculated and tuned with absolute precision.
-2. **Simple, Highly Robust Bring-Up**: Current-mode PWM ICs like UC3843 require no complex zero-crossing detection (ZCD) or valley-skipping logic. A standard $R_T/C_T$ timing network ($10\,\text{k}\Omega / 2.2\,\text{nF}$) guarantees a reliable, rock-solid 65 kHz clock on initial power-up.
+2. **Simple, Highly Robust Bring-Up**: Current-mode PWM ICs like UC3842 require no complex zero-crossing detection (ZCD) or valley-skipping logic. A standard $R_T/C_T$ timing network ($10\,\text{k}\Omega / 2.2\,\text{nF}$) guarantees a reliable, rock-solid 65 kHz clock on initial power-up.
 3. **Inherent Cycle-by-Cycle Peak Current Protection**: Current flowing through the primary switch generates a voltage across $R_{\text{sense}} = 0.25\,\Omega$. If current exceeds the internal $1.0\,\text{V}$ threshold, the gate is instantly terminated for the remainder of the clock cycle, preventing transformer magnetic saturation.
 
 ---

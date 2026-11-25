@@ -34,7 +34,7 @@ digraph Figure9AuxPower {
         penwidth = 1.6;
 
         aux_wind [label="Transformer Aux Winding\nN_aux = 5T (0.25mm) + UF4004", fillcolor="#FFE0B2", color="#E65100"];
-        vcc_pri [label="+14.0V DC Primary VCC Rail\nPowers UC3843 PWM Controller", fillcolor="#FFE0B2", color="#E65100"];
+        vcc_pri [label="+14.0V DC Primary VCC Rail\nPowers UC3842 PWM Controller", fillcolor="#FFE0B2", color="#E65100"];
         aux_wind -> vcc_pri;
     }
 

@@ -21,7 +21,7 @@ The **Smart Programmable Power Supply (SPPS)** is a high-density, digitally cont
 │ Input Voltage Range (Vac)  │ 85 V – 265 V AC RMS         │ Universal Mains (Nom. 230V) │
 │ Input Frequency (f_line)   │ 47 Hz – 63 Hz               │ Global Grid Compatible      │
 │ Inrush Current Limiting    │ < 37.5 A Peak               │ Cold start via 10Ω NTC      │
-│ Primary Conversion Stage   │ Uniform-Frequency Flyback   │ 65 kHz PWM (UC3843)         │
+│ Primary Conversion Stage   │ Uniform-Frequency Flyback   │ 65 kHz PWM (UC3842)         │
 │ Galvanic Safety Isolation  │ Reinforced (IEC 62368-1)    │ ≥ 6.4mm Creepage / 3kV Hipot│
 │ Intermediate DC Bus Rail   │ +24.0 V DC Fixed (±1.0%)    │ 72 W throughput, < 40mV pk  │
 │ Post-Regulator Topology    │ 4-Switch Synchronous BB     │ TI LM5176 (250 kHz PWM)     │
@@ -61,7 +61,7 @@ At the highest functional boundary, the system operates across three distinct do
   │ • AC Protection (Fuse/NTC/MOV)  │
   │ • 2-Stage EMI Filter (Class B)  │
   │ • Bridge Rectifier & C_BULK     │
-  │ • Uniform Flyback (UC3843 @ 65k)│
+  │ • Uniform Flyback (UC3842 @ 65k)│
   │ • Primary 800V Superjunction FET│
   └────────────────┬────────────────┘
                    │
@@ -170,7 +170,7 @@ flowchart LR
         TX_PRI["Transformer Primary Winding<br/>PQ26/20 Core (3C95 Ferrite)<br/>Np = 36T | Lp = 220µH"]:::priStyle
         SNUBBER["RCD Clamp Snubber<br/>50kΩ / 2.2nF / UF4007<br/>Clamps Vds Ringing"]:::priStyle
         Q1_FET["Primary MOSFET Q1<br/>Infineon IPB80R290P7<br/>800V Superjunction, 0.29Ω"]:::priStyle
-        UC_CTRL["Uniform PWM Controller<br/>UC3843 / UCC28C43<br/>• Fixed 65 kHz Clock (RT/CT)<br/>• Cycle Peak Current Mode"]:::priStyle
+        UC_CTRL["Uniform PWM Controller<br/>UC3842 / UCC28C42<br/>• Fixed 65 kHz Clock (RT/CT)<br/>• Cycle Peak Current Mode"]:::priStyle
         R_SENSE["Current Sense Shunt<br/>R_sense = 0.25Ω / 2W"]:::priStyle
         AUX_WIND["Aux Bias Winding<br/>Naux = 5T (+14V VCC)"]:::priStyle
 
@@ -322,7 +322,7 @@ The isolated primary stage converts unpredictable universal grid AC ($85\,\text{
 
 #### Technical Operational Principles:
 1. **Uniform-Frequency Current-Mode PWM Operation**:
-   - The primary stage utilizes a standard current-mode PWM controller (**UC3843 / UCC28C43**) operating at a fixed, uniform switching frequency of **$65\,\text{kHz} \pm 5\%$**, accurately governed by an external $R_T/C_T$ timing network ($R_T = 10\,\text{k}\Omega, C_T = 2.2\,\text{nF}$ on Pin 4):
+   - The primary stage utilizes a standard current-mode PWM controller (**UC3842 / UCC28C42**) operating at a fixed, uniform switching frequency of **$65\,\text{kHz} \pm 5\%$**, accurately governed by an external $R_T/C_T$ timing network ($R_T = 10\,\text{k}\Omega, C_T = 2.2\,\text{nF}$ on Pin 4):
      $$f_{\text{sw}} \approx \frac{1.72}{R_T \times C_T} = \frac{1.72}{10\,000 \times 2.2 \times 10^{-9}} \approx 78\,\text{kHz} \longrightarrow 65\,\text{kHz} \text{ (with internal discharge)}$$
    - Fixed-frequency operation produces predictable, non-jittering switching harmonics, making EMI input filtering and bench testing straightforward.
    - Cycle-by-cycle peak primary current sensing across a low-inductance sense resistor ($R_{\text{sense}} = 0.25\,\Omega$) provides immediate peak current limiting ($I_{\text{pk,max}} = 1.0\,\text{V} / 0.25\,\Omega = 4.0\,\text{A}$), protecting the 800V MOSFET against core saturation.
@@ -478,7 +478,7 @@ A frequent point of failure in power supply design is inadequate bias supply seq
 *(Vector format: [`block_diagram_aux_power_distribution.svg`](file:///home/tthhongs/build_tthongs/tasks_aa_ii/vvdn/smart_programmable_power_supply/block_diagram_aux_power_distribution.svg))*
 
 #### 1. Auxiliary Power Rails:
-1. **Primary $+14.0\,\text{V}$ VCC**: Derived from the transformer auxiliary winding $N_{\text{aux}} = 5\,\text{T}$ via an ES1J ultra-fast diode and $22\,\mu\text{F} / 35\,\text{V}$ capacitor. Powers the UC3843 / UCC28C43 controller VDD pin.
+1. **Primary $+14.0\,\text{V}$ VCC**: Derived from the transformer auxiliary winding $N_{\text{aux}} = 5\,\text{T}$ via an ES1J ultra-fast diode and $22\,\mu\text{F} / 35\,\text{V}$ capacitor. Powers the UC3842 / UCC28C42 controller VDD pin.
 2. **Secondary $+5.0\,\text{V}$ Aux Rail**: Stepped down from the $+24.0\,\text{V}$ bus by a high-efficiency synchronous buck regulator (**TI TPS54202**, $2.0\,\text{A}$ rating, $92\%$ efficiency). Powers the LM5176 gate drivers and OLED display backlight.
 3. **Secondary $+3.3\,\text{V}$ Logic Rail**: Stepped down from $+5.0\,\text{V}$ by an ultra-low-noise, high-PSRR LDO (**TI TPS7A25**, $500\,\text{mA}$). Powers the STM32G474 digital core, INA226, and MicroSD card.
 4. **Precision $+3.000\,\text{V}$ Reference Rail**: Stepped down from $+3.3\,\text{V}$ by a precision bandgap reference (**TI REF3030**, $0.2\%$ tolerance, $15\,\text{ppm/}^\circ\text{C}$ drift). Feeds MCU `VDDA` and `VREF+` pins to guarantee rock-solid ADC/DAC accuracy.
@@ -545,9 +545,9 @@ This table establishes the comprehensive pinout and interface contract uniting a
 | `AC_L`, `AC_N` | IEC C14 Receptacle | Input Protection | AC Power | $85-265\,\text{V}_{\text{RMS}}$ | $50/60\,\text{Hz}$ | Universal mains high-voltage conductors. |
 | `EARTH_PE` | IEC C14 Earth Pin | Chassis & Y-Caps | Safety Earth | $0\,\text{V}$ Earth | DC / RF Ground | Protective Earth chassis return. |
 | `+V_BULK` | Bridge Rectifier | Flyback Primary | High-Voltage DC | $+120-375\,\text{V}$ DC | Line Ripple ($100\text{Hz}$) | Rectified DC bus on `GND_PRI`. |
-| `PRI_GATE` | UC3843 Controller | Q1 (IPB80R290P7) | Gate Drive | $0-12\,\text{V}$ Pulsed | $65\,\text{kHz}$ Uniform | Uniform 65 kHz primary gate drive. |
-| `PRI_CS` | Current Resistor $R_{sense}$ | UC3843 Controller | Analog Sense | $0-1.0\,\text{V}$ Peak | $65\,\text{kHz}$ | Cycle-by-cycle primary peak current sense. |
-| `PRI_RTCT` | RT/CT Timing Network | UC3843 Pin 4 | Oscillator Ramp | $1.2-2.8\,\text{V}$ Sawtooth | $65\,\text{kHz}$ Uniform | Uniform clock frequency timing network. |
+| `PRI_GATE` | UC3842 Controller | Q1 (IPB80R290P7) | Gate Drive | $0-12\,\text{V}$ Pulsed | $65\,\text{kHz}$ Uniform | Uniform 65 kHz primary gate drive. |
+| `PRI_CS` | Current Resistor $R_{sense}$ | UC3842 Controller | Analog Sense | $0-1.0\,\text{V}$ Peak | $65\,\text{kHz}$ | Cycle-by-cycle primary peak current sense. |
+| `PRI_RTCT` | RT/CT Timing Network | UC3842 Pin 4 | Oscillator Ramp | $1.2-2.8\,\text{V}$ Sawtooth | $65\,\text{kHz}$ Uniform | Uniform clock frequency timing network. |
 | `OPTO_FB` | TL431 Shunt Reference | PC817 Optocoupler | Current Loop | $0-5\,\text{mA}$ Loop | DC to $10\,\text{kHz}$ | **Crosses 3kV Isolation Barrier**. |
 | `+24V_BUS` | MBR10100 Schottky Rectifier | LM5176 / Aux Buck | Power Rail | $+24.0\,\text{V} \pm 1\%$ | DC ($<40\text{mV}$ rip) | Regulated intermediate DC bus on `GND_SEC`. |
 | `PWM_A..D` | LM5176 Controller | 4-Switch H-Bridge | Gate Drive | $0-5\,\text{V}$ High-Curr | $250\,\text{kHz}$ Fixed | High/low side gate drives for Buck-Boost FETs. |

@@ -8,7 +8,7 @@ flowchart TD
     subgraph AUX_DISTRIBUTION ["AUXILIARY BIAS POWER RAIL DISTRIBUTION SUBSYSTEM"]
         subgraph PRIMARY_HOT_AUX ["PRIMARY AUXILIARY DOMAIN (GND_PRI)"]
             TX_AUX["<b>FLYBACK AUXILIARY WINDING</b><br/>TX1_AUX: N_aux = 5T (0.25mm wire)<br/>UF4004 Fast Diode + 47µF Cap"]:::priStyle
-            VCC_PRI["<b>+14.0V DC PRIMARY VCC RAIL</b><br/>Powers UC3843 PWM Controller (Pin 7)<br/>Sustained above 8.4V UVLO Threshold"]:::priStyle
+            VCC_PRI["<b>+14.0V DC PRIMARY VCC RAIL</b><br/>Powers UC3842 PWM Controller (Pin 7)<br/>Sustained above 10.0V UVLO Threshold (16.0V Start)"]:::priStyle
             TX_AUX --> VCC_PRI
         end
 

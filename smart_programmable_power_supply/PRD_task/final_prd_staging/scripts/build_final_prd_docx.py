@@ -210,7 +210,7 @@ def generate_final_prd():
     rev_row = t1.rows[1]
     set_cell_text(rev_row.cells[0], "16-Oct-2026", align=WD_ALIGN_PARAGRAPH.CENTER)
     set_cell_text(rev_row.cells[1], "A1_001", bold=True, align=WD_ALIGN_PARAGRAPH.CENTER)
-    set_cell_text(rev_row.cells[2], "Production-Grade PRD Release: Uniform-Frequency Flyback (UC3843 @ 65kHz), MBR10100 Schottky passive rectification, full sequence tables, complete BOMs, 11 block diagrams, and cross-mentor technical defense.")
+    set_cell_text(rev_row.cells[2], "Production-Grade PRD Release: Uniform-Frequency Flyback (UC3842 @ 65kHz), MBR10100 Schottky passive rectification, full sequence tables, complete BOMs, 11 block diagrams, and cross-mentor technical defense.")
     set_cell_text(rev_row.cells[3], "Power Electronics Trainee (GET)")
     set_cell_text(rev_row.cells[4], "Senior Hardware Architect")
     set_cell_text(rev_row.cells[5], "BU SME (Power Electronics)")
@@ -303,7 +303,7 @@ def generate_final_prd():
         ("REF-002", "IEC 62368-1 (3rd Edition): Audio/video, information and communication technology equipment – Safety requirements"),
         ("REF-003", "CISPR 32 / EN 55032 Class B: Electromagnetic compatibility of multimedia equipment – Emission requirements"),
         ("REF-004", "Texas Instruments LM5176: High-Performance 4-Switch Synchronous Buck-Boost Controller Datasheet (SNVSAR4)"),
-        ("REF-005", "Texas Instruments UC3843 / UCC28C43: High-Performance Current-Mode PWM Controller Datasheet"),
+        ("REF-005", "Texas Instruments UC3842 / UCC28C42: High-Performance Current-Mode PWM Controller Datasheet"),
         ("REF-006", "Texas Instruments INA226: High-Side / Low-Side 16-Bit I2C Power Monitor Datasheet"),
         ("REF-007", "Texas Instruments AMC1311: 5000V RMS Reinforced Isolated Delta-Sigma Modulator Datasheet"),
         ("REF-008", "STMicroelectronics STM32G474RET6: 170 MHz Mixed-Signal Microcontroller Datasheet & Reference Manual (RM0440)"),
@@ -326,7 +326,7 @@ def generate_final_prd():
         ("4", "Synchronous 4-switch Buck-Boost step-down/step-up post-regulation (5 V – 20 V DC)"),
         ("5", "High-precision 10 mV digital voltage steering via 12-bit DAC summing network"),
         ("6", "LM5176 built-in cycle-by-cycle overcurrent protection via CSP/CSN pins"),
-        ("7", "Primary Flyback cycle-by-cycle current limit via UC3843 ISENSE resistor"),
+        ("7", "Primary Flyback cycle-by-cycle current limit via UC3842 ISENSE resistor"),
         ("8", "Controller internal thermal shutdown and board temperature monitoring"),
         ("9", "Primary AC input power measurement via isolated delta-sigma amplifier and CT"),
         ("10", "Secondary DC load voltage, current, and power monitoring via 16-bit I2C monitor"),
@@ -512,7 +512,7 @@ def generate_final_prd():
                 "The onboard microcontroller (STM32G474) acts as the system brain by reading dual-domain electrical telemetry (primary AC input power and "
                 "secondary DC load power), computing real-time conversion efficiency, updating the 1.3-inch OLED dashboard, and driving the precision 12-bit DAC "
                 "voltage steering network. Circuit protection relies on robust, standard, industry-proven hardware protections: primary AC fuse (2A), "
-                "inrush NTC (10Ω), surge MOV (300V), primary cycle-by-cycle Flyback current limiting (UC3843 ISENSE), and secondary LM5176 built-in "
+                "inrush NTC (10Ω), surge MOV (300V), primary cycle-by-cycle Flyback current limiting (UC3842 ISENSE), and secondary LM5176 built-in "
                 "cycle-by-cycle overcurrent protection with thermal shutdown."
             )
         elif "A diagram showing various systems of the product and the external entities" in txt or "Small description of different systems within the product" in txt or "Also, if the product comprises of developing multiple systems" in txt:
@@ -595,7 +595,7 @@ def generate_final_prd():
         elif "Identify any dependencies the project has on external factors" in txt or "<List down the dependencies for the product>" in txt:
             p.text = (
                 "The following dependencies are included in the design and development of the SPPS module:\n"
-                "• Component sourcing and lead times for TI LM5176, UC3843 / UCC28C43, INA226, AMC1311, and ST STM32G474.\n"
+                "• Component sourcing and lead times for TI LM5176, UC3842 / UCC28C42, INA226, AMC1311, and ST STM32G474.\n"
                 "• Laboratory equipment availability: AC source (Chroma 61602), DC electronic load (Chroma 63102A), 3000V RMS Hi-Pot tester, and thermal camera.\n"
                 "• Mechanical front-panel drawings for binding post standard 19.05 mm center-to-center spacing.\n"
                 "• Firmware device drivers for SSD1306 OLED display, INA226 power monitor, and STM32 internal 12-bit DAC."
@@ -905,7 +905,7 @@ def generate_final_prd():
 
     fig6_steps = [
         ("1", "High-Voltage DC Input", "Receives +120V to +375V DC bulk bus into primary switching cell."),
-        ("2", "Uniform-Frequency PWM", "UC3843 / UCC28C43 controller operates at constant 65kHz uniform clock set by RT/CT with predictable EMI harmonics."),
+        ("2", "Uniform-Frequency PWM", "UC3842 / UCC28C42 controller operates at constant 65kHz uniform clock set by RT/CT with predictable EMI harmonics."),
         ("3", "3000V RMS Safety Barrier", "PQ26/20 transformer (Lp=220µH) with Furukawa TEX-E wire provides reinforced galvanic isolation."),
         ("4", "Schottky Barrier Rectification", "MBR10100 100V/10A Schottky diode provides simple, robust passive rectification with high reliability."),
         ("5", "+24.0V DC Intermediate Rail", "Low-ESR LC filter delivers stable +24.0V DC (72W) with optocoupled feedback regulation.")
@@ -1013,17 +1013,17 @@ def generate_final_prd():
                 # Add comprehensive Stage 3 Table (Table 4.6D)
                 stage3_data = [
                     ("HVDC Input Interface", "+HVDC", "Stage 2 Bulk DC Bus Link", "+120 V to +375 V DC operating span", "Low-impedance high-voltage input rail feeding transformer primary winding and snubber network."),
-                    ("Uniform-Freq PWM Controller", "U1", "Texas Instruments UC3843 / UCC28C43", "Uniform 65 kHz clock, RT/CT oscillator, cycle-by-cycle CS, direct totem-pole gate out", "Generates constant-frequency PWM switching pulses at a uniform 65 kHz rate, providing predictable EMI harmonics and deterministic current-mode control."),
+                    ("Uniform-Freq PWM Controller", "U1", "Texas Instruments UC3842 / UCC28C42", "Uniform 65 kHz clock, RT/CT oscillator, cycle-by-cycle CS, direct totem-pole gate out", "Generates constant-frequency PWM switching pulses at a uniform 65 kHz rate, providing predictable EMI harmonics and deterministic current-mode control."),
                     ("Oscillator Timing Network", "R_T / C_T", "Precision Thin-Film Resistor + C0G Ceramic Cap", "R_T = 10.0 kΩ (1%), C_T = 2.2 nF (50V C0G)", "Sets constant oscillator clock frequency: f_sw approx 1.72 / (R_T x C_T) = 65 kHz uniform clock without frequency jitter."),
                     ("Primary Power Switch", "Q1", "STMicroelectronics STP10NK80Z / IPB80R290P7", "800 V, 17 A, R_DS(on) = 0.29 Ω, V_DS,peak = 599 V", "Main switching element modulated by 65 kHz PWM gate drive. Voltage stress derated to 74.9% of 800V rating (< 75% limit)."),
-                    ("Primary Current Sensing", "R_CS", "Current Sense Shunt Resistor Network", "Low-inductance metal strip, 0.25 Ω, 1%, 2 W", "Monitors primary switch peak current (I_pk = 2.96 A) on UC3843 ISENSE pin (Pin 3) with 1.0 V internal comparator threshold for cycle-by-cycle OCP."),
+                    ("Primary Current Sensing", "R_CS", "Current Sense Shunt Resistor Network", "Low-inductance metal strip, 0.25 Ω, 1%, 2 W", "Monitors primary switch peak current (I_pk = 2.96 A) on UC3842 ISENSE pin (Pin 3) with 1.0 V internal comparator threshold for cycle-by-cycle OCP."),
                     ("RCD Snubber Clamp", "D_snub / R / C", "Diodes Inc. US1M + 3x 68 kΩ (22.6k net) + 1.0 nF / 1 kV", "Diode: 1000 V, 1 A, t_rr = 75 ns; Cap: 1 nF / 1000 V ceramic; Clamp: ~216 V clamp level", "Damps high-voltage inductive kick caused by transformer leakage inductance (L_lk approx 2.2 uH); clamps peak drain voltage spike safely below 650 V peak."),
                     ("Flyback Power Transformer", "TX1", "Ferroxcube PQ26/20 (3C95 Ferrite) / EE25 Core", "L_p = 220 uH +/- 10%, B_max = 0.148 T (B_sat = 0.38 T), N_p = 36 T", "Stores energy during switch on-time and delivers 72 W continuous power to secondary during off-time (Np:Ns = 6:1 turns ratio)."),
-                    ("Auxiliary Bias Winding", "TX1_AUX", "N_aux = 5 T (0.25 mm wire) + UF4004 & 47 µF Cap", "Output: +14.0 V DC bias rail", "Sustains UC3843 VCC pin (Pin 7) above UVLO threshold (8.4 V start / 7.6 V min) after initial high-voltage bleed startup."),
+                    ("Auxiliary Bias Winding", "TX1_AUX", "N_aux = 5 T (0.25 mm wire) + UF4004 & 47 µF Cap", "Output: +14.0 V DC bias rail", "Sustains UC3842 VCC pin (Pin 7) above UVLO threshold (16.0 V start / 10.0 V min) after initial high-voltage bleed startup."),
                     ("Galvanic Safety Barrier", "TX1_ISO", "Furukawa TEX-E Triple-Insulated Wire (TIW)", "N_s = 6 T (N_p:N_s = 6:1), Reinforced insulation, >= 6.4 mm creepage", "Complies with IEC 62368-1 standard. Provides certified >= 3000 V RMS dielectric withstand between primary hot domain and secondary touch-safe SELV domain."),
                     ("Secondary Schottky Rectifier", "D_SEC", "ON Semi / Vishay MBR10100 / MBR20100CT", "100 V, 10 A Schottky Barrier Diode, V_F = 0.60 V, TO-220 with heatsink", "Performs high-speed passive rectification of secondary flyback pulses. Highly reliable and robust passive design, eliminating active gate driver IC complexity."),
                     ("Secondary LC Output Filter", "C_sec / L_sec", "470 µF / 35 V Low-ESR Electrolytic + 2.2 µH + 22 µF MLCC", "Low-ESR filtering, Delta V_ripple < 40 mV pk-pk", "Attenuates 65 kHz fundamental switching ripple and high-frequency commutation spikes to produce a quiet intermediate DC rail."),
-                    ("Isolated Closed-Loop Feedback", "OPTO1 / U3", "Everlight PC817 Optocoupler + TI TL431 Shunt", "5000 V RMS optical isolation, 2.495 V internal bandgap, 0.5%", "Precision resistor divider samples +24.0 V rail, driving optocoupler LED to pull down UC3843 COMP pin (Pin 1), regulating rail to +/- 1.0%."),
+                    ("Isolated Closed-Loop Feedback", "OPTO1 / U3", "Everlight PC817 Optocoupler + TI TL431 Shunt", "5000 V RMS optical isolation, 2.495 V internal bandgap, 0.5%", "Precision resistor divider samples +24.0 V rail, driving optocoupler LED to pull down UC3842 COMP pin (Pin 1), regulating rail to +/- 1.0%."),
                     ("Intermediate Rail Output", "+24V_BUS", "Intermediate DC Power Distribution Bus", "+24.0 V DC +/- 1.0%, 72.0 W continuous (3.0 A), 84 W peak", "Delivers stable intermediate regulated DC power to Stage 4 (Synchronous Buck-Boost Post-Regulator) and secondary auxiliary housekeeping LDOs.")
                 ]
 
@@ -1216,7 +1216,7 @@ def generate_final_prd():
         ("10", "C_BULK", "Bulk Electrolytic Capacitor, 100µF, 450V, 105°C", "1", "Snap-In 22x30mm", "Nichicon", "LGW2W101MELZ25"),
         ("11", "C_HF", "High-Voltage Decoupling MLCC, 100nF, 630V X7R", "1", "SMD 1812", "Murata", "GA342QR7GD102KW01L"),
         ("12", "R_BL1..3", "Safety Bleeder Resistor, 3x 330kΩ, 0.25W", "3", "SMD 1206", "Vishay Dale", "CRCW1206330KFKEA"),
-        ("13", "U1", "Uniform-Frequency PWM Controller (65 kHz)", "1", "SOIC-8", "Texas Instruments", "UC3843BN / UCC28C43D"),
+        ("13", "U1", "Uniform-Frequency PWM Controller (65 kHz)", "1", "SOIC-8", "Texas Instruments", "UC3842BN / UCC28C42D"),
         ("14", "Q1", "Superjunction N-MOSFET, 800V, 17A, 0.29Ω", "1", "D2PAK (TO-263)", "STMicroelectronics", "STP10NK80Z / IPB80R290P7"),
         ("15", "TX1", "Flyback Transformer, PQ26/20, Lp=220µH, 6:1", "1", "PQ26/20 Through-Hole", "Custom / Ferroxcube", "3C95-PQ2620-72W"),
         ("16", "R_T", "Oscillator Timing Resistor, 10.0 kΩ, 0.1%", "1", "SMD 0805", "Vishay Dale", "TNPW080510K0BEEA"),
@@ -1416,7 +1416,7 @@ def generate_final_prd():
 
     qa_list = [
         ("Q1: Walk me through the complete power conversion chain from the wall to the device.",
-         "The power conversion hardware operates in four clean, sequential stages: First, universal mains AC (85V–265V AC RMS) enters through an IEC C14 inlet with a 2A time-lag ceramic fuse, 10Ω NTC inrush thermistor, MOV surge clamp, and a 2-stage common-mode EMI filter. Second, a GBU606 bridge rectifier and 100µF/450V bulk electrolytic capacitor convert AC into an unregulated high-voltage DC bus (+120V to +375V DC). Third, Stage 3 (a Uniform-Frequency Flyback converter with UC3843 / UCC28C43 and a custom PQ26/20 transformer) provides certified 3000V RMS reinforced safety isolation and steps down power to a stable +24.0V DC intermediate bus (72W) using an MBR10100 Schottky barrier diode with heatsink. Fourth, Stage 4 (a TI LM5176 4-switch synchronous Buck-Boost post-regulator) regulates the +24V bus down or across to the target 5.0V–20.0V DC at up to 3.0A with sub-25mV ripple, delivering clean DC to the device under test via heavy-duty 4mm binding posts."),
+         "The power conversion hardware operates in four clean, sequential stages: First, universal mains AC (85V–265V AC RMS) enters through an IEC C14 inlet with a 2A time-lag ceramic fuse, 10Ω NTC inrush thermistor, MOV surge clamp, and a 2-stage common-mode EMI filter. Second, a GBU606 bridge rectifier and 100µF/450V bulk electrolytic capacitor convert AC into an unregulated high-voltage DC bus (+120V to +375V DC). Third, Stage 3 (a Uniform-Frequency Flyback converter with UC3842 / UCC28C42 and a custom PQ26/20 transformer) provides certified 3000V RMS reinforced safety isolation and steps down power to a stable +24.0V DC intermediate bus (72W) using an MBR10100 Schottky barrier diode with heatsink. Fourth, Stage 4 (a TI LM5176 4-switch synchronous Buck-Boost post-regulator) regulates the +24V bus down or across to the target 5.0V–20.0V DC at up to 3.0A with sub-25mV ripple, delivering clean DC to the device under test via heavy-duty 4mm binding posts."),
 
         ("Q2: Why did you use a passive filter and bridge rectifier instead of an active Boost PFC stage?",
          "Under international standard IEC 61000-3-2, active Power Factor Correction (PFC) is legally mandated only for equipment with active input power exceeding 75W. Our module delivers a maximum continuous output of 60W (72W peak intermediate), so it falls strictly below the 75W threshold. Adding an active PFC boost stage would require an additional high-voltage MOSFET, boost diode, controller IC, and large inductor—adding approximately $4.20 to the BOM, consuming 35% more PCB area, and introducing a ~3% efficiency penalty without any regulatory requirement."),

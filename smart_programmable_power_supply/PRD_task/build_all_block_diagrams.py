@@ -75,7 +75,7 @@ digraph MasterArchitecture {
         tx_pri [label="Transformer Primary\nPQ26/20 Core (3C95)\nNp = 48T | Lp = 220µH", fillcolor="#FFE0B2", color="#E65100"];
         snubber [label="RCD Clamp Snubber\n50kΩ / 2.2nF / UF4007\nClamps Vds Ringing", fillcolor="#FFFFFF", color="#F57C00"];
         pri_mosfet [label="Primary Switch Q1\nIPB80R290P7 (800V, 0.29Ω)\nSuperjunction D2PAK", fillcolor="#FFFFFF", color="#E65100"];
-        pri_ctrl [label="Uniform-Freq PWM Controller\nUC3843 / UCC28C43\n• Uniform 65kHz Fixed Clock\n• Cycle-by-Cycle Peak CS", fillcolor="#FFFFFF", color="#E65100"];
+        pri_ctrl [label="Uniform-Freq PWM Controller\nUC3842 / UCC28C42\n• Uniform 65kHz Fixed Clock\n• Cycle-by-Cycle Peak CS", fillcolor="#FFFFFF", color="#E65100"];
         pri_rsense [label="Current Sense Shunt\nRsense = 0.2Ω / 2W", fillcolor="#FFFFFF", color="#F57C00"];
         aux_pri [label="Aux Bias Winding\nNaux = 8T (+14V VCC)", fillcolor="#FFE0B2", color="#E65100"];
 
@@ -292,7 +292,7 @@ digraph Stage1Flyback {
         snubber_rcd [label="RCD Snubber Clamp\n50kΩ / 2.2nF / UF4007\nDamps Leakage Inductance Ring", fillcolor="#FFFFFF", color="#F57C00"];
         fet_q1 [label="Primary MOSFET Q1\nInfineon IPB80R290P7\n800V Superjunction, 0.29Ω", fillcolor="#FFFFFF", color="#E65100"];
         rsense_pri [label="Current Sense Shunt\nRsense = 0.2Ω / 2W", fillcolor="#FFFFFF", color="#F57C00"];
-        ctrl_ucc [label="Uniform-Freq PWM Controller\nUC3843 / UCC28C43\n• Fixed 65kHz Clock (RT/CT)\n• Cycle Peak Current Mode", fillcolor="#FFFFFF", color="#E65100"];
+        ctrl_ucc [label="Uniform-Freq PWM Controller\nUC3842 / UCC28C42\n• Fixed 65kHz Clock (RT/CT)\n• Cycle Peak Current Mode", fillcolor="#FFFFFF", color="#E65100"];
         aux_wind [label="Aux Bias Winding\nNaux = 8T -> +14V VCC", fillcolor="#FFE0B2", color="#E65100"];
 
         cbulk -> pri_wind [label=" +V_BULK", color="#D84315", penwidth=2.2];
@@ -630,7 +630,7 @@ digraph AuxPower {
         color = "#E65100";
         naux [label="Transformer Aux Winding Naux (8T)\nFlyback Coupling during Off-time", fillcolor="#FFE0B2", color="#E65100"];
         pri_rect [label="Fast Diode (ES1J) + 22µF/35V Cap\nGenerates +14.0V Primary VCC", fillcolor="#FFFFFF", color="#E65100"];
-        ucc_vcc [label="UC3843 / UCC28C43 VCC Pin\nPrimary PWM Controller Bias", fillcolor="#FFFFFF", color="#E65100"];
+        ucc_vcc [label="UC3842 / UCC28C42 VCC Pin\nPrimary PWM Controller Bias", fillcolor="#FFFFFF", color="#E65100"];
 
         naux -> pri_rect -> ucc_vcc [label=" +14V VCC", color="#E65100"];
     }

@@ -78,7 +78,7 @@ mmd_content = """flowchart TD
         Q1_FET["Primary MOSFET Q1<br/>STP10NK80Z (800V, 17A)<br/>Pins: Drain, Gate, Source"]:::priPwr
         RCD_CLAMP["RCD Snubber Clamp<br/>• US1M Diode (1000V, 1A)<br/>• C_SNUB 1nF / 1kV<br/>• R_SNUB 22.6kΩ (3x 68k)"]:::priPwr
         R_CS["CS Shunt Resistor R_CS<br/>0.25Ω / 1%, 2W Metal<br/>Pin: ISENSE to GND_PRI"]:::priPwr
-        U1_PWM["PWM Controller U1<br/>TI UC3843 / UCC28C43<br/>• Pin 7: VCC (+14V Aux)<br/>• Pin 8: VREF (5.0V)<br/>• Pin 4: RT/CT (65kHz)<br/>• Pin 3: ISENSE (1.0V OCP)<br/>• Pin 6: OUT (Gate Drive)<br/>• Pin 1: COMP / Pin 2: FB<br/>• Pin 5: GND_PRI"]:::priPwr
+        U1_PWM["PWM Controller U1<br/>TI UC3842 / UCC28C42<br/>• Pin 7: VCC (+14V Aux)<br/>• Pin 8: VREF (5.0V)<br/>• Pin 4: RT/CT (65kHz)<br/>• Pin 3: ISENSE (1.0V OCP)<br/>• Pin 6: OUT (Gate Drive)<br/>• Pin 1: COMP / Pin 2: FB<br/>• Pin 5: GND_PRI"]:::priPwr
         TX1_AUX["TX1 Aux Winding<br/>Pins 4, 5 (Naux=5T)<br/>+ UF4004 & 47µF Cap"]:::priPwr
 
         C_BULK -->|"+HVDC (+120V to +375V)"| TX1_PRI
@@ -301,7 +301,7 @@ dot_content = r"""digraph ComponentConnectionsDiagram {
         Q1_FET [label="Primary MOSFET Q1\nSTP10NK80Z (800V, 17A, 0.29Ω)\nPins: Drain, Gate, Source", fillcolor="#FFFFFF", color="#D84315"];
         RCD_CLAMP [label="RCD Snubber Network\n• US1M Diode (1000V, 1A)\n• 1nF / 1kV + 22.6kΩ Net", fillcolor="#FFFFFF", color="#D84315"];
         R_CS [label="CS Shunt R_CS\n0.25Ω / 1%, 2W Metal\nSource to GND_PRI", fillcolor="#FFFFFF", color="#D84315"];
-        U1_PWM [label="PWM Controller U1\nTI UC3843 / UCC28C43 (65 kHz)\n• Pin 7: VCC (+14V Aux)\n• Pin 4: RT/CT (10kΩ / 2.2nF)\n• Pin 3: ISENSE (1.0V OCP)\n• Pin 6: OUT (Gate Drive)\n• Pin 1: COMP / Pin 2: FB", fillcolor="#FFFFFF", color="#D84315"];
+        U1_PWM [label="PWM Controller U1\nTI UC3842 / UCC28C42 (65 kHz)\n• Pin 7: VCC (+14V Aux)\n• Pin 4: RT/CT (10kΩ / 2.2nF)\n• Pin 3: ISENSE (1.0V OCP)\n• Pin 6: OUT (Gate Drive)\n• Pin 1: COMP / Pin 2: FB", fillcolor="#FFFFFF", color="#D84315"];
         TX1_AUX [label="TX1 Aux Winding\nNaux=5T (Pins 4, 5)\n+ UF4004 & 47µF Cap", fillcolor="#FFFFFF", color="#D84315"];
 
         C_BULK -> TX1_PRI [label="+HVDC Rail"];

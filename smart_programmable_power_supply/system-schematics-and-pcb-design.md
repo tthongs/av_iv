@@ -28,7 +28,7 @@ Below is the master system interconnection schematic uniting the universal AC fr
                                             [ RCD Snubber ]
                                             (50kΩ / 2.2nF)
                                                     │
-                                                   Gate ─── Driven by UC3843 Controller (65 kHz PWM)
+                                                   Gate ─── Driven by UC3842 Controller (65 kHz PWM)
                                                     │
                                                  Source ───[ R_sense: 0.25Ω ]─── GND_PRI
 
@@ -39,7 +39,7 @@ Below is the master system interconnection schematic uniting the universal AC fr
   Secondary Winding (6T) ───[ MBR10100 Schottky Diode (100V, 10A) ]───────────┬───> +24V Intermediate DC Bus (72W)
                                                                               │
                                                                            ┌──┴──┐
-                                                                           │TL431│ ───> [ PC817 Optocoupler ] ───> (Feedback to UC3843)
+                                                                           │TL431│ ───> [ PC817 Optocoupler ] ───> (Feedback to UC3842)
                                                                            └──┬──┘
                                                                               │
                                                                            GND_SEC
@@ -159,7 +159,7 @@ The PCB is architected as a high-density **4-layer board ($1.6\,\text{mm}$ FR-4,
 │ 6    │ 1   │ C_BULK1                   │ Electrolytic 100uF/450V │ Radial 18x25 │ Nichicon LGW2W101MELZ25                │
 │ 7    │ 1   │ TX1                       │ Transformer PQ26/20 220uH│ PQ26/20      │ Custom VVDN / Ferroxcube 3C95          │
 │ 8    │ 1   │ Q1                        │ Superjunction FET 800V  │ D2PAK / TO263│ Infineon IPB80R290P7                   │
-│ 9    │ 1   │ U1 (Primary Controller)   │ Uniform PWM Controller  │ SOIC-8 / DIP-8│ Texas Instruments UC3843BN / UCC28C43 │
+│ 9    │ 1   │ U1 (Primary Controller)   │ Uniform PWM Controller  │ SOIC-8 / DIP-8│ Texas Instruments UC3842BN / UCC28C42 │
 │ 10   │ 1   │ D_sec (Secondary Diode)   │ Schottky Rectifier 100V │ TO-220AC     │ ON Semiconductor MBR10100G             │
 │ 11   │ 1   │ R_T / C_T (Timing Network)│ 10kΩ 1% / 2.2nF C0G 50V │ 0805 SMD     │ Panasonic ERA-6AEB103V / Murata C0G    │
 │ 12   │ 1   │ OPTO1                     │ Optocoupler 5000V RMS   │ DIP-4 / SMD  │ Everlight EL817(S)(TA)                 │
@@ -193,7 +193,7 @@ Follow this rigorous multi-step procedure when assembling and verifying the firs
 │      │                      │   Leakage current must be $< 1.0\,\text{mA}$.        │
 ├──────┼──────────────────────┼─────────────────────────────────────────────────────┤
 │ **2**│ Low-Voltage Primary  │ Apply current-limited $+30\,\text{V}$ DC from bench  │
-│      │ Functional Check     │ supply to $C_{bulk}$. Check UC3843 startup pulses    │
+│      │ Functional Check     │ supply to $C_{bulk}$. Check UC3842 startup pulses    │
 │      │                      │ on gate using oscilloscope. Verify VCC charges.      │
 ├──────┼──────────────────────┼─────────────────────────────────────────────────────┤
 │ **3**│ AC Mains Variac Ramp │ Connect through an Isolation Transformer + Variac.   │

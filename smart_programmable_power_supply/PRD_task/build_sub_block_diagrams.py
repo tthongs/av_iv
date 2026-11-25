@@ -3,7 +3,7 @@
 Generate internal sub-block diagrams for each of the 4 stages of the Smart Programmable Power Supply:
 1. Stage 1: Mains Supply Subsystem (AC Inlet, Fuse, NTC, MOV, 2-Stage EMI Filter)
 2. Stage 2: Rectifier & Bulk Stage Subsystem (GBU606 Bridge, 100µF/450V Bulk, Bleeder, Decoupling)
-3. Stage 3: Converter DC-DC (Uniform-Frequency Isolated Flyback) Subsystem (Fixed 65kHz UC3843, 800V FET, PQ26/20 3kV Iso, Schottky Rec, +24V Bus)
+3. Stage 3: Converter DC-DC (Uniform-Frequency Isolated Flyback) Subsystem (Fixed 65kHz UC3842, 800V FET, PQ26/20 3kV Iso, Schottky Rec, +24V Bus)
 4. Stage 4: Final Stage (Buck-Boost Post-Regulator & Output) Subsystem (LM5176, 4-Switch H-Bridge, 10µH Inductor, DAC Steering, <5µs CC Clamp)
 """
 
@@ -410,7 +410,7 @@ digraph InsideStage3Flyback {
         pwm_controller [
             label = <<table border="0" cellborder="0" cellspacing="2">
                 <tr><td><b>UNIFORM-FREQ PWM IC (U1)</b></td></tr>
-                <tr><td><font color="#2E7D32">UC3843 / UCC28C43 (8-Pin)</font></td></tr>
+                <tr><td><font color="#2E7D32">UC3842 / UCC28C42 (8-Pin)</font></td></tr>
                 <hr/>
                 <tr><td align="left">• Uniform 65kHz Fixed Clock</td></tr>
                 <tr><td align="left">• RT = 10kΩ, CT = 2.2nF Timing</td></tr>
@@ -427,7 +427,7 @@ digraph InsideStage3Flyback {
                 <tr><td><font color="#6A1B9A">+14.0V Bias Supply (5T)</font></td></tr>
                 <hr/>
                 <tr><td align="left">• UF4004 Diode + 47µF Cap</td></tr>
-                <tr><td align="left">• Powers UC3843 VCC pin</td></tr>
+                <tr><td align="left">• Powers UC3842 VCC pin</td></tr>
             </table>>,
             fillcolor = "#E1BEE7",
             color = "#6A1B9A"
@@ -487,7 +487,7 @@ digraph InsideStage3Flyback {
                 <hr/>
                 <tr><td align="left">• Precision 2.495V shunt</td></tr>
                 <tr><td align="left">• 5000V RMS Optocoupler</td></tr>
-                <tr><td align="left">• Pulls down UC3843 COMP pin</td></tr>
+                <tr><td align="left">• Pulls down UC3842 COMP pin</td></tr>
                 <tr><td align="left">• Regulates +24.0V ± 1.0%</td></tr>
             </table>>,
             fillcolor = "#D7CCC8",

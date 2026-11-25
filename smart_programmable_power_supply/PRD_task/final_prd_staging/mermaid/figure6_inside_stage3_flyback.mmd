@@ -10,11 +10,11 @@ flowchart LR
         HVDC_IN["<b>+HVDC BUS IN</b><br/>+120V to +375V DC<br/>From Stage 2 Bulk Cap"]:::hvdcStyle
         
         subgraph PRIMARY_CIRCUIT ["PRIMARY CONTROL & SWITCHING CELL (GND_PRI)"]
-            UC3843["<b>PWM CONTROLLER</b><br/>TI UC3843 / UCC28C43<br/>• Uniform 65 kHz Clock<br/>• RT=10kΩ, CT=2.2nF<br/>• Totem-Pole Gate Out<br/>• Cycle-by-Cycle ISENSE"]:::ctrlStyle
+            UC3842["<b>PWM CONTROLLER</b><br/>TI UC3842 / UCC28C42<br/>• Uniform 65 kHz Clock<br/>• RT=10kΩ, CT=2.2nF<br/>• Totem-Pole Gate Out<br/>• Cycle-by-Cycle ISENSE"]:::ctrlStyle
             Q1["<b>PRIMARY MOSFET</b><br/>STP10NK80Z / IPB80R290P7<br/>• 800V Superjunction N-FET<br/>• R_DS(on) = 0.29Ω<br/>• V_DS,peak = 599V (< 75% derated)"]:::fetStyle
             SNUBBER["<b>RCD CLAMP SNUBBER</b><br/>US1M (1kV, 75ns) +<br/>22.6kΩ (3W) + 1nF / 1kV<br/>• Clamps Leakage Spike &lt; 650V"]:::fetStyle
             R_SENSE["<b>PRIMARY CURRENT SHUNT</b><br/>R_CS: 0.25Ω / 2W Non-Inductive<br/>• Monitored at ISENSE Pin<br/>• Limits Peak Current to 2.96A"]:::fetStyle
-            AUX_WIND["<b>AUXILIARY BIAS WINDING</b><br/>N_aux = 5T (0.25mm) + UF4004<br/>• Generates +14.0V DC Rail<br/>• Powers UC3843 VCC Pin"]:::ctrlStyle
+            AUX_WIND["<b>AUXILIARY BIAS WINDING</b><br/>N_aux = 5T (0.25mm) + UF4004<br/>• Generates +14.0V DC Rail<br/>• Powers UC3842 VCC Pin"]:::ctrlStyle
         end
 
         subgraph TRANSFORMER_BARRIER ["⚡ REINFORCED ISOLATION BARRIER (IEC 62368-1)"]
@@ -35,9 +35,9 @@ flowchart LR
         TX_PRI -->|Drain| Q1
         Q1 -.->|Leakage Clamp| SNUBBER
         Q1 -->|Source| R_SENSE
-        R_SENSE -.->|ISENSE Pin| UC3843
-        UC3843 -->|65kHz PWM Gate| Q1
-        AUX_WIND -->|+14V VCC| UC3843
+        R_SENSE -.->|ISENSE Pin| UC3842
+        UC3842 -->|65kHz PWM Gate| Q1
+        AUX_WIND -->|+14V VCC| UC3842
 
         TX_PRI ==>|Magnetic Coupling| TX_SEC
         TX_SEC -->|Switched AC Pulses| SCHOTTKY
@@ -45,5 +45,5 @@ flowchart LR
         LC_FILT --> BUS_24V
         BUS_24V -->|Voltage Sense| TL431
         TL431 -->|Opto LED Drive| OPTO
-        OPTO -.->|COMP Pin Pull-Down| UC3843
+        OPTO -.->|COMP Pin Pull-Down| UC3842
     end

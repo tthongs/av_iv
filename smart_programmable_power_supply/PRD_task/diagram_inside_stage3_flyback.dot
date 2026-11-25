@@ -87,7 +87,7 @@ digraph InsideStage3Flyback {
         pwm_controller [
             label = <<table border="0" cellborder="0" cellspacing="2">
                 <tr><td><b>UNIFORM-FREQ PWM IC (U1)</b></td></tr>
-                <tr><td><font color="#2E7D32">UC3843 / UCC28C43 (8-Pin)</font></td></tr>
+                <tr><td><font color="#2E7D32">UC3842 / UCC28C42 (8-Pin)</font></td></tr>
                 <hr/>
                 <tr><td align="left">• Uniform 65kHz Fixed Clock</td></tr>
                 <tr><td align="left">• RT = 10kΩ, CT = 2.2nF Timing</td></tr>
@@ -104,7 +104,7 @@ digraph InsideStage3Flyback {
                 <tr><td><font color="#6A1B9A">+14.0V Bias Supply (5T)</font></td></tr>
                 <hr/>
                 <tr><td align="left">• UF4004 Diode + 47µF Cap</td></tr>
-                <tr><td align="left">• Powers UC3843 VCC pin</td></tr>
+                <tr><td align="left">• Powers UC3842 VCC pin</td></tr>
             </table>>,
             fillcolor = "#E1BEE7",
             color = "#6A1B9A"
@@ -164,7 +164,7 @@ digraph InsideStage3Flyback {
                 <hr/>
                 <tr><td align="left">• Precision 2.495V shunt</td></tr>
                 <tr><td align="left">• 5000V RMS Optocoupler</td></tr>
-                <tr><td align="left">• Pulls down UC3843 COMP pin</td></tr>
+                <tr><td align="left">• Pulls down UC3842 COMP pin</td></tr>
                 <tr><td align="left">• Regulates +24.0V ± 1.0%</td></tr>
             </table>>,
             fillcolor = "#D7CCC8",

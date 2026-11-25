@@ -89,7 +89,7 @@ digraph SimplePowerFlow {
                 <tr><td><font point-size="12"><b>3. ISOLATED DC-DC CONVERTER</b></font></td></tr>
                 <tr><td><font color="#1B5E20"><b>Stage 3: Uniform-Freq Flyback (72W)</b></font></td></tr>
                 <hr/>
-                <tr><td align="left">• Controller: <b>UC3843 / UCC28C43</b> (65kHz)</td></tr>
+                <tr><td align="left">• Controller: <b>UC3842 / UCC28C42</b> (65kHz)</td></tr>
                 <tr><td align="left">• Timing: <b>RT/CT Fixed Clock Oscillator</b></td></tr>
                 <tr><td align="left">• Magnetics: <b>PQ26/20 Core</b> (Lp=220µH)</td></tr>
                 <tr><td align="left">• <b>Isolation: 3000V RMS Reinforced</b></td></tr>

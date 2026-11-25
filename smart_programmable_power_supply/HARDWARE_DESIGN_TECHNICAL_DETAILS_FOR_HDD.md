@@ -67,7 +67,7 @@ This document serves as the **deep technical reference and design formulation re
  P_loss,BR = 2 × V_F × I_avg = 2 × 0.95 V × 0.85 A = 1.62 W
 
 ### 3.2 Bulk Electrolytic Capacitor Sizing (C_BULK)
-* **Minimum Allowed Bulk Voltage**: V_bulk,min = 90 V DC (minimum operating voltage for UC3843 Flyback).
+* **Minimum Allowed Bulk Voltage**: V_bulk,min = 90 V DC (minimum operating voltage for UC3842 Flyback).
 * **Grid Holdup Time**: t_holdup = 10 ms (one full half-cycle at 50 Hz).
 * **Flyback Maximum Power Input**: P_IN,flyback = (72 W / 0.88) ≈ 81.8 W.
 * **Required Capacitance**:
@@ -122,7 +122,7 @@ This document serves as the **deep technical reference and design formulation re
  Turns ratio n = N_p / N_s:
  n = (V_R / V_OUT + V_F) = (144 V / 24.0 V + 0.60 V) = 5.85 ≈ 6.0 -> N_s = (36 / 6) = 6 turns
 * **Auxiliary Bias Turns (N_aux)**:
- For V_aux = 14.0 V to bias UC3843:
+ For V_aux = 14.0 V to bias UC3842:
  N_aux = N_s × (V_aux + 0.7 V / V_OUT + V_F) = 6 × (14.7 / 24.6) = 3.58 -> 4 to 5 turns
 * **Wire Specifications**:
  * Primary: 2x parallel strands of 0.35 mm Grade 2 enamel magnet wire.
@@ -162,7 +162,7 @@ This document serves as the **deep technical reference and design formulation re
  Mounted on a compact aluminum clip-on heatsink (R_thetasa = 12°C/W), junction temperature rise is:
  Δ T_J = 1.80 W × (1.5 + 12)°C/W = 24.3°C
  At T_amb = 40°C, T_J ≈ 64.3°C, safely below the 150°C rating.
-* **Controller**: Uniform-Frequency PWM Controller Texas Instruments / ST `UC3843` / `UCC28C43` (SOIC-8 / DIP-8). Robust passive secondary architecture completely eliminates complex synchronous gate timing circuitry.
+* **Controller**: Uniform-Frequency PWM Controller Texas Instruments / ST `UC3842` / `UCC28C42` (SOIC-8 / DIP-8). Robust passive secondary architecture completely eliminates complex synchronous gate timing circuitry.
 
 ---
 
@@ -246,7 +246,7 @@ This document serves as the **deep technical reference and design formulation re
 | 11 | R_BL1..3 | Safety Bleeder Resistor | 3x 100kΩ, 0.25W | SMD 1206 | Vishay Dale | CRCW1206100KFKEA | Stage 2 |
 | 12 | TX1 | Flyback Transformer | PQ26/20, Lp=220µH | PQ26/20 Through-Hole | Custom / Ferroxcube | 3C95-PQ2620-72W | Stage 3 |
 | 13 | Q1 | Superjunction CoolMOS FET | 800V, 17A, 0.29Ω | D2PAK (TO-263) | Infineon | IPB80R290P7 | Stage 3 |
-| 14 | U1 | Uniform-Freq PWM Controller | Fixed 65kHz Clock | SOIC-8 / DIP-8 | Texas Instruments / ST | UC3843BN / UCC28C43D | Stage 3 |
+| 14 | U1 | Uniform-Freq PWM Controller | Fixed 65kHz Clock | SOIC-8 / DIP-8 | Texas Instruments / ST | UC3842BN / UCC28C42D | Stage 3 |
 | 15 | D_SEC | Schottky Barrier Rectifier | 100V, 10A, TO-220 | TO-220-2 | ON Semi / Vishay | MBR10100G | Stage 3 |
 | 16 | R_T / C_T | Oscillator Timing Components | 10kΩ 1% + 2.2nF C0G | SMD 0805 | Vishay / Murata | TNPW0805 / GRM18 | Stage 3 |
 | 17 | OPTO1 | Reinforced Optocoupler | 5000V RMS Isolation | SMD-4 | Everlight | EL817(S)(TA) | Stage 3 |
@@ -276,9 +276,9 @@ Before applying full grid power to first-run prototype hardware, the following 5
 2. **0 V to 50 V AC RMS**: Slowly rotate the Variac knob from 0V to 50V AC.
  * Verify the series bulb remains dark (indicating zero shoot-through current).
  * Measure bulk capacitor voltage: V_bulk ≈ 50 × √(2) = 70.7 V DC.
- * Verify UC3843 / UCC28C43 V_CC pin begins charging up through the high-voltage startup resistor network.
+ * Verify UC3842 / UCC28C42 V_CC pin begins charging up through the high-voltage startup resistor network.
 3. **85 V AC RMS (Low-Line Start)**: Increase Variac to 85V AC.
- * UC3843 / UCC28C43 controller reaches startup threshold (V_CC,start ≈ 8.4 V).
+ * UC3842 / UCC28C42 controller reaches startup threshold (V_CC,start ≈ 16.0 V).
  * Controller initiates 65 kHz uniform PWM switching.
  * Probe +24.0 V intermediate bus on an oscilloscope: verify smooth rise with zero overshoot (< 24.5 V peak) and stable continuous regulation at +24.0 V ± 1.0%.
 
@@ -313,13 +313,13 @@ Before applying full grid power to first-run prototype hardware, the following 5
 ## 8. Cross-Mentor Technical Defense Cheatsheet
 
 ### Q1: Walk me through the complete power conversion chain from wall to device.
-* **Trainee Defense**: *"The hardware operates in four sequential stages: First, universal mains AC (85V–265V AC RMS) enters via an IEC C14 inlet through a 2A time-lag fuse, 10Ω NTC inrush limiter, 14D471K MOV surge suppressor, and a 2-stage common-mode EMI filter. Second, a GBU606 bridge rectifier and 100µF/450V electrolytic bulk capacitor convert the AC into high-voltage DC (+120V to +375V DC) with >10ms dropout holdup. Third, Stage 3 (a Uniform-Frequency Flyback converter operating at a fixed 65 kHz clock powered by UC3843 / UCC28C43 and a custom PQ26/20 transformer) steps down the power and provides certified 3000V RMS reinforced safety isolation to create a stable +24.0V DC intermediate rail (72W) using a simple, robust MBR10100 Schottky rectifier. Fourth, Stage 4 (a TI LM5176 4-switch synchronous Buck-Boost post-regulator) regulates the +24V bus down or across to 5.0V–20.0V DC at up to 3.0A with sub-25mV ripple and sub-5µs hardware protection, feeding the device under test via 4mm binding posts."*
+* **Trainee Defense**: *"The hardware operates in four sequential stages: First, universal mains AC (85V–265V AC RMS) enters via an IEC C14 inlet through a 2A time-lag fuse, 10Ω NTC inrush limiter, 14D471K MOV surge suppressor, and a 2-stage common-mode EMI filter. Second, a GBU606 bridge rectifier and 100µF/450V electrolytic bulk capacitor convert the AC into high-voltage DC (+120V to +375V DC) with >10ms dropout holdup. Third, Stage 3 (a Uniform-Frequency Flyback converter operating at a fixed 65 kHz clock powered by UC3842 / UCC28C42 and a custom PQ26/20 transformer) steps down the power and provides certified 3000V RMS reinforced safety isolation to create a stable +24.0V DC intermediate rail (72W) using a simple, robust MBR10100 Schottky rectifier. Fourth, Stage 4 (a TI LM5176 4-switch synchronous Buck-Boost post-regulator) regulates the +24V bus down or across to 5.0V–20.0V DC at up to 3.0A with sub-25mV ripple and sub-5µs hardware protection, feeding the device under test via 4mm binding posts."*
 
 ### Q2: Why did you use a passive filter and bridge rectifier instead of an active Boost PFC stage?
 * **Trainee Defense**: *"Under international regulatory standard IEC 61000-3-2 (Harmonic Current Emissions), active Power Factor Correction is legally mandated only for power supplies with active input power exceeding 75W. Our module delivers a maximum continuous output of 60W (72W peak intermediate), so it falls strictly below the 75W regulatory threshold. Adding an active PFC boost stage would require an additional high-voltage MOSFET, boost diode, controller IC, and large inductor—adding approximately 4.20 to the BOM, consuming 35% more board footprint, and introducing a ~3% efficiency penalty without any regulatory requirement."*
 
 ### Q3: How did you calculate the Flyback transformer magnetics on the PQ26/20 core?
-* **Trainee Defense**: *"At minimum 85V AC input, the bulk bus drops to 120V DC. For a maximum duty cycle of 45% and a uniform 65 kHz switching frequency (fixed by 10kΩ and 2.2nF on UC3843 pin 4) at 72W output power, primary peak current is ~3.0A to 3.3A. Using L_p = (V_bulk_min * D_max) / (I_pk * f_sw), I selected a primary inductance of 220µH to ensure stable boundary/CCM margin. I chose a PQ26/20 core in 3C95 material because its cross-sectional area Ae is 122 mm², keeping peak flux density B_max at ~0.15 Tesla, well below the 0.38 Tesla saturation limit. The turns ratio is 6:1 (36 primary turns, 6 secondary turns). On the secondary, an MBR10100 Schottky diode provides simple, robust rectification without active timing risks. To guarantee IEC 62368-1 reinforced isolation (3000V RMS), the secondary is wound with Furukawa TEX-E triple-insulated wire."*
+* **Trainee Defense**: *"At minimum 85V AC input, the bulk bus drops to 120V DC. For a maximum duty cycle of 45% and a uniform 65 kHz switching frequency (fixed by 10kΩ and 2.2nF on UC3842 pin 4) at 72W output power, primary peak current is ~3.0A to 3.3A. Using L_p = (V_bulk_min * D_max) / (I_pk * f_sw), I selected a primary inductance of 220µH to ensure stable boundary/CCM margin. I chose a PQ26/20 core in 3C95 material because its cross-sectional area Ae is 122 mm², keeping peak flux density B_max at ~0.15 Tesla, well below the 0.38 Tesla saturation limit. The turns ratio is 6:1 (36 primary turns, 6 secondary turns). On the secondary, an MBR10100 Schottky diode provides simple, robust rectification without active timing risks. To guarantee IEC 62368-1 reinforced isolation (3000V RMS), the secondary is wound with Furukawa TEX-E triple-insulated wire."*
 
 ### Q4: Why is the intermediate bus chosen at +24.0V DC instead of +12V or +48V?
 * **Trainee Defense**: *"+24.0V DC is the optimal sweet spot for a 5V to 20V output range. If we chose +12V, stepping up to 20V at 3A (60W) would require high inductor boost currents (I_in = 5.5A), creating excessive conduction losses in the Buck-Boost MOSFETs. If we chose +48V, the Flyback turns ratio would decrease, increasing primary switch voltage stress, and stepping down from 48V to 5V would require an extreme duty cycle of 10%. With +24V, 5V, 12V, and 15V operate in pure Buck mode (> 96% efficiency), and 20V operates near unity Buck-Boost transition with minimal switching stress."*

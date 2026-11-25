@@ -53,7 +53,7 @@ digraph MasterArchitecture {
         tx_pri [label="Transformer Primary\nPQ26/20 Core (3C95)\nNp = 48T | Lp = 220µH", fillcolor="#FFE0B2", color="#E65100"];
         snubber [label="RCD Clamp Snubber\n50kΩ / 2.2nF / UF4007\nClamps Vds Ringing", fillcolor="#FFFFFF", color="#F57C00"];
         pri_mosfet [label="Primary Switch Q1\nIPB80R290P7 (800V, 0.29Ω)\nSuperjunction D2PAK", fillcolor="#FFFFFF", color="#E65100"];
-        pri_ctrl [label="Uniform-Freq PWM Controller\nUC3843 / UCC28C43\n• Uniform 65kHz Fixed Clock\n• Cycle-by-Cycle Peak CS", fillcolor="#FFFFFF", color="#E65100"];
+        pri_ctrl [label="Uniform-Freq PWM Controller\nUC3842 / UCC28C42\n• Uniform 65kHz Fixed Clock\n• Cycle-by-Cycle Peak CS", fillcolor="#FFFFFF", color="#E65100"];
         pri_rsense [label="Current Sense Shunt\nRsense = 0.2Ω / 2W", fillcolor="#FFFFFF", color="#F57C00"];
         aux_pri [label="Aux Bias Winding\nNaux = 8T (+14V VCC)", fillcolor="#FFE0B2", color="#E65100"];
 

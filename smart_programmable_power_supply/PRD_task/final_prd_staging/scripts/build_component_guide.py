@@ -38,7 +38,7 @@ mmd_flow = """flowchart LR
 
     STAGE2["<b>2. AC RECTIFICATION & EMI FILTER</b><br/>• 2-Stage CM Filter: 15mH + 4.7mH Chokes<br/>• Differential X2 Caps: 2x 0.22uF + 0.10uF<br/>• Common-Mode Y2 Caps: 4x 2.2nF to Earth PE<br/>• GBU606 Bridge Rectifier (600V, 6A)<br/>• 100uF / 450V Bulk Electrolytic Cap<br/>• Output: +120V to +375V DC Bulk Bus"]:::rectStyle
 
-    STAGE3["<b>3. FLYBACK CONVERTER SYSTEM</b><br/>• Uniform 65 kHz PWM Clock (UC3843 IC)<br/>• PQ26/20 Core (3C95 Ferrite, Lp = 220uH)<br/>• 3000V RMS Reinforced Galvanic Barrier<br/>• 800V Superjunction Power FET (Q1)<br/>• Passive MBR10100 Schottky Diode + Heatsink<br/>• Output: +24.0V DC Intermediate Bus (72W)"]:::flybackStyle
+    STAGE3["<b>3. FLYBACK CONVERTER SYSTEM</b><br/>• Uniform 65 kHz PWM Clock (UC3842 IC)<br/>• PQ26/20 Core (3C95 Ferrite, Lp = 220uH)<br/>• 3000V RMS Reinforced Galvanic Barrier<br/>• 800V Superjunction Power FET (Q1)<br/>• Passive MBR10100 Schottky Diode + Heatsink<br/>• Output: +24.0V DC Intermediate Bus (72W)"]:::flybackStyle
 
     STAGE4["<b>4. BUCK-BOOST POST-REGULATOR</b><br/>• 4-Switch Synchronous H-Bridge (QA - QD)<br/>• Direct PWM Duty Cycle Control (300 kHz)<br/>• Modulated by STM32G474 HRTIM Engine<br/>• 10uH Flat-Wire Inductor (8.5A RMS / 11.5A Sat)<br/>• Sub-30ns Hardware Peak Limit (10mOhm Shunt)<br/>• Step-down or across to 5.0V - 20.0V DC"]:::bbStyle
 
@@ -113,7 +113,7 @@ dot_flow = r"""digraph SystemPowerFlow {
         label=<<table border="0" cellborder="0" cellspacing="2">
             <tr><td><b>3. FLYBACK CONVERTER SYSTEM</b></td></tr>
             <hr/>
-            <tr><td align="left">• Uniform 65 kHz Clock (TI UC3843 PWM)</td></tr>
+            <tr><td align="left">• Uniform 65 kHz Clock (TI UC3842 PWM)</td></tr>
             <tr><td align="left">• PQ26/20 Core (3C95 Ferrite, Lp=220uH)</td></tr>
             <tr><td align="left">• 3000V RMS Reinforced Galvanic Barrier</td></tr>
             <tr><td align="left">• 800V Superjunction MOSFET (Q1)</td></tr>
@@ -234,7 +234,7 @@ AC Mains (85-265V AC) ──► [Stage 1: EMI & Protection] ──► [Stage 2: 
    - Smooths the rectified pulses into an unregulated high-voltage DC bus (+120 V DC at 85 V AC line up to +375 V DC at 265 V AC line) using a high-reliability 100 uF / 450V electrolytic capacitor paired with a high-frequency film capacitor to supply peak magnetizing currents with low ESR.
 3. **Stage 3 (Uniform-Frequency Isolated Flyback DC-DC Converter)**:
    - Steps down the unregulated +120V to +375V DC bulk rail to a stable, isolated +24.0 V DC intermediate rail (72W continuous, 84W peak).
-   - Operates at a constant 65 kHz switching frequency using a Texas Instruments UC3843 / UCC28C43 current-mode PWM controller and an 800V superjunction power MOSFET.
+   - Operates at a constant 65 kHz switching frequency using a Texas Instruments UC3842 / UCC28C42 current-mode PWM controller and an 800V superjunction power MOSFET.
    - Provides certified reinforced safety isolation (greater than 3000 V AC RMS withstand for 60 seconds) across a custom Ferroxcube PQ26/20 ferrite transformer wound with Furukawa TEX-E triple-insulated wire.
    - Rectifies secondary flyback energy using a passive ON Semi MBR10100 (100V, 10A) Schottky barrier diode with a stamped heatsink, eliminating active synchronous driver complexity.
 4. **Stage 4 (Synchronous 4-Switch Buck-Boost Post-Regulator)**:
@@ -388,12 +388,12 @@ AC Mains (85-265V AC) ──► [Stage 1: EMI & Protection] ──► [Stage 2: 
 ## 4. Stage 3: Uniform-Frequency 65 kHz Flyback Converter Components
 
 ### 4.1 Fixed-Frequency Current-Mode PWM Controller (U1)
-* **Manufacturer & Part Number**: Texas Instruments UC3843BN / UCC28C43D
+* **Manufacturer & Part Number**: Texas Instruments UC3842BN / UCC28C42D
 * **Package / Style**: SOIC-8 or DIP-8
-* **Key Ratings**: Uniform Fixed Clock, Start Threshold 8.4V, UVLO Min 7.6V, Reference Voltage 5.00V +/- 1%, Peak Totem-Pole Gate Output 1.0A Source / Sink, Response Time < 100 ns
+* **Key Ratings**: Uniform Fixed Clock, Start Threshold 16.0V, UVLO Min 10.0V, Reference Voltage 5.00V +/- 1%, Peak Totem-Pole Gate Output 1.0A Source / Sink, Response Time < 100 ns
 * **Why It Is Used**: Serves as the dedicated hardware controller for the isolated Flyback stage. Operates at a constant 65 kHz frequency to ensure predictable, deterministic EMI harmonics that align perfectly with the input EMI filter design.
 * **Parameters Considered During Selection**:
-  - UVLO thresholds: UC3843 has an 8.4V turn-on threshold and a 7.6V turn-off threshold, making it easy to start up from a simple bleed resistor and maintain operation from a +14V auxiliary winding.
+  - UVLO thresholds: UC3842 has an 16.0V turn-on threshold and a 10.0V turn-off threshold, making it easy to start up from a simple bleed resistor and maintain operation from a +14V auxiliary winding.
   - Cycle-by-cycle current mode: Senses primary current pulse-by-pulse on Pin 3 (ISENSE) with an internal 1.0V comparator threshold, providing instant hardware overcurrent protection and inherent line regulation.
   - Low cost & extreme reliability: Over three decades of proven industrial track record; zero firmware dependencies, eliminating lockups or crash states.
 
@@ -401,7 +401,7 @@ AC Mains (85-265V AC) ──► [Stage 1: EMI & Protection] ──► [Stage 2: 
 * **Manufacturer & Part Number**: Vishay Dale RN55 (10.0 kOhm, 0.1%) + Murata GRM1885C1H222JA01 (2.2 nF, 50V C0G)
 * **Package / Style**: SMD 0805
 * **Key Ratings**: R_T = 10.0 kOhm (Temperature Coefficient 25 ppm/K), C_T = 2.2 nF (C0G / NP0 Ultra-Stable, 0 ppm/K)
-* **Why They Are Used**: Set the internal oscillator ramp frequency of the UC3843 controller to an exact, uniform 65.0 kHz clock.
+* **Why They Are Used**: Set the internal oscillator ramp frequency of the UC3842 controller to an exact, uniform 65.0 kHz clock.
 * **Parameters Considered During Selection**:
   - Frequency calculation formula:
     f_sw = 1.72 / (R_T * C_T) = 1.72 / (10,000 Ohm * 2.2 * 10^-9 F) = 78,181 Hz (internal clock), giving an effective switching frequency of 65.0 kHz after accounting for internal discharge dead-time.
@@ -428,12 +428,12 @@ AC Mains (85-265V AC) ──► [Stage 1: EMI & Protection] ──► [Stage 2: 
 * **Manufacturer & Part Number**: Bourns CSS2H-2512R-L250F
 * **Package / Style**: SMD 2512 Metal Strip Shunt
 * **Key Ratings**: 0.25 Ohm +/- 1%, 2.0 W Continuous Power, Low Inductance (< 3 nH), Temperature Coefficient 50 ppm/K
-* **Why It Is Used**: Senses the source current of Q1 to provide cycle-by-cycle peak current feedback to the UC3843 ISENSE pin (Pin 3).
+* **Why It Is Used**: Senses the source current of Q1 to provide cycle-by-cycle peak current feedback to the UC3842 ISENSE pin (Pin 3).
 * **Parameters Considered During Selection**:
   - Overcurrent threshold sizing:
     At maximum duty cycle (45%) and minimum line (120V DC), peak primary current at 72W output is 2.96A.
     Voltage on ISENSE pin: V_sense = I_pk * R_CS = 2.96A * 0.25 Ohm = 0.740 Volts.
-    This provides comfortable headroom below the UC3843 internal 1.0V current trip threshold, setting the absolute hardware power limit at:
+    This provides comfortable headroom below the UC3842 internal 1.0V current trip threshold, setting the absolute hardware power limit at:
     I_pk_limit = 1.0V / 0.25 Ohm = 4.0A (corresponding to 96W peak burst capability).
   - Power dissipation: P = (I_rms)^2 * R = (0.95A)^2 * 0.25 Ohm = 0.226 Watts, well below the 2.0W rating (giving an 8.8x thermal safety factor).
 
@@ -487,7 +487,7 @@ AC Mains (85-265V AC) ──► [Stage 1: EMI & Protection] ──► [Stage 2: 
   - OPTO1: Everlight PC817 Phototransistor Optocoupler (5000 V RMS Dielectric Withstand)
   - U2: Texas Instruments TL431ACDBZR Precision Adjustable Shunt Regulator (2.495V internal reference, 0.5% tolerance)
   - Feedback Divider: 21.5 kOhm and 2.49 kOhm 0.1% metal film resistors
-* **Why They Are Used**: Transmits the secondary +24.0V DC regulation error voltage across the 3000V isolation barrier back to the primary UC3843 COMP pin to maintain +/- 1.0% voltage regulation.
+* **Why They Are Used**: Transmits the secondary +24.0V DC regulation error voltage across the 3000V isolation barrier back to the primary UC3842 COMP pin to maintain +/- 1.0% voltage regulation.
 * **Parameters Considered During Selection**:
   - Isolation rating: 5000 V RMS rating exceeds the 3000 V RMS module requirement.
   - Current Transfer Ratio (CTR): Sized with CTR between 100% and 200% to ensure stable loop gain and fast transient response across aging and temperature variations.

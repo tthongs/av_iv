@@ -54,7 +54,7 @@ digraph Figure10MasterArchitecture {
         tx_pri [label="Transformer Primary\nPQ26/20 (3C95 Ferrite)\nNp = 36T, Lp = 220µH", fillcolor="#FFE0B2", color="#E65100"];
         snubber [label="RCD Snubber Clamp\nUS1M + 22.6kΩ + 1nF", fillcolor="#FFFFFF", color="#F57C00"];
         pri_fet [label="STP10NK80Z N-FET\n800V, 0.29Ω D2PAK", fillcolor="#FFFFFF", color="#E65100"];
-        pri_ctrl [label="UC3843 PWM Controller\nUniform 65kHz Fixed Clock\nCycle-by-cycle ISENSE", fillcolor="#FFFFFF", color="#E65100"];
+        pri_ctrl [label="UC3842 PWM Controller\nUniform 65kHz Fixed Clock\nCycle-by-cycle ISENSE", fillcolor="#FFFFFF", color="#E65100"];
 
         ac_rect -> tx_pri [label=" +HVDC", color="#D84315", penwidth=2.2];
         tx_pri -> pri_fet [label=" Drain"];

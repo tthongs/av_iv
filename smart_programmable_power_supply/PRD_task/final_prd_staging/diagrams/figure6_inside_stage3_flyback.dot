@@ -46,10 +46,10 @@ digraph Figure6Stage3Flyback {
         color = "#E65100";
         penwidth = 1.6;
 
-        uc3843 [
+        uc3842 [
             label = <<table border="0" cellborder="0" cellspacing="2">
                 <tr><td><b>PWM CONTROLLER</b></td></tr>
-                <tr><td><font color="#0277BD">UC3843 / UCC28C43</font></td></tr>
+                <tr><td><font color="#0277BD">UC3842 / UCC28C42</font></td></tr>
                 <hr/>
                 <tr><td align="left">• Uniform 65 kHz Clock</td></tr>
                 <tr><td align="left">• RT = 10kΩ, CT = 2.2nF</td></tr>
@@ -102,7 +102,7 @@ digraph Figure6Stage3Flyback {
                 <tr><td><b>AUX BIAS WINDING</b></td></tr>
                 <tr><td><font color="#0277BD">N_aux = 5T (+14V DC)</font></td></tr>
                 <hr/>
-                <tr><td align="left">• Sustains UC3843 VCC</td></tr>
+                <tr><td align="left">• Sustains UC3842 VCC</td></tr>
                 <tr><td align="left">• High-rel bootstrap</td></tr>
             </table>>,
             fillcolor = "#E1F5FE",
@@ -187,9 +187,9 @@ digraph Figure6Stage3Flyback {
     tx_pri -> q1 [label=" Drain", color="#E65100"];
     q1 -> snub [dir=both, style=dashed, color="#E65100"];
     q1 -> rcs [label=" Source", color="#E65100"];
-    rcs -> uc3843 [label=" ISENSE", style=dashed, color="#0277BD"];
-    uc3843 -> q1 [label=" 65kHz Gate", color="#0277BD"];
-    aux -> uc3843 [label=" +14V VCC", color="#0277BD"];
+    rcs -> uc3842 [label=" ISENSE", style=dashed, color="#0277BD"];
+    uc3842 -> q1 [label=" 65kHz Gate", color="#0277BD"];
+    aux -> uc3842 [label=" +14V VCC", color="#0277BD"];
 
     tx_pri -> tx_sec [label=" 6:1 Ratio", color="#C62828", style=bold];
     tx_sec -> mbr [label=" Secondary AC", color="#2E7D32", penwidth=2.0];
@@ -197,5 +197,5 @@ digraph Figure6Stage3Flyback {
     lc -> bus_24v [label=" +24V Rail", color="#1B5E20", penwidth=2.2];
     bus_24v -> tl431 [label=" Sense", color="#2E7D32"];
     tl431 -> opto [label=" LED Drive", color="#C62828"];
-    opto -> uc3843 [label=" COMP Pull-Down", color="#C62828"];
+    opto -> uc3842 [label=" COMP Pull-Down", color="#C62828"];
 }

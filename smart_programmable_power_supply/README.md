@@ -71,7 +71,7 @@ flowchart LR
     end
 
     subgraph COLD_DOMAIN ["SECONDARY COLD DOMAIN (Touch-Safe SELV)"]
-        S3["3. CONVERTER DC-DC<br/>• Uniform Flyback (UC3843 @ 65kHz)<br/>• PQ26/20 Core (Lp = 220µH)<br/>• ⚡ 3000V RMS Safety Isolation<br/>• MBR10100 Schottky Rectifier<br/>• +24.0V DC Intermediate Rail (72W)"]:::isoStyle
+        S3["3. CONVERTER DC-DC<br/>• Uniform Flyback (UC3842 @ 65kHz)<br/>• PQ26/20 Core (Lp = 220µH)<br/>• ⚡ 3000V RMS Safety Isolation<br/>• MBR10100 Schottky Rectifier<br/>• +24.0V DC Intermediate Rail (72W)"]:::isoStyle
         S4["4. FINAL STAGE<br/>• 4-Switch Buck-Boost (TI LM5176)<br/>• 4x 40V Low-Rds MOSFETs<br/>• Analog DAC Steering (10mV)<br/>• Built-in CSP/CSN Current Limit<br/>• 5.0V - 20.0V DC / 3.0A (60W)"]:::bbStyle
         S3 -->|"+24.0V DC Rail"| S4
     end
@@ -110,7 +110,7 @@ Full-wave rectification via GBU606 bridge (600V, 6A) and energy smoothing via 10
 </p>
 
 #### Stage 3: Converter DC-DC (Isolated Uniform-Frequency Flyback Subsystem)
-Standard current-mode PWM controller (UC3843 / UCC28C43 @ 65 kHz fixed clock), 800V CoolMOS IPB80R290P7, custom PQ26/20 transformer with certified 3000V RMS reinforced safety isolation, and a robust MBR10100 Schottky diode generating a stable +24.0V DC intermediate rail (72W).
+Standard current-mode PWM controller (UC3842 / UCC28C42 @ 65 kHz fixed clock), 800V CoolMOS IPB80R290P7, custom PQ26/20 transformer with certified 3000V RMS reinforced safety isolation, and a robust MBR10100 Schottky diode generating a stable +24.0V DC intermediate rail (72W).
 <p align="center">
   <img src="PRD_task/diagram_inside_stage3_flyback.png" alt="Inside Stage 3: Converter DC-DC Flyback Subsystem" width="100%"/>
 </p>
@@ -161,7 +161,7 @@ Why is a two-stage cascaded architecture (**Universal AC-DC Flyback + Synchronou
 
 1. **AC-DC Primary Flyback Converter Stage**:
    - Universal mains rectification ($85\,\text{V} \dots 265\,\text{V}$ AC) with EMI Pi-filtering (common-mode choke + differential film caps) compliant with CISPR 32 Class B.
-   - Uniform-frequency current-mode PWM controller (UC3843 / UCC28C43) operating at a fixed 65 kHz clock driving an $800\,\text{V}$ Superjunction MOSFET.
+   - Uniform-frequency current-mode PWM controller (UC3842 / UCC28C42) operating at a fixed 65 kHz clock driving an $800\,\text{V}$ Superjunction MOSFET.
    - Precision transformer design on PQ26/20 ferrite core with triple-insulated secondary wire ($\ge 3\,\text{kV}_{\text{RMS}}$ reinforced barrier).
    - Robust secondary rectification using an MBR10100 Schottky diode (100V, 10A) with small clip heatsink, delivering ~88% stage efficiency with zero shoot-through risks.
    - Regulated $+24.0\,\text{V}$ intermediate DC bus output with optocoupler isolation (PC817) and TL431 reference.

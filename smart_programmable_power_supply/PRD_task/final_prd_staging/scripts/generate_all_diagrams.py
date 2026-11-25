@@ -37,7 +37,7 @@ fig1_mmd = r"""flowchart LR
     end
 
     subgraph COLD_DOMAIN ["SECONDARY COLD DOMAIN (Touch-Safe SELV)"]
-        S3["<b>Stage 3: CONVERTER DC-DC</b><br/>• Uniform-Freq Flyback (UC3843 @ 65kHz)<br/>• PQ26/20 Core (Lp = 220µH, 6:1 turns)<br/>• MBR10100 Schottky Diode + Heatsink<br/>• +24.0V DC Intermediate Rail (72W)"]:::isoStyle
+        S3["<b>Stage 3: CONVERTER DC-DC</b><br/>• Uniform-Freq Flyback (UC3842 @ 65kHz)<br/>• PQ26/20 Core (Lp = 220µH, 6:1 turns)<br/>• MBR10100 Schottky Diode + Heatsink<br/>• +24.0V DC Intermediate Rail (72W)"]:::isoStyle
         S4["<b>Stage 4: POST-REGULATOR</b><br/>• 4-Switch Buck-Boost (TI LM5176 @ 300kHz)<br/>• 4x 40V Low-Rds MOSFETs + 10µH Inductor<br/>• Direct PWM Duty Cycle Control (D = 20.8% - 83.3%)<br/>• Built-in CSP/CSN Peak Current Limit<br/>• 5.0V - 20.0V DC / 3.0A (60W)"]:::bbStyle
         S3 -->|"+24.0V DC Rail"| S4
     end
@@ -131,7 +131,7 @@ fig1_dot = r"""digraph Figure1PowerFlow {
                 <tr><td><b>STAGE 3: CONVERTER DC-DC</b></td></tr>
                 <tr><td><font color="#2E7D32">Uniform-Frequency Flyback</font></td></tr>
                 <hr/>
-                <tr><td align="left">• UC3843 PWM @ Uniform 65 kHz</td></tr>
+                <tr><td align="left">• UC3842 PWM @ Uniform 65 kHz</td></tr>
                 <tr><td align="left">• PQ26/20 Core (Lp = 220µH, 6:1)</td></tr>
                 <tr><td align="left">• 800V Superjunction MOSFET</td></tr>
                 <tr><td align="left">• MBR10100 Schottky Diode</td></tr>
@@ -666,11 +666,11 @@ fig6_mmd = r"""flowchart LR
         HVDC_IN["<b>+HVDC BUS IN</b><br/>+120V to +375V DC<br/>From Stage 2 Bulk Cap"]:::hvdcStyle
         
         subgraph PRIMARY_CIRCUIT ["PRIMARY CONTROL & SWITCHING CELL (GND_PRI)"]
-            UC3843["<b>PWM CONTROLLER</b><br/>TI UC3843 / UCC28C43<br/>• Uniform 65 kHz Clock<br/>• RT=10kΩ, CT=2.2nF<br/>• Totem-Pole Gate Out<br/>• Cycle-by-Cycle ISENSE"]:::ctrlStyle
+            UC3842["<b>PWM CONTROLLER</b><br/>TI UC3842 / UCC28C42<br/>• Uniform 65 kHz Clock<br/>• RT=10kΩ, CT=2.2nF<br/>• Totem-Pole Gate Out<br/>• Cycle-by-Cycle ISENSE"]:::ctrlStyle
             Q1["<b>PRIMARY MOSFET</b><br/>STP10NK80Z / IPB80R290P7<br/>• 800V Superjunction N-FET<br/>• R_DS(on) = 0.29Ω<br/>• V_DS,peak = 599V (< 75% derated)"]:::fetStyle
             SNUBBER["<b>RCD CLAMP SNUBBER</b><br/>US1M (1kV, 75ns) +<br/>22.6kΩ (3W) + 1nF / 1kV<br/>• Clamps Leakage Spike &lt; 650V"]:::fetStyle
             R_SENSE["<b>PRIMARY CURRENT SHUNT</b><br/>R_CS: 0.25Ω / 2W Non-Inductive<br/>• Monitored at ISENSE Pin<br/>• Limits Peak Current to 2.96A"]:::fetStyle
-            AUX_WIND["<b>AUXILIARY BIAS WINDING</b><br/>N_aux = 5T (0.25mm) + UF4004<br/>• Generates +14.0V DC Rail<br/>• Powers UC3843 VCC Pin"]:::ctrlStyle
+            AUX_WIND["<b>AUXILIARY BIAS WINDING</b><br/>N_aux = 5T (0.25mm) + UF4004<br/>• Generates +14.0V DC Rail<br/>• Powers UC3842 VCC Pin"]:::ctrlStyle
         end
 
         subgraph TRANSFORMER_BARRIER ["⚡ REINFORCED ISOLATION BARRIER (IEC 62368-1)"]
@@ -691,9 +691,9 @@ fig6_mmd = r"""flowchart LR
         TX_PRI -->|Drain| Q1
         Q1 -.->|Leakage Clamp| SNUBBER
         Q1 -->|Source| R_SENSE
-        R_SENSE -.->|ISENSE Pin| UC3843
-        UC3843 -->|65kHz PWM Gate| Q1
-        AUX_WIND -->|+14V VCC| UC3843
+        R_SENSE -.->|ISENSE Pin| UC3842
+        UC3842 -->|65kHz PWM Gate| Q1
+        AUX_WIND -->|+14V VCC| UC3842
 
         TX_PRI ==>|Magnetic Coupling| TX_SEC
         TX_SEC -->|Switched AC Pulses| SCHOTTKY
@@ -701,7 +701,7 @@ fig6_mmd = r"""flowchart LR
         LC_FILT --> BUS_24V
         BUS_24V -->|Voltage Sense| TL431
         TL431 -->|Opto LED Drive| OPTO
-        OPTO -.->|COMP Pin Pull-Down| UC3843
+        OPTO -.->|COMP Pin Pull-Down| UC3842
     end
 """
 
@@ -753,10 +753,10 @@ fig6_dot = r"""digraph Figure6Stage3Flyback {
         color = "#E65100";
         penwidth = 1.6;
 
-        uc3843 [
+        uc3842 [
             label = <<table border="0" cellborder="0" cellspacing="2">
                 <tr><td><b>PWM CONTROLLER</b></td></tr>
-                <tr><td><font color="#0277BD">UC3843 / UCC28C43</font></td></tr>
+                <tr><td><font color="#0277BD">UC3842 / UCC28C42</font></td></tr>
                 <hr/>
                 <tr><td align="left">• Uniform 65 kHz Clock</td></tr>
                 <tr><td align="left">• RT = 10kΩ, CT = 2.2nF</td></tr>
@@ -809,7 +809,7 @@ fig6_dot = r"""digraph Figure6Stage3Flyback {
                 <tr><td><b>AUX BIAS WINDING</b></td></tr>
                 <tr><td><font color="#0277BD">N_aux = 5T (+14V DC)</font></td></tr>
                 <hr/>
-                <tr><td align="left">• Sustains UC3843 VCC</td></tr>
+                <tr><td align="left">• Sustains UC3842 VCC</td></tr>
                 <tr><td align="left">• High-rel bootstrap</td></tr>
             </table>>,
             fillcolor = "#E1F5FE",
@@ -894,9 +894,9 @@ fig6_dot = r"""digraph Figure6Stage3Flyback {
     tx_pri -> q1 [label=" Drain", color="#E65100"];
     q1 -> snub [dir=both, style=dashed, color="#E65100"];
     q1 -> rcs [label=" Source", color="#E65100"];
-    rcs -> uc3843 [label=" ISENSE", style=dashed, color="#0277BD"];
-    uc3843 -> q1 [label=" 65kHz Gate", color="#0277BD"];
-    aux -> uc3843 [label=" +14V VCC", color="#0277BD"];
+    rcs -> uc3842 [label=" ISENSE", style=dashed, color="#0277BD"];
+    uc3842 -> q1 [label=" 65kHz Gate", color="#0277BD"];
+    aux -> uc3842 [label=" +14V VCC", color="#0277BD"];
 
     tx_pri -> tx_sec [label=" 6:1 Ratio", color="#C62828", style=bold];
     tx_sec -> mbr [label=" Secondary AC", color="#2E7D32", penwidth=2.0];
@@ -904,7 +904,7 @@ fig6_dot = r"""digraph Figure6Stage3Flyback {
     lc -> bus_24v [label=" +24V Rail", color="#1B5E20", penwidth=2.2];
     bus_24v -> tl431 [label=" Sense", color="#2E7D32"];
     tl431 -> opto [label=" LED Drive", color="#C62828"];
-    opto -> uc3843 [label=" COMP Pull-Down", color="#C62828"];
+    opto -> uc3842 [label=" COMP Pull-Down", color="#C62828"];
 }
 """
 
@@ -1314,7 +1314,7 @@ fig9_mmd = r"""flowchart TD
     subgraph AUX_DISTRIBUTION ["AUXILIARY BIAS POWER RAIL DISTRIBUTION SUBSYSTEM"]
         subgraph PRIMARY_HOT_AUX ["PRIMARY AUXILIARY DOMAIN (GND_PRI)"]
             TX_AUX["<b>FLYBACK AUXILIARY WINDING</b><br/>TX1_AUX: N_aux = 5T (0.25mm wire)<br/>UF4004 Fast Diode + 47µF Cap"]:::priStyle
-            VCC_PRI["<b>+14.0V DC PRIMARY VCC RAIL</b><br/>Powers UC3843 PWM Controller (Pin 7)<br/>Sustained above 8.4V UVLO Threshold"]:::priStyle
+            VCC_PRI["<b>+14.0V DC PRIMARY VCC RAIL</b><br/>Powers UC3842 PWM Controller (Pin 7)<br/>Sustained above 10.0V UVLO Threshold (16.0V Start)"]:::priStyle
             TX_AUX --> VCC_PRI
         end
 
@@ -1376,7 +1376,7 @@ fig9_dot = r"""digraph Figure9AuxPower {
         penwidth = 1.6;
 
         aux_wind [label="Transformer Aux Winding\nN_aux = 5T (0.25mm) + UF4004", fillcolor="#FFE0B2", color="#E65100"];
-        vcc_pri [label="+14.0V DC Primary VCC Rail\nPowers UC3843 PWM Controller", fillcolor="#FFE0B2", color="#E65100"];
+        vcc_pri [label="+14.0V DC Primary VCC Rail\nPowers UC3842 PWM Controller", fillcolor="#FFE0B2", color="#E65100"];
         aux_wind -> vcc_pri;
     }
 
@@ -1438,7 +1438,7 @@ fig10_mmd = r"""flowchart LR
         TX_PRI["Flyback Primary<br/>PQ26/20 Core (3C95)<br/>Np=36T, Lp=220µH"]:::priStyle
         Q1_FET["Primary FET Q1<br/>STP10NK80Z (800V, 0.29Ω)"]:::priStyle
         SNUBBER["RCD Clamp Snubber<br/>US1M + 22.6kΩ + 1nF"]:::priStyle
-        PWM_CTRL["UC3843 Controller<br/>Uniform 65kHz Fixed Clock<br/>Cycle-by-cycle ISENSE"]:::priStyle
+        PWM_CTRL["UC3842 Controller<br/>Uniform 65kHz Fixed Clock<br/>Cycle-by-cycle ISENSE"]:::priStyle
 
         RECT_BULK --> TX_PRI
         TX_PRI --> Q1_FET
@@ -1565,7 +1565,7 @@ fig10_dot = r"""digraph Figure10MasterArchitecture {
         tx_pri [label="Transformer Primary\nPQ26/20 (3C95 Ferrite)\nNp = 36T, Lp = 220µH", fillcolor="#FFE0B2", color="#E65100"];
         snubber [label="RCD Snubber Clamp\nUS1M + 22.6kΩ + 1nF", fillcolor="#FFFFFF", color="#F57C00"];
         pri_fet [label="STP10NK80Z N-FET\n800V, 0.29Ω D2PAK", fillcolor="#FFFFFF", color="#E65100"];
-        pri_ctrl [label="UC3843 PWM Controller\nUniform 65kHz Fixed Clock\nCycle-by-cycle ISENSE", fillcolor="#FFFFFF", color="#E65100"];
+        pri_ctrl [label="UC3842 PWM Controller\nUniform 65kHz Fixed Clock\nCycle-by-cycle ISENSE", fillcolor="#FFFFFF", color="#E65100"];
 
         ac_rect -> tx_pri [label=" +HVDC", color="#D84315", penwidth=2.2];
         tx_pri -> pri_fet [label=" Drain"];

@@ -61,7 +61,7 @@ digraph SystemPowerFlow {
         label=<<table border="0" cellborder="0" cellspacing="2">
             <tr><td><b>3. FLYBACK CONVERTER SYSTEM</b></td></tr>
             <hr/>
-            <tr><td align="left">• Uniform 65 kHz Clock (TI UC3843 PWM)</td></tr>
+            <tr><td align="left">• Uniform 65 kHz Clock (TI UC3842 PWM)</td></tr>
             <tr><td align="left">• PQ26/20 Core (3C95 Ferrite, Lp=220uH)</td></tr>
             <tr><td align="left">• 3000V RMS Reinforced Galvanic Barrier</td></tr>
             <tr><td align="left">• 800V Superjunction MOSFET (Q1)</td></tr>

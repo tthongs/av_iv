@@ -51,7 +51,7 @@ flowchart TD
         Q1_FET["Primary MOSFET Q1<br/>STP10NK80Z (800V, 17A)<br/>Pins: Drain, Gate, Source"]:::priPwr
         RCD_CLAMP["RCD Snubber Clamp<br/>• US1M Diode (1000V, 1A)<br/>• C_SNUB 1nF / 1kV<br/>• R_SNUB 22.6kΩ (3x 68k)"]:::priPwr
         R_CS["CS Shunt Resistor R_CS<br/>0.25Ω / 1%, 2W Metal<br/>Pin: ISENSE to GND_PRI"]:::priPwr
-        U1_PWM["PWM Controller U1<br/>TI UC3843 / UCC28C43<br/>• Pin 7: VCC (+14V Aux)<br/>• Pin 8: VREF (5.0V)<br/>• Pin 4: RT/CT (65kHz)<br/>• Pin 3: ISENSE (1.0V OCP)<br/>• Pin 6: OUT (Gate Drive)<br/>• Pin 1: COMP / Pin 2: FB<br/>• Pin 5: GND_PRI"]:::priPwr
+        U1_PWM["PWM Controller U1<br/>TI UC3842 / UCC28C42<br/>• Pin 7: VCC (+14V Aux)<br/>• Pin 8: VREF (5.0V)<br/>• Pin 4: RT/CT (65kHz)<br/>• Pin 3: ISENSE (1.0V OCP)<br/>• Pin 6: OUT (Gate Drive)<br/>• Pin 1: COMP / Pin 2: FB<br/>• Pin 5: GND_PRI"]:::priPwr
         TX1_AUX["TX1 Aux Winding<br/>Pins 4, 5 (Naux=5T)<br/>+ UF4004 & 47µF Cap"]:::priPwr
 
         C_BULK -->|"+HVDC (+120V to +375V)"| TX1_PRI

@@ -23,7 +23,7 @@ flowchart LR
         TX_PRI["Flyback Primary<br/>PQ26/20 Core (3C95)<br/>Np=36T, Lp=220µH"]:::priStyle
         Q1_FET["Primary FET Q1<br/>STP10NK80Z (800V, 0.29Ω)"]:::priStyle
         SNUBBER["RCD Clamp Snubber<br/>US1M + 22.6kΩ + 1nF"]:::priStyle
-        PWM_CTRL["UC3843 Controller<br/>Uniform 65kHz Fixed Clock<br/>Cycle-by-cycle ISENSE"]:::priStyle
+        PWM_CTRL["UC3842 Controller<br/>Uniform 65kHz Fixed Clock<br/>Cycle-by-cycle ISENSE"]:::priStyle
 
         RECT_BULK --> TX_PRI
         TX_PRI --> Q1_FET
